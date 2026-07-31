@@ -5,9 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "prisma migrate deploy && next start",
     "lint": "eslint",
+    "postinstall": "prisma generate",
     "worker": "tsx watch src/worker/followup-worker.ts",
+    "worker:start": "tsx src/worker/followup-worker.ts",
     "create-admin": "tsx scripts/create-admin.ts"
   },
   "dependencies": {
@@ -18,17 +20,17 @@
     "dotenv": "^17.4.2",
     "next": "16.2.12",
     "pg-boss": "^10.4.2",
+    "prisma": "^7.9.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "tsx": "^4.23.1",
+    "typescript": "^5"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.12",
-    "prisma": "^7.9.0",
-    "tsx": "^4.23.1",
-    "typescript": "^5"
+    "eslint-config-next": "16.2.12"
   }
 }

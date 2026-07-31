@@ -5,7 +5,7 @@ export default function PrivacyPolicyPage() {
       <p style={{ color: "#666" }}>Last updated: 2026</p>
 
       <p>
-        This policy describes how TRUEFIX WELLNESS GLOBAL ("we", "us") handles information when you
+        This policy describes how TRUEFIX WELLNESS GLOBAL (&quot;we&quot;, &quot;us&quot;) handles information when you
         contact us on WhatsApp.
       </p>
 
@@ -29,7 +29,7 @@ export default function PrivacyPolicyPage() {
 
       <h2>Who we share it with</h2>
       <p>
-        We use WhatsApp (Meta) to send and receive your messages, and Anthropic's Claude API to help
+        We use WhatsApp (Meta) to send and receive your messages, and Anthropic&apos;s Claude API to help
         generate responses to your questions. We do not sell your information to anyone.
       </p>
 
