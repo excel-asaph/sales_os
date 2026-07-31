@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: antflow
+      POSTGRES_PASSWORD: antflow
+      POSTGRES_DB: antflow_sales_os
+    ports:
+      # Host port 55432, not 5432 — a native PostgreSQL service already
+      # owns 5432 on this machine, and connections to 5432 were silently
+      # landing on that instead of this container.
+      - "55432:5432"
+    volumes:
+      - antflow_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  antflow_postgres_data:

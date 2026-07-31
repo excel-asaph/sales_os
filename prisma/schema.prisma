@@ -1,0 +1,312 @@
+// Antflow Sales OS — Prisma schema
+// Mirrors docs/ARCHITECTURE.md §5 (Database Schema). Keep the two in sync:
+// if a field or table changes here, update the architecture doc, and vice versa.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Workflow state (PRD Chapter 5.4)
+// ---------------------------------------------------------------------------
+
+enum ConversationStage {
+  NEW_LEAD
+  GREETING_SENT
+  INTRODUCTION_COMPLETED
+  INTEREST_CONFIRMED
+  PRODUCT_SELECTED
+  WAITING_FOR_DECISION
+  WAITING_FOR_PAYMENT
+  RECEIPT_RECEIVED
+  PAYMENT_VERIFIED
+  PRODUCT_DELIVERED
+  SALE_COMPLETED
+  FOLLOWUP_DAY_1
+  FOLLOWUP_DAY_3
+  FOLLOWUP_DAY_7
+  LOST_LEAD
+  HUMAN_REVIEW_REQUIRED
+  HUMAN_ASSIGNED
+  RESOLVED
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum MessageSender {
+  CUSTOMER
+  AI
+  HUMAN
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  DOCUMENT
+  VOICE
+}
+
+// Conversation Brain facts (PRD Chapter 6.3): intent, goals, objections,
+// extracted entities, and outstanding tasks all live here as typed rows
+// rather than one JSON blob, so "which objections are unresolved" stays
+// a real query.
+enum FactKind {
+  INTENT
+  GOAL
+  OBJECTION
+  ENTITY
+  TASK
+}
+
+enum OrderStatus {
+  PENDING
+  VERIFIED
+  ESCALATED
+  REJECTED
+}
+
+// ---------------------------------------------------------------------------
+// Business
+// ---------------------------------------------------------------------------
+
+model Business {
+  id                    String   @id @default(cuid())
+  name                  String
+  whatsappPhoneNumberId String?  @map("whatsapp_phone_number_id")
+  timezone              String   @default("Africa/Lagos")
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  config          BusinessConfig?
+  paymentAccounts PaymentAccount[]
+  products        Product[]
+  customers       Customer[]
+  humanAgents     HumanAgent[]
+
+  @@map("businesses")
+}
+
+/// Business Rules Engine (PRD 5.10, Module 6) — every business-specific
+/// policy lives here, never hardcoded in application code (Non-Negotiable 14.4).
+model BusinessConfig {
+  id                          String   @id @default(cuid())
+  businessId                  String   @unique @map("business_id")
+  deliverBeforePayment        Boolean  @default(false) @map("deliver_before_payment")
+  maxFollowups                Int      @default(3) @map("max_followups")
+  escalationConfidenceThreshold Float  @default(0.7) @map("escalation_confidence_threshold")
+  businessHours               Json?    @map("business_hours")
+  greetingTemplate            String?  @map("greeting_template")
+  /// Sales Playbook (PRD 11.3, Knowledge Engine) — this business's own
+  /// proven scripts (trust-building lines, payment sign-off, confirmation
+  /// phrase, follow-up wording). A flexible string map rather than fixed
+  /// columns because the set of scripts worth capturing differs per
+  /// business. The AI is instructed to mirror these closely, not to
+  /// freehand-compose new copy (Non-Negotiable/Philosophy: consistency
+  /// builds trust).
+  playbook                     Json?
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("business_config")
+}
+
+/// Payment Knowledge (PRD 11.3)
+model PaymentAccount {
+  id            String  @id @default(cuid())
+  businessId    String  @map("business_id")
+  bankName      String  @map("bank_name")
+  accountNumber String  @map("account_number")
+  accountName   String  @map("account_name")
+  active        Boolean @default(true)
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  orders   Order[]
+
+  @@map("payment_accounts")
+}
+
+/// Product Knowledge (PRD 11.3)
+model Product {
+  id          String  @id @default(cuid())
+  businessId  String  @map("business_id")
+  name        String
+  description String?
+  price       Decimal
+  currency    String  @default("NGN")
+  fileUrl     String? @map("file_url")
+  format      String?
+  category    String?
+  available   Boolean @default(true)
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  orders   Order[]
+
+  @@map("products")
+}
+
+// ---------------------------------------------------------------------------
+// Customer & conversation
+// ---------------------------------------------------------------------------
+
+/// Customer Profile (PRD 6.3)
+model Customer {
+  id                String   @id @default(cuid())
+  businessId        String   @map("business_id")
+  phoneNumber       String   @map("phone_number")
+  name              String?
+  preferredLanguage String?  @map("preferred_language")
+  country           String?
+  timezone          String?
+  returningCustomer Boolean  @default(false) @map("returning_customer")
+  lifetimePurchases Int      @default(0) @map("lifetime_purchases")
+  customerSince     DateTime @default(now()) @map("customer_since")
+  tags              Json?
+
+  business      Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  conversations Conversation[]
+
+  @@unique([businessId, phoneNumber])
+  @@map("customers")
+}
+
+/// Conversation state (PRD 6.3) + Workflow Engine state (PRD 5.4)
+model Conversation {
+  id               String            @id @default(cuid())
+  customerId       String            @map("customer_id")
+  currentStage     ConversationStage @default(NEW_LEAD) @map("current_stage")
+  currentObjective String?           @map("current_objective")
+  confidence       Float?
+  assignedHumanId  String?           @map("assigned_human_id")
+  summary          String?
+  /// Ad/post attribution (Meta's `referral` webhook object) — set once,
+  /// from whatever the *first* inbound message of this conversation
+  /// carried. A flexible Json field (like BusinessConfig.playbook) rather
+  /// than fixed columns since it's read-only reference data, not queried
+  /// field-by-field.
+  referral         Json?
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  customer     Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  assignedTo   HumanAgent?       @relation(fields: [assignedHumanId], references: [id])
+  messages     Message[]
+  facts        ConversationFact[]
+  orders       Order[]
+  followups    Followup[]
+  events       Event[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String            @id @default(cuid())
+  conversationId String            @map("conversation_id")
+  direction      MessageDirection
+  sender         MessageSender
+  type           MessageType       @default(TEXT)
+  content        String?
+  mediaUrl       String?           @map("media_url")
+  createdAt      DateTime          @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+/// Intent / Goals / Objections / Extracted Entities / Outstanding Tasks (PRD 6.3)
+model ConversationFact {
+  id             String       @id @default(cuid())
+  conversationId String       @map("conversation_id")
+  kind           FactKind
+  payload        Json
+  confidence     Float?
+  resolved       Boolean      @default(false)
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("conversation_facts")
+}
+
+/// Payment Collection + Receipt Verification (PRD 13.3)
+model Order {
+  id                      String          @id @default(cuid())
+  conversationId          String          @map("conversation_id")
+  productId               String          @map("product_id")
+  paymentAccountId        String?         @map("payment_account_id")
+  expectedAmount          Decimal         @map("expected_amount")
+  receiptImageUrl         String?         @map("receipt_image_url")
+  extractedAmount         Decimal?        @map("extracted_amount")
+  extractedBank           String?         @map("extracted_bank")
+  verificationConfidence  Float?          @map("verification_confidence")
+  status                  OrderStatus     @default(PENDING)
+  verifiedAt              DateTime?       @map("verified_at")
+  createdAt               DateTime        @default(now()) @map("created_at")
+
+  conversation   Conversation    @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  product        Product         @relation(fields: [productId], references: [id])
+  paymentAccount PaymentAccount? @relation(fields: [paymentAccountId], references: [id])
+
+  @@map("orders")
+}
+
+/// Follow-Up Engine (PRD 8.6)
+model Followup {
+  id             String    @id @default(cuid())
+  conversationId String    @map("conversation_id")
+  step           Int
+  /// The message the AI planned to send when scheduling this follow-up.
+  /// Not sent verbatim — the worker re-enters the AI Employee Runtime with
+  /// this as context so the actual wording stays natural (ARCHITECTURE.md
+  /// §9); it's used as the fallback template if that generation fails.
+  message        String
+  scheduledFor   DateTime  @map("scheduled_for")
+  sent           Boolean   @default(false)
+  cancelled      Boolean   @default(false)
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("followups")
+}
+
+/// Human Handoff (PRD 5.9, 8.7) — also the Dashboard's login identity
+/// (PRD 4: "a single admin/business-owner role and a human-agent role,
+/// two roles only for MVP"). `isAdmin` distinguishes the two: an admin can
+/// reach /settings and /manage, a plain agent only /dashboard.
+model HumanAgent {
+  id           String  @id @default(cuid())
+  businessId   String  @map("business_id")
+  name         String
+  contact      String? // WhatsApp number or dashboard login identifier
+  passwordHash String  @map("password_hash")
+  isAdmin      Boolean @default(false) @map("is_admin")
+  active       Boolean @default(true)
+
+  business      Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  conversations Conversation[]
+
+  @@map("human_agents")
+}
+
+/// Event Engine (PRD Module 2) — append-only source of truth. The
+/// Conversation Brain and Workflow state above are a materialized view
+/// that can, in principle, be rebuilt by replaying these in order
+/// (Non-Negotiable 14.5 / 14.6).
+model Event {
+  id             String   @id @default(cuid())
+  conversationId String?  @map("conversation_id")
+  type           String
+  payload        Json?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+
+  @@map("events")
+}
