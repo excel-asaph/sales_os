@@ -86,11 +86,12 @@ export default async function ConversationReviewPage({
                 alignSelf: fromCustomer ? "flex-start" : "flex-end",
                 maxWidth: "75%",
                 background: fromCustomer ? "#f1f1f1" : message.sender === "HUMAN" ? "#dbeafe" : "#dcfce7",
+                color: "#111",
                 borderRadius: 10,
                 padding: "8px 12px",
               }}
             >
-              <div style={{ fontSize: 12, color: "#666", marginBottom: 2 }}>
+              <div style={{ fontSize: 12, color: "#555", marginBottom: 2 }}>
                 {fromCustomer ? "Customer" : message.sender} · {message.createdAt.toLocaleString()}
               </div>
               <div style={{ whiteSpace: "pre-wrap" }}>{message.content ?? `[${message.type}]`}</div>
