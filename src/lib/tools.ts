@@ -31,13 +31,28 @@ export const actionContractTools: Anthropic.Tool[] = [
   {
     name: "send_message",
     description:
-      "Send a WhatsApp text message to the customer. This is the only way to speak to the customer — never rely on plain response text.",
+      "Send a WhatsApp text message to the customer, composed by you. Use this ONLY for things not covered by a template (see your instructions for this business's exact scripted messages) — small talk, unexpected objections, clarifying questions, anything genuinely unscripted. Never use this to retype or paraphrase a message that has a template — use send_template_message for those instead.",
     input_schema: {
       type: "object",
       properties: {
         text: { type: "string", description: "The message to send, in the customer's language/tone." },
       },
       required: ["text"],
+    },
+  },
+  {
+    name: "send_template_message",
+    description:
+      "Send one of this business's exact, pre-written message templates verbatim (see your instructions for the list of keys and when each applies). The platform sends the stored text exactly as written — you never see or edit it. Use this instead of send_message whenever the conversation reaches one of those scripted moments.",
+    input_schema: {
+      type: "object",
+      properties: {
+        template_key: {
+          type: "string",
+          description: "The exact key of the template to send, e.g. \"delivery_first_pitch\".",
+        },
+      },
+      required: ["template_key"],
     },
   },
   {

@@ -27,8 +27,9 @@ Every conversation moves through: Observe (understand what the customer wants be
 # Hard rules — never violate these
 1. You must never tell a customer their payment is confirmed. You have no way to verify a receipt yourself — call \`request_payment_verification\` and wait for the platform's result. Only report what that result says.
 2. You must never state a product exists, its price, or a policy from memory. Always call \`search_products\` first. If nothing relevant comes back, say so or ask a clarifying question.
-3. Every customer-facing message must go through the \`send_message\` tool. Do not rely on plain text output to talk to the customer.
+3. Every customer-facing message must go through \`send_message\` or \`send_template_message\`. Do not rely on plain text output to talk to the customer.
 4. If your confidence in what the customer wants or what happened is low, or the situation falls outside routine sales (refund requests, complaints, anger, medical claims, anything you're unsure about), call \`escalate_to_human\` rather than guessing.
+5. Whenever a message is covered by one of this business's templates (below), send it with \`send_template_message\` using the matching key — never retype, paraphrase, or reformat it yourself via \`send_message\`, even if you're confident you remember it correctly.
 
 # Ending your turn
 Once you've said what this turn needs (e.g. you've asked the customer a question, or delivered the information they need), stop — do not keep calling tools looking for more to do. There is no requirement to take a fixed number of actions. Finishing after one well-formed reply, with nothing left pending, is correct; it is not a signal to search for more work. Wait for the customer's next message before continuing.
@@ -55,17 +56,58 @@ Respond naturally, as a helpful, honest salesperson would — never robotic, nev
 }
 
 /**
- * Sales Playbook (PRD 11.3, Knowledge Engine): a business's own proven
- * scripts. Rendered as reference copy to mirror, not just background
- * flavor — Philosophy 6 (Consistency Builds Trust) means the AI should
- * say the tested thing the same way each time, not freehand-compose.
+ * Sales Playbook (PRD 11.3, Knowledge Engine): a business's own proven,
+ * exact scripts. Unlike free-text guidance, these are sent verbatim by the
+ * platform via send_template_message — the model only ever picks a key
+ * (Philosophy 3: AI reasons, platform executes), so the actual customer-
+ * facing bytes never pass through generation and can't drift from what's
+ * stored here. Philosophy 6 (Consistency Builds Trust) enforced at the
+ * architecture level, not just by asking nicely.
  */
 function renderPlaybook(playbook?: Record<string, string> | null): string {
   if (!playbook || Object.keys(playbook).length === 0) return "";
   const lines = Object.entries(playbook).map(([key, value]) => `- ${key}: "${value}"`);
+  const keys = new Set(Object.keys(playbook));
+  const has = (key: string) => keys.has(key);
+
+  const flowLines: string[] = [];
+  if (has("delivery_first_pitch") || (has("payment_first_benefits") && has("payment_first_pitch"))) {
+    flowLines.push(
+      `- A new lead asks about the product: if today's delivery-order default is deliver-before-payment, send \`delivery_first_pitch\`. Otherwise, send \`payment_first_benefits\`, then \`payment_first_pitch\` as a second, separate message.`
+    );
+  }
+  if (has("ebook_delivery_note") && has("payment_instructions_primary")) {
+    flowLines.push(
+      `- The customer confirms after \`delivery_first_pitch\` with a plain confirmation (not asking for account details): call \`send_product\` to deliver the file (no message alongside it — the file is the whole message), then send \`ebook_delivery_note\`, then send \`payment_instructions_primary\`.`
+    );
+  }
+  if (has("payment_instructions_primary")) {
+    flowLines.push(
+      `- The customer asks for account/payment details directly, at any point: send \`payment_instructions_primary\` (do not deliver the product until payment is verified, in this case).`
+    );
+  }
+  if (has("payment_instructions_alternate")) {
+    flowLines.push(
+      `- The customer says they don't recognize or use that bank, or asks for a different one: send \`payment_instructions_alternate\` instead — not a modified version of the primary one, the complete alternate template.`
+    );
+  }
+  if (has("payment_confirmation")) {
+    flowLines.push(
+      `- \`request_payment_verification\` reports the payment verified: send \`payment_confirmation\`, then call \`send_product\` if the product hasn't been delivered yet, then send \`thank_you_message\` if it exists.`
+    );
+  }
+  if (has("payment_followup")) {
+    flowLines.push(
+      `- The product was delivered on trust and payment has gone quiet for a while: use \`payment_followup\` as the message when calling \`create_followup\`.`
+    );
+  }
+
   return `
-# This business's proven scripts
-These phrases and lines are already tested and working for this business. Mirror them closely — reuse the wording and spirit — rather than composing new phrasing from scratch. Adapt only what genuinely needs to change (names, amounts); don't rewrite the voice.
+# This business's exact message templates
+Call \`send_template_message\` with the key to send one of these verbatim — never type these out yourself via \`send_message\`, even if you're confident you remember the wording exactly. Anything not covered by a template below is yours to compose naturally with \`send_message\`.
 ${lines.join("\n")}
+
+## When to use which template
+${flowLines.join("\n")}
 `;
 }

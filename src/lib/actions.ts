@@ -27,6 +27,8 @@ export async function executeAction(
   switch (toolName) {
     case "send_message":
       return sendMessage(ctx, input.text as string);
+    case "send_template_message":
+      return sendTemplateMessage(ctx, input.template_key as string);
     case "search_products":
       return searchProducts(ctx.businessId, input.query as string);
     case "send_product":
@@ -67,6 +69,22 @@ async function sendMessage(ctx: ActionContext, text: string) {
     }),
   ]);
   return { sent: true };
+}
+
+/**
+ * The enforcement point for exact-wording templates (business_config.playbook):
+ * the model only ever supplies a key, never the text itself, so a scripted
+ * message can't drift through generation — this just looks up the stored
+ * string and sends it through the same path as sendMessage, byte-for-byte.
+ */
+async function sendTemplateMessage(ctx: ActionContext, templateKey: string) {
+  const config = await getBusinessConfig(ctx.businessId);
+  const playbook = (config.playbook as Record<string, string> | null) ?? {};
+  const text = playbook[templateKey];
+  if (!text) {
+    return { sent: false, reason: `No template found for key "${templateKey}".` };
+  }
+  return sendMessage(ctx, text);
 }
 
 async function sendProduct(ctx: ActionContext, productId: string) {
