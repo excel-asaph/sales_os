@@ -4,8 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 export const claude = new Anthropic();
 
 // Configurable via env so switching models is a one-line change, not a
-// code change. Opus is the default per current guidance; for a per-message
-// WhatsApp runtime running on every customer turn, claude-sonnet-5 is a
-// reasonable cost-conscious alternative worth benchmarking before scaling
-// beyond a single pilot business.
-export const CLAUDE_MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-5";
+// code change. Sonnet is the default: a per-message WhatsApp turn is a
+// bounded tool-calling task against a well-specified playbook, not the
+// kind of open-ended multi-step reasoning Opus is for.
+export const CLAUDE_MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
