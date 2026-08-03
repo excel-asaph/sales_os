@@ -90,18 +90,33 @@ async function handleFollowup(followupId: string) {
   // last message — nothing to send, just decide whether to give up. If
   // we got here, nothing cancelled it via a reply in the meantime.
   if (followup.step > maxSteps) {
+    // A customer who already claimed to have paid isn't "uninterested" just
+    // because they stopped answering check-ins — silence there could mean a
+    // real, unreconciled transfer sitting unclaimed, not a lost lead. That
+    // ambiguity needs a human's eyes, not an automatic "Uninterested" tag.
+    const awaitingPaymentEvidence = followup.reason === "AWAITING_PAYMENT_EVIDENCE";
+
     await prisma.$transaction([
       prisma.followup.update({ where: { id: followup.id }, data: { sent: true } }),
-      prisma.conversation.update({ where: { id: conversation.id }, data: { currentStage: "LOST_LEAD" } }),
+      prisma.conversation.update({
+        where: { id: conversation.id },
+        data: awaitingPaymentEvidence
+          ? {
+              currentStage: "HUMAN_REVIEW_REQUIRED",
+              summary:
+                "Customer said they had paid but never sent evidence, and didn't respond to repeated follow-up requests for it — needs manual reconciliation (check for an unmatched incoming transfer).",
+            }
+          : { currentStage: "LOST_LEAD" },
+      }),
       prisma.event.create({
         data: {
           conversationId: conversation.id,
-          type: "FOLLOWUP_SEQUENCE_EXHAUSTED",
-          payload: { afterStep: maxSteps },
+          type: awaitingPaymentEvidence ? "FOLLOWUP_SEQUENCE_EXHAUSTED_ESCALATED" : "FOLLOWUP_SEQUENCE_EXHAUSTED",
+          payload: { afterStep: maxSteps, reason: followup.reason },
         },
       }),
     ]);
-    await addCustomerTag(conversation.id, "Uninterested");
+    await addCustomerTag(conversation.id, awaitingPaymentEvidence ? "Needs payment follow-up" : "Uninterested");
     return;
   }
 
@@ -200,7 +215,7 @@ async function scheduleNext(followup: LoadedFollowup, maxSteps: number) {
     const fallbackMessage = playbook.payment_followup || DEFAULT_FALLBACK_MESSAGE;
 
     const next = await prisma.followup.create({
-      data: { conversationId: conversation.id, step: nextStep, message: fallbackMessage, scheduledFor },
+      data: { conversationId: conversation.id, step: nextStep, message: fallbackMessage, scheduledFor, reason: followup.reason },
     });
     await boss.send(FOLLOWUP_QUEUE, { followupId: next.id }, { startAfter: scheduledFor });
     await prisma.event.create({
@@ -215,7 +230,7 @@ async function scheduleNext(followup: LoadedFollowup, maxSteps: number) {
 
   const checkAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
   const check = await prisma.followup.create({
-    data: { conversationId: conversation.id, step: nextStep, message: "", scheduledFor: checkAt },
+    data: { conversationId: conversation.id, step: nextStep, message: "", scheduledFor: checkAt, reason: followup.reason },
   });
   await boss.send(FOLLOWUP_QUEUE, { followupId: check.id }, { startAfter: checkAt });
 }

@@ -135,7 +135,7 @@ export const actionContractTools: Anthropic.Tool[] = [
   {
     name: "create_followup",
     description:
-      "Start a follow-up sequence for a customer who paused before completing their purchase — this schedules only the first check-in; the platform automatically continues the rest of the sequence (with decreasing frequency over several days) if the customer stays quiet, up to this business's configured limit, without you needing to call this again. If the customer gave a specific time (\"I'll pay this evening\", \"tomorrow morning\"), set hours to match that instead of the default.",
+      "Make sure a check-in is scheduled for this conversation if the customer goes quiet — call this any time you end a turn with the ball in the customer's court (a pitch, a question, payment details sent, evidence requested) and there's no reason to think a sequence is already running. It's always safe to call: if one is already active, this is a no-op and won't restart it. This schedules only the first check-in; the platform automatically continues the rest of the sequence (decreasing frequency over several days) if the customer stays quiet, up to this business's configured limit. If the customer gave a specific time (\"I'll pay this evening\", \"tomorrow morning\"), set hours to match that instead of the default.",
     input_schema: {
       type: "object",
       properties: {
@@ -148,8 +148,14 @@ export const actionContractTools: Anthropic.Tool[] = [
           type: "string",
           description: "What you'd say in this first check-in — used as a fallback if composing fresh isn't possible when it fires.",
         },
+        reason: {
+          type: "string",
+          enum: ["GENERAL", "AWAITING_PAYMENT_EVIDENCE"],
+          description:
+            "AWAITING_PAYMENT_EVIDENCE if the customer has claimed to have paid (with or without attaching anything) and you're waiting on them to actually send evidence — this changes what happens if the sequence exhausts with no reply (a human reviews it, since real money may be unreconciled, rather than the lead just being marked uninterested). GENERAL for every other case: a pitch gone quiet, payment details sent with no reply, a clarifying question left unanswered, or a stated deferral.",
+        },
       },
-      required: ["hours", "message"],
+      required: ["hours", "message", "reason"],
     },
   },
   {

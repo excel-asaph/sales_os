@@ -73,6 +73,17 @@ enum OrderStatus {
   REJECTED
 }
 
+/// What a follow-up sequence is actually waiting on — decides what happens
+/// if the customer never responds and the sequence exhausts (src/worker/
+/// followup-worker.ts): GENERAL ends in LOST_LEAD as before, but
+/// AWAITING_PAYMENT_EVIDENCE means the customer already claimed to have
+/// paid, so silence isn't necessarily disinterest — it escalates to a
+/// human instead of getting quietly tagged "Uninterested".
+enum FollowupReason {
+  GENERAL
+  AWAITING_PAYMENT_EVIDENCE
+}
+
 // ---------------------------------------------------------------------------
 // Business
 // ---------------------------------------------------------------------------
@@ -300,6 +311,7 @@ model Followup {
   /// this as context so the actual wording stays natural (ARCHITECTURE.md
   /// §9); it's used as the fallback template if that generation fails.
   message        String
+  reason         FollowupReason @default(GENERAL)
   scheduledFor   DateTime  @map("scheduled_for")
   sent           Boolean   @default(false)
   cancelled      Boolean   @default(false)

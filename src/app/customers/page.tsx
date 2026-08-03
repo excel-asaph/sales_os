@@ -4,10 +4,14 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { formatNaira } from "@/lib/currency";
 import { relativeTime } from "@/lib/relative-time";
+import { stageStyle } from "@/lib/stage-display";
+import { clampMaxFollowups } from "@/lib/followup-sequence";
+import { getBusinessConfig } from "@/lib/knowledge";
 import { AppShell } from "@/components/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import {
   Table,
   TableBody,
@@ -16,6 +20,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+// Follow-up sequence events worth surfacing once a sequence is no longer
+// active, so the column doesn't just go blank the moment it stops — see
+// src/worker/followup-worker.ts for where each of these is written.
+const FOLLOWUP_END_EVENT_TYPES = [
+  "FOLLOWUP_CANCELLED",
+  "FOLLOWUP_SEQUENCE_EXHAUSTED",
+  "FOLLOWUP_SEQUENCE_EXHAUSTED_ESCALATED",
+] as const;
+
+const FOLLOWUP_END_LABELS: Record<(typeof FOLLOWUP_END_EVENT_TYPES)[number], string> = {
+  FOLLOWUP_CANCELLED: "Stopped — customer replied",
+  FOLLOWUP_SEQUENCE_EXHAUSTED: "Sequence ended — no reply",
+  FOLLOWUP_SEQUENCE_EXHAUSTED_ESCALATED: "Sequence ended — escalated to a human",
+};
 
 // Customers directory — the "browse everyone" complement to the Customer
 // Profile page (/customers/[id]): before this, a customer was only
@@ -32,24 +51,58 @@ export default async function CustomersPage({
   const { q } = await searchParams;
   const query = q?.trim();
 
-  const customers = await prisma.customer.findMany({
-    where: {
-      businessId: session.businessId,
-      ...(query
-        ? {
-            OR: [
-              { name: { contains: query, mode: "insensitive" as const } },
-              { phoneNumber: { contains: query } },
-            ],
-          }
-        : {}),
-    },
-    include: {
-      conversations: {
-        select: { updatedAt: true, orders: { select: { status: true, expectedAmount: true } } },
+  const [customers, config] = await Promise.all([
+    prisma.customer.findMany({
+      where: {
+        businessId: session.businessId,
+        ...(query
+          ? {
+              OR: [
+                { name: { contains: query, mode: "insensitive" as const } },
+                { phoneNumber: { contains: query } },
+              ],
+            }
+          : {}),
       },
-    },
-  });
+      include: {
+        conversations: {
+          orderBy: { updatedAt: "desc" },
+          select: {
+            id: true,
+            updatedAt: true,
+            currentStage: true,
+            orders: { select: { status: true, expectedAmount: true } },
+            followups: {
+              where: { sent: false, cancelled: false },
+              orderBy: { step: "asc" },
+              take: 1,
+            },
+          },
+        },
+      },
+    }),
+    getBusinessConfig(session.businessId),
+  ]);
+  const maxFollowups = clampMaxFollowups(config.maxFollowups);
+
+  // Each customer's most-recent conversation is checked for a pending
+  // follow-up; conversations without one fall back to the last time a
+  // sequence ended, if any, so the column reads "why did it stop" rather
+  // than just disappearing.
+  const conversationsNeedingLastEvent = customers
+    .map((c) => c.conversations[0])
+    .filter((c): c is NonNullable<typeof c> => Boolean(c) && c.followups.length === 0)
+    .map((c) => c.id);
+
+  const lastEvents = conversationsNeedingLastEvent.length
+    ? await prisma.event.findMany({
+        where: { conversationId: { in: conversationsNeedingLastEvent }, type: { in: [...FOLLOWUP_END_EVENT_TYPES] } },
+        orderBy: { createdAt: "desc" },
+        distinct: ["conversationId"],
+        select: { conversationId: true, type: true },
+      })
+    : [];
+  const lastEventByConversation = new Map(lastEvents.map((e) => [e.conversationId, e.type]));
 
   const rows = customers
     .map((customer) => {
@@ -62,6 +115,13 @@ export default async function CustomersPage({
         null
       );
       const tags = Array.isArray(customer.tags) ? (customer.tags as string[]) : [];
+
+      const latestConversation = customer.conversations[0] ?? null;
+      const activeFollowup = latestConversation?.followups[0] ?? null;
+      const lastFollowupEvent = latestConversation
+        ? (lastEventByConversation.get(latestConversation.id) as (typeof FOLLOWUP_END_EVENT_TYPES)[number] | undefined)
+        : undefined;
+
       return {
         id: customer.id,
         name: customer.name,
@@ -71,6 +131,10 @@ export default async function CustomersPage({
         totalOrders: orders.length,
         totalSpent,
         lastActivity,
+        stage: latestConversation?.currentStage ?? null,
+        followupStep: activeFollowup?.step ?? null,
+        followupDue: activeFollowup?.scheduledFor ?? null,
+        followupEndLabel: lastFollowupEvent ? FOLLOWUP_END_LABELS[lastFollowupEvent] : null,
       };
     })
     .sort((a, b) => (b.lastActivity?.getTime() ?? 0) - (a.lastActivity?.getTime() ?? 0));
@@ -96,6 +160,7 @@ export default async function CustomersPage({
                 <TableRow>
                   <TableHead>Customer</TableHead>
                   <TableHead>Tags</TableHead>
+                  <TableHead>Follow-up</TableHead>
                   <TableHead>Conversations</TableHead>
                   <TableHead>Orders</TableHead>
                   <TableHead>Total spent</TableHead>
@@ -124,6 +189,29 @@ export default async function CustomersPage({
                             </Badge>
                           ))}
                         </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="min-w-40">
+                      {row.stage ? (
+                        <div className="flex flex-col gap-1">
+                          <Badge className={`${stageStyle(row.stage)} w-fit border-transparent font-medium`}>
+                            {row.stage.replaceAll("_", " ")}
+                          </Badge>
+                          {row.followupStep !== null && row.followupDue ? (
+                            <div className="flex flex-col gap-0.5">
+                              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                <span>
+                                  {row.followupStep}/{maxFollowups} · next {relativeTime(row.followupDue)}
+                                </span>
+                              </div>
+                              <Progress value={(row.followupStep / maxFollowups) * 100} className="w-24" />
+                            </div>
+                          ) : row.followupEndLabel ? (
+                            <span className="text-xs text-muted-foreground">{row.followupEndLabel}</span>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">{row.conversationCount}</TableCell>

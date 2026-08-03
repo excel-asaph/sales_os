@@ -5,7 +5,7 @@ import { downloadWhatsAppMedia, persistMediaFile, readPersistedMedia } from "@/l
 import { verifyReceiptContent, type ReceiptExtraction, type PaymentAccountRef } from "@/lib/receipt-verification";
 import { getBoss, FOLLOWUP_QUEUE } from "@/lib/queue";
 import { addCustomerTag } from "@/lib/customer-tags";
-import type { ConversationStage, FactKind } from "@/generated/prisma/client";
+import type { ConversationStage, FactKind, FollowupReason } from "@/generated/prisma/client";
 
 export interface ActionContext {
   conversationId: string;
@@ -43,7 +43,12 @@ export async function executeAction(
     case "record_fact":
       return recordFact(ctx, input.kind as FactKind, input.key as string, input.value as string);
     case "create_followup":
-      return createFollowup(ctx, input.hours as number, input.message as string);
+      return createFollowup(
+        ctx,
+        input.hours as number,
+        input.message as string,
+        (input.reason as FollowupReason | undefined) ?? "GENERAL"
+      );
     case "escalate_to_human":
       return escalateToHuman(ctx, input.reason as string, input.summary as string);
     case "tag_customer":
@@ -614,10 +619,31 @@ async function recordFact(ctx: ActionContext, kind: FactKind, key: string, value
 // call is just the entry point: "start following up on this
 // conversation," optionally at a specific time if the customer gave one
 // (e.g. "I'll pay this evening").
-async function createFollowup(ctx: ActionContext, hours: number, message: string) {
+//
+// The system prompt now instructs the AI to call this any time a turn ends
+// with the ball in the customer's court, not just on a stated deferral —
+// so it will legitimately get called more than once across a conversation's
+// life while a sequence is already running. Rather than relying on the
+// model to track that itself (calling it again mid-sequence used to
+// silently restart the sequence from step one, which is exactly what a
+// wider mandate would otherwise do constantly), the platform makes a
+// repeat call a no-op whenever one is already pending.
+async function createFollowup(
+  ctx: ActionContext,
+  hours: number,
+  message: string,
+  reason: FollowupReason = "GENERAL"
+) {
+  const existing = await prisma.followup.findFirst({
+    where: { conversationId: ctx.conversationId, sent: false, cancelled: false },
+  });
+  if (existing) {
+    return { scheduled: false, alreadyActive: true, scheduledFor: existing.scheduledFor, step: existing.step };
+  }
+
   const scheduledFor = new Date(Date.now() + hours * 60 * 60 * 1000);
   const followup = await prisma.followup.create({
-    data: { conversationId: ctx.conversationId, step: 1, message, scheduledFor },
+    data: { conversationId: ctx.conversationId, step: 1, message, scheduledFor, reason },
   });
 
   const boss = await getBoss();
@@ -627,7 +653,7 @@ async function createFollowup(ctx: ActionContext, hours: number, message: string
     data: {
       conversationId: ctx.conversationId,
       type: "FOLLOWUP_SCHEDULED",
-      payload: { followupId: followup.id, scheduledFor, message },
+      payload: { followupId: followup.id, scheduledFor, message, reason },
     },
   });
   return { scheduled: true, scheduledFor };
