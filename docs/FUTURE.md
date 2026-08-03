@@ -1,0 +1,28 @@
+# Antflow Sales OS — Future Considerations
+
+Ideas, gaps, and deferred decisions surfaced during real work on this project — not a commitment, not scheduled. The point is that a good idea only has to be raised once; it lives here instead of getting lost or re-litigated from scratch. Move an item out (and delete it here) when it's actually built, or when it's deliberately decided against — don't let this become a graveyard nobody reads.
+
+## AI Employee Runtime
+
+- **Ebook content search (phase 2 of the FAQ work)** — deferred in favor of a curated FAQ first (safer for health-adjacent claims, cheaper, covers the predictable question set). Only build real on-demand search over the ebook's chunked content if real customers start asking things the FAQ can't cover.
+- **Quiet-hours enforcement** — `BusinessConfig.businessHours` already exists in the schema but nothing reads it; follow-ups can currently fire at 3am.
+- **Human escalation after full follow-up exhaustion** — don't silently auto-tag "Uninterested" and stop; flag it for a human's one final glance before writing off a lead.
+- **Follow-up effectiveness analytics** — a Home KPI for "follow-ups sent → % converted" would show whether the cadence is actually working.
+- **Prompt caching** — explicitly deferred ("let's hold it for when there's more real traffic"). Revisit once real (non-test) message volume grows; caches the system prompt + static tool definitions, cuts ~90% of the repeated-input-token cost, but the win depends on request cadence relative to the cache TTL.
+- **Gemini vs. Claude tone comparison** — one informal test suggested Gemini may score better on Nigerian Pidgin/cultural nuance specifically, separate from Claude's proven strength at strict tool-use rule-following. Not rigorous; revisit once there's a real side-by-side against actual sample conversations. The Action Contract/Conversation Brain architecture is provider-agnostic enough that swapping only the conversational model is plausible without a rebuild.
+
+## Dashboard / CRM
+
+- **Pipeline/kanban board view** — all conversations grouped by stage as columns, the standard CRM bird's-eye pattern; today you can only see one conversation's stage at a time.
+- **Stage-based filter rail on the Conversations list** — a left-hand filter (New Lead / Product Selected / Payment / Delivered / Completed, each with a count) so a human can jump straight to, say, everyone stuck at Payment, instead of scanning one flat list. Maps directly onto the existing `ConversationStage`/`PIPELINE_MILESTONES` — spotted while comparing against respond.io's inbox UI (lifecycle filters in their nav rail).
+- **Internal team notes on a conversation** — a way for a human to leave a free-text note for whoever picks up the conversation next ("returning customer, reported X"), visible to the team but never sent to the customer. Distinct from the existing structured facts/summary; today there's no equivalent at all. Also from the respond.io comparison — their inbox has a separate "comment" mode alongside the customer-facing reply box.
+- **Inline system/event log in the conversation timeline** — stage changes, escalations, and tags-added are already recorded (`Event` model) but invisible on the Review page; a human can't currently see *why* a conversation moved stage without digging. Surfacing key events inline in the message thread (e.g. "Stage updated to Hot Lead", "Escalated to human") would make Review self-explanatory at a glance.
+- **Connection health indicator** — the WhatsApp webhook/token silently breaking is invisible until a real customer complains (this already happened once). A "webhook last received: X ago, token status: OK" card would catch it immediately.
+- **Usage/cost visibility in-app** — the Opus→Sonnet cost issue was caught by the user noticing it in the Anthropic Console, not from anything in this dashboard. A "conversations this month, spend this month" tile is cheap and closes that blind spot.
+- **Dark mode toggle** — shadcn's `.dark`-class tokens are already wired up, but no toggle exists; the app is deliberately light-only since every reference design provided was light-mode. Build if asked.
+
+## Infrastructure
+
+- **R2 custom domain** — currently serving receipt images via the bucket's `r2.dev` public development URL, which Cloudflare flags as rate-limited and meant for lighter use. Fine at current traffic; move to a real custom domain if volume grows.
+- **Git remote's embedded PAT** — the `sales_os` GitHub remote URL has a personal access token embedded directly in it (local `.git/config`, never committed/leaked publicly, but still worth cleaning up via `gh auth` or Windows Credential Manager eventually).
+- **Node 20 → 22** — the AWS SDK v3 (used for R2 storage) warns that versions published after early January 2027 will require Node ≥22; Railway is currently on 20. Not urgent, but a real deadline exists.
