@@ -34,6 +34,11 @@ export async function POST(request: NextRequest) {
     if (!valid) {
       return new NextResponse("Invalid signature", { status: 401 });
     }
+  } else if (process.env.NODE_ENV === "production") {
+    // Fail closed, not open: an unset secret in production must not
+    // silently degrade into accepting any POST as genuine Meta traffic.
+    console.error("WHATSAPP_APP_SECRET is not set in production — rejecting webhook request.");
+    return new NextResponse("Webhook not configured", { status: 500 });
   } else {
     console.warn(
       "WHATSAPP_APP_SECRET is not set — skipping webhook signature verification. Do not run like this in production."

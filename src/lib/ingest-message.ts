@@ -5,6 +5,11 @@ import type {
 } from "@/generated/prisma/client";
 import type { WhatsAppChangeValue } from "@/lib/whatsapp";
 import { runAIEmployeeTurn } from "@/lib/ai-runtime";
+import { downloadWhatsAppMedia, persistMediaFile } from "@/lib/media-storage";
+
+// Media worth saving so a human reviewing the conversation later can
+// actually see it, not just a WhatsApp media reference that expires.
+const PERSISTABLE_MEDIA_TYPES: MessageType[] = ["IMAGE", "DOCUMENT", "VOICE"];
 
 // Workflow stages that mean "this conversation is done" — a new inbound
 // message should start a fresh conversation rather than reopen one of these
@@ -64,6 +69,7 @@ export async function ingestInboundMessage(
   });
 
   const { messageType, content, mediaRef } = normalizeContent(message);
+  let inboundMessageId: string | null = null;
 
   await prisma.$transaction(async (tx) => {
     if (!conversation) {
@@ -80,7 +86,7 @@ export async function ingestInboundMessage(
       });
     }
 
-    await tx.message.create({
+    const inboundMessage = await tx.message.create({
       data: {
         conversationId: conversation.id,
         direction: "INBOUND",
@@ -90,6 +96,7 @@ export async function ingestInboundMessage(
         mediaUrl: mediaRef,
       },
     });
+    inboundMessageId = inboundMessage.id;
 
     await tx.event.create({
       data: {
@@ -110,6 +117,58 @@ export async function ingestInboundMessage(
     });
   });
 
+  // Download and re-host media now, not just when something later chooses
+  // to inspect it (e.g. payment verification) — otherwise anything the AI
+  // never verifies (a non-receipt photo, a voice note) is stuck as an
+  // expiring WhatsApp media reference no human can ever actually view.
+  // Runs before the AI turn below so request_payment_verification reuses
+  // this instead of downloading the same asset from WhatsApp twice.
+  if (inboundMessageId && mediaRef?.startsWith("whatsapp-media:") && PERSISTABLE_MEDIA_TYPES.includes(messageType)) {
+    try {
+      const mediaId = mediaRef.slice("whatsapp-media:".length);
+      const downloaded = await downloadWhatsAppMedia(mediaId);
+      if (downloaded) {
+        const storedUrl = await persistMediaFile(downloaded.buffer, downloaded.mimeType, mediaId);
+        await prisma.message.update({ where: { id: inboundMessageId }, data: { mediaUrl: storedUrl } });
+      }
+    } catch (error) {
+      console.error(`Failed to persist inbound media for message ${inboundMessageId}`, error);
+    }
+  }
+
+  // Cost-abuse guard: every inbound message triggers a real Claude API call
+  // below, with nothing else in the pipeline bounding volume. A customer
+  // (or spoofed/replayed traffic) sending messages in a tight burst would
+  // otherwise mean an unbounded number of paid API calls. The threshold is
+  // deliberately generous — normal rapid typing (several messages in a
+  // row) should never come close — this exists to catch abuse/bugs, not to
+  // police real customers. Scoped to the customer (not just this
+  // conversation) since a new conversation only starts once the old one
+  // reaches a terminal stage, not on demand.
+  const RATE_LIMIT_WINDOW_MS = 60_000;
+  const RATE_LIMIT_MAX_MESSAGES = 15;
+  const recentInboundCount = await prisma.message.count({
+    where: {
+      conversation: { customerId: customer.id },
+      direction: "INBOUND",
+      createdAt: { gte: new Date(Date.now() - RATE_LIMIT_WINDOW_MS) },
+    },
+  });
+
+  if (recentInboundCount > RATE_LIMIT_MAX_MESSAGES) {
+    console.warn(
+      `Rate limit hit for customer ${customer.id} (${recentInboundCount} inbound messages in the last minute) — skipping AI turn for message ${message.id}`
+    );
+    await prisma.event.create({
+      data: {
+        conversationId: conversation!.id,
+        type: "RATE_LIMIT_SKIPPED_AI_TURN",
+        payload: { messageCount: recentInboundCount, windowMs: RATE_LIMIT_WINDOW_MS },
+      },
+    });
+    return;
+  }
+
   // The Channel Gateway's job ends at normalization. Running the AI
   // Employee Runtime here (rather than via a queue) is a deliberate MVP
   // simplification — ARCHITECTURE.md §3 notes pg-boss isn't wired up yet,
@@ -129,10 +188,9 @@ function normalizeContent(
     case "text":
       return { messageType: "TEXT", content: message.text?.body ?? "", mediaRef: null };
     case "image":
-      // Media download (Graph API media-id -> URL -> our object storage)
-      // is not wired up yet — object storage isn't provisioned (see
-      // ARCHITECTURE.md §12). We keep the WhatsApp media id so nothing is
-      // lost; a follow-up pass fetches and re-hosts it.
+      // The raw WhatsApp media id, re-hosted to real storage right after
+      // this function returns (see the persistence step below) — kept as
+      // the placeholder here since normalizeContent itself has no async/IO.
       return {
         messageType: "IMAGE",
         content: message.image?.caption ?? null,

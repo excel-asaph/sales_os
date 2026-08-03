@@ -1,10 +1,11 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
 import { sendWhatsAppText, sendWhatsAppTemplate } from "@/lib/whatsapp-send";
 import { isWithinCustomerServiceWindow } from "@/lib/whatsapp-window";
 import { revalidatePath } from "next/cache";
-import { requireSession } from "@/lib/auth";
+import { requireSession, requireAdminSession } from "@/lib/auth";
 
 async function loadOwnedConversation(conversationId: string, businessId: string) {
   const conversation = await prisma.conversation.findUniqueOrThrow({
@@ -108,4 +109,27 @@ export async function resolveConversation(formData: FormData) {
 
   revalidatePath(`/dashboard/${conversationId}`);
   revalidatePath("/dashboard");
+}
+
+// Deliberately narrow: only a conversation with zero orders can ever be
+// deleted here. An Order is a financial/payment-verification record —
+// Conversation cascades to delete Order rows (prisma/schema.prisma), so an
+// unrestricted delete would silently destroy real transaction history. For
+// a conversation with genuine order history, resolveConversation (above)
+// is the right tool — this is only for spam, wrong numbers, and test leads
+// that never went anywhere.
+export async function deleteConversation(formData: FormData) {
+  const session = await requireAdminSession();
+  const conversationId = String(formData.get("conversationId"));
+  await loadOwnedConversation(conversationId, session.businessId);
+
+  const orderCount = await prisma.order.count({ where: { conversationId } });
+  if (orderCount > 0) {
+    throw new Error(
+      "This conversation has order/payment history and can't be deleted — mark it resolved instead to keep the record."
+    );
+  }
+
+  await prisma.conversation.delete({ where: { id: conversationId } });
+  redirect("/dashboard");
 }

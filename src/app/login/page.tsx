@@ -12,7 +12,11 @@ export default async function LoginPage({
 }) {
   const params = await searchParams;
   const next = typeof params.next === "string" ? params.next : "/home";
-  const hasError = params.error === "1";
+  const hasError = params.error === "1" || params.error === "2";
+  const errorMessage =
+    params.error === "2"
+      ? "Too many attempts — please wait a few minutes before trying again."
+      : "Incorrect login or password.";
 
   return (
     <main className="flex min-h-svh items-center justify-center bg-muted/30 p-4">
@@ -36,7 +40,7 @@ export default async function LoginPage({
             {hasError && (
               <div className="mb-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
                 <AlertCircle className="size-4 shrink-0" />
-                Incorrect login or password.
+                {errorMessage}
               </div>
             )}
 

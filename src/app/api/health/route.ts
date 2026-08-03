@@ -8,9 +8,10 @@ export async function GET() {
     const businessCount = await prisma.business.count();
     return NextResponse.json({ status: "ok", businessCount });
   } catch (error) {
-    return NextResponse.json(
-      { status: "error", message: (error as Error).message },
-      { status: 500 }
-    );
+    // Log the real error server-side for debugging, but don't hand raw
+    // Prisma/DB error text (which can include connection-string or
+    // schema details) back to an unauthenticated caller.
+    console.error("Health check failed", error);
+    return NextResponse.json({ status: "error" }, { status: 500 });
   }
 }
