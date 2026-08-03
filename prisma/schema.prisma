@@ -89,6 +89,7 @@ model Business {
   products        Product[]
   customers       Customer[]
   humanAgents     HumanAgent[]
+  faqEntries      FaqEntry[]
 
   @@map("businesses")
 }
@@ -99,8 +100,21 @@ model BusinessConfig {
   id                          String   @id @default(cuid())
   businessId                  String   @unique @map("business_id")
   deliverBeforePayment        Boolean  @default(false) @map("deliver_before_payment")
-  maxFollowups                Int      @default(3) @map("max_followups")
+  /// How many steps of the fixed follow-up sequence (src/lib/followup-sequence.ts)
+  /// to run before giving up and auto-tagging the customer "Uninterested".
+  /// Business-editable (Settings → General); 5 is the full designed
+  /// sequence, so this is clamped 1-5 in the UI and worker.
+  maxFollowups                Int      @default(5) @map("max_followups")
   escalationConfidenceThreshold Float  @default(0.7) @map("escalation_confidence_threshold")
+  /// When a receipt fails automated verification for a correctable reason
+  /// (wrong amount, wrong account, unreadable image), let the AI tell the
+  /// customer specifically what's wrong and ask them to resend, instead of
+  /// escalating to a human on the first mismatch. Capped at
+  /// RECEIPT_RETRY_LIMIT (src/lib/actions.ts) regardless of this setting —
+  /// and never applies to a receipt that looks digitally altered, or any
+  /// non-payment escalation (refunds, complaints, anger) — those always
+  /// reach a human.
+  aiHandlesReceiptIssues       Boolean  @default(true) @map("ai_handles_receipt_issues")
   businessHours               Json?    @map("business_hours")
   greetingTemplate            String?  @map("greeting_template")
   /// Sales Playbook (PRD 11.3, Knowledge Engine) — this business's own
@@ -115,6 +129,25 @@ model BusinessConfig {
   business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   @@map("business_config")
+}
+
+/// Curated FAQ (PRD Ch 11, Knowledge Engine) — business-owner-authored Q&A
+/// pairs, injected into the system prompt verbatim so the AI answers common
+/// product questions consistently instead of improvising from the ebook.
+/// Full-document search over the ebook itself is a deferred phase 2
+/// (docs/FUTURE.md) — only worth building once real customers ask things
+/// this curated list can't cover.
+model FaqEntry {
+  id         String   @id @default(cuid())
+  businessId String   @map("business_id")
+  question   String
+  answer     String
+  order      Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("faq_entries")
 }
 
 /// Payment Knowledge (PRD 11.3)
@@ -292,6 +325,12 @@ model HumanAgent {
   business      Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
   conversations Conversation[]
 
+  // Login (src/app/login/actions.ts) looks agents up by contact with
+  // findFirst, not findUnique — nothing previously stopped two agents in
+  // the same business sharing a contact, which would make login pick
+  // between them unpredictably. Multiple NULLs are still fine under
+  // Postgres unique-constraint semantics (NULL is never equal to NULL).
+  @@unique([businessId, contact])
   @@map("human_agents")
 }
 
