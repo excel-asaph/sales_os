@@ -3,7 +3,16 @@ import { getSession } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { SubmitButton } from "@/components/submit-button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -14,7 +23,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { createPaymentAccount, togglePaymentAccountActive, deletePaymentAccount } from "./actions";
+import {
+  createPaymentAccount,
+  togglePaymentAccountActive,
+  deletePaymentAccount,
+  updatePaymentAccount,
+} from "./actions";
 
 export default async function PaymentAccountsPage() {
   const session = await getSession();
@@ -57,6 +71,41 @@ export default async function PaymentAccountsPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        <Dialog>
+                          <DialogTrigger render={<Button variant="outline" size="sm" />}>Edit</DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Edit payment account</DialogTitle>
+                            </DialogHeader>
+                            <form action={updatePaymentAccount} className="flex flex-col gap-4">
+                              <input type="hidden" name="accountId" value={account.id} />
+                              <div className="grid gap-4 sm:grid-cols-2">
+                                <div className="flex flex-col gap-1.5">
+                                  <Label htmlFor={`bankName-${account.id}`}>Bank name</Label>
+                                  <Input id={`bankName-${account.id}`} name="bankName" defaultValue={account.bankName} required />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                  <Label htmlFor={`accountNumber-${account.id}`}>Account number</Label>
+                                  <Input
+                                    id={`accountNumber-${account.id}`}
+                                    name="accountNumber"
+                                    defaultValue={account.accountNumber}
+                                    required
+                                  />
+                                </div>
+                              </div>
+                              <div className="flex flex-col gap-1.5">
+                                <Label htmlFor={`accountName-${account.id}`}>Account name</Label>
+                                <Input id={`accountName-${account.id}`} name="accountName" defaultValue={account.accountName} required />
+                              </div>
+                              <DialogFooter>
+                                <SubmitButton pendingLabel="Saving…" successMessage="Account updated">
+                                  Save changes
+                                </SubmitButton>
+                              </DialogFooter>
+                            </form>
+                          </DialogContent>
+                        </Dialog>
                         <form action={togglePaymentAccountActive}>
                           <input type="hidden" name="accountId" value={account.id} />
                           <SubmitButton

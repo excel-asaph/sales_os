@@ -3,7 +3,16 @@ import { getSession } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { SubmitButton } from "@/components/submit-button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -14,7 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { createProduct, toggleProductAvailable, deleteProduct } from "./actions";
+import { createProduct, toggleProductAvailable, deleteProduct, updateProduct } from "./actions";
 
 export default async function ProductsPage() {
   const session = await getSession();
@@ -59,6 +68,52 @@ export default async function ProductsPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        <Dialog>
+                          <DialogTrigger render={<Button variant="outline" size="sm" />}>Edit</DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Edit product</DialogTitle>
+                            </DialogHeader>
+                            <form action={updateProduct} className="flex flex-col gap-4">
+                              <input type="hidden" name="productId" value={product.id} />
+                              <div className="grid gap-4 sm:grid-cols-2">
+                                <div className="flex flex-col gap-1.5">
+                                  <Label htmlFor={`name-${product.id}`}>Name</Label>
+                                  <Input id={`name-${product.id}`} name="name" defaultValue={product.name} required />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                  <Label htmlFor={`price-${product.id}`}>Price (NGN)</Label>
+                                  <Input
+                                    id={`price-${product.id}`}
+                                    name="price"
+                                    type="number"
+                                    required
+                                    min={0}
+                                    step="0.01"
+                                    defaultValue={product.price.toString()}
+                                  />
+                                </div>
+                              </div>
+                              <div className="flex flex-col gap-1.5">
+                                <Label htmlFor={`description-${product.id}`}>Description</Label>
+                                <Input id={`description-${product.id}`} name="description" defaultValue={product.description ?? ""} />
+                              </div>
+                              <div className="flex flex-col gap-1.5">
+                                <Label htmlFor={`fileUrl-${product.id}`}>File URL</Label>
+                                <Input id={`fileUrl-${product.id}`} name="fileUrl" defaultValue={product.fileUrl ?? ""} />
+                              </div>
+                              <div className="flex flex-col gap-1.5">
+                                <Label htmlFor={`category-${product.id}`}>Category</Label>
+                                <Input id={`category-${product.id}`} name="category" defaultValue={product.category ?? ""} />
+                              </div>
+                              <DialogFooter>
+                                <SubmitButton pendingLabel="Saving…" successMessage="Product updated">
+                                  Save changes
+                                </SubmitButton>
+                              </DialogFooter>
+                            </form>
+                          </DialogContent>
+                        </Dialog>
                         <form action={toggleProductAvailable}>
                           <input type="hidden" name="productId" value={product.id} />
                           <SubmitButton
