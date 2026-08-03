@@ -4,7 +4,7 @@ import { buildSystemPrompt } from "@/lib/system-prompt";
 import { actionContractTools } from "@/lib/tools";
 import { executeAction, type ActionContext } from "@/lib/actions";
 import { loadConversationBrain, renderConversationBrain } from "@/lib/conversation-brain";
-import { getBusinessConfig } from "@/lib/knowledge";
+import { getBusinessConfig, getFaqEntries } from "@/lib/knowledge";
 import { prisma } from "@/lib/prisma";
 
 // A single rich turn (search a product, send 2-3 short messages, update
@@ -42,15 +42,17 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
     customerPhoneNumber: conversation.customer.phoneNumber,
   };
 
-  const [brain, config] = await Promise.all([
+  const [brain, config, faq] = await Promise.all([
     loadConversationBrain(conversationId),
     getBusinessConfig(businessId),
+    getFaqEntries(businessId),
   ]);
 
   const system = buildSystemPrompt({
     name: conversation.customer.business.name,
     deliverBeforePayment: config.deliverBeforePayment,
     playbook: config.playbook as Record<string, string> | null,
+    faq,
   });
 
   const brainContent = followupNote

@@ -35,6 +35,10 @@ export async function getPaymentAccounts(businessId: string) {
   return prisma.paymentAccount.findMany({ where: { businessId, active: true } });
 }
 
+export async function getFaqEntries(businessId: string) {
+  return prisma.faqEntry.findMany({ where: { businessId }, orderBy: { order: "asc" } });
+}
+
 export async function getBusinessConfig(businessId: string) {
   const config = await prisma.businessConfig.findUnique({ where: { businessId } });
   // Defaults mirror the Prisma schema defaults — used if a business hasn't
@@ -44,6 +48,7 @@ export async function getBusinessConfig(businessId: string) {
       deliverBeforePayment: false,
       maxFollowups: 3,
       escalationConfidenceThreshold: 0.7,
+      aiHandlesReceiptIssues: true,
       greetingTemplate: null,
       playbook: null,
     }

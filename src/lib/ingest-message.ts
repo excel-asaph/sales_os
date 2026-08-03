@@ -98,6 +98,16 @@ export async function ingestInboundMessage(
         payload: JSON.parse(JSON.stringify(message)),
       },
     });
+
+    // The customer just spoke — any follow-up scheduled for their prior
+    // silence is stale the moment they reply (the entire premise of a
+    // follow-up is "they went quiet," and now they haven't). The worker
+    // already checks `cancelled` before sending, so flagging it here is
+    // enough; no need to also touch the already-queued pg-boss job.
+    await tx.followup.updateMany({
+      where: { conversationId: conversation.id, sent: false, cancelled: false },
+      data: { cancelled: true },
+    });
   });
 
   // The Channel Gateway's job ends at normalization. Running the AI

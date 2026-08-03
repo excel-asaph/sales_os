@@ -2,8 +2,9 @@ import { prisma } from "@/lib/prisma";
 import { sendWhatsAppText, sendWhatsAppDocument } from "@/lib/whatsapp-send";
 import { getPaymentAccounts, getBusinessConfig, searchProducts } from "@/lib/knowledge";
 import { downloadWhatsAppMedia, persistReceiptImage } from "@/lib/media-storage";
-import { verifyReceiptImage } from "@/lib/receipt-verification";
+import { verifyReceiptContent, type ReceiptExtraction, type PaymentAccountRef } from "@/lib/receipt-verification";
 import { getBoss, FOLLOWUP_QUEUE } from "@/lib/queue";
+import { addCustomerTag } from "@/lib/customer-tags";
 import type { ConversationStage, FactKind } from "@/generated/prisma/client";
 
 export interface ActionContext {
@@ -42,7 +43,7 @@ export async function executeAction(
     case "record_fact":
       return recordFact(ctx, input.kind as FactKind, input.key as string, input.value as string);
     case "create_followup":
-      return createFollowup(ctx, input.days as number, input.message as string);
+      return createFollowup(ctx, input.hours as number, input.message as string);
     case "escalate_to_human":
       return escalateToHuman(ctx, input.reason as string, input.summary as string);
     case "tag_customer":
@@ -142,9 +143,29 @@ async function sendProduct(ctx: ActionContext, productId: string) {
  * a human regardless of the model's stated confidence (Non-Negotiable
  * 14.2: never fabricate a verified payment).
  */
+// Cap on self-correction attempts (src/lib/system-prompt.ts's guidance,
+// BusinessConfig.aiHandlesReceiptIssues) before a receipt mismatch always
+// escalates to a human regardless of that setting — a repeated-failure
+// pattern is itself a signal worth a human's eyes, and this is also the
+// circuit breaker against someone trying many fake receipts hoping one
+// slips past. Not business-configurable on purpose: raising it would blunt
+// the one guardrail that isn't a business preference.
+const RECEIPT_RETRY_LIMIT = 3;
+
+// A customer's receipt "evidence" can arrive as any inbound message type —
+// a screenshot, a forwarded PDF, or a pasted bank SMS/debit-alert as plain
+// text. Whichever is most recent is what the customer is pointing at when
+// the AI checks; VOICE is excluded since there's nothing to extract from
+// audio without transcription (out of scope).
+const RECEIPT_MESSAGE_TYPES = ["IMAGE", "DOCUMENT", "TEXT"] as const;
+
 async function requestPaymentVerification(ctx: ActionContext, productId: string, expectedAmount: number) {
   const receiptMessage = await prisma.message.findFirst({
-    where: { conversationId: ctx.conversationId, type: "IMAGE", direction: "INBOUND" },
+    where: {
+      conversationId: ctx.conversationId,
+      direction: "INBOUND",
+      type: { in: [...RECEIPT_MESSAGE_TYPES] },
+    },
     orderBy: { createdAt: "desc" },
   });
 
@@ -153,61 +174,88 @@ async function requestPaymentVerification(ctx: ActionContext, productId: string,
     getPaymentAccounts(ctx.businessId),
   ]);
 
-  if (!receiptMessage?.mediaUrl) {
-    return recordEscalatedOrder(ctx, productId, expectedAmount, {
-      receiptImageUrl: null,
-      confidence: 0,
-      threshold: config.escalationConfidenceThreshold,
-      reason: "No receipt image found in this conversation yet.",
-    });
+  if (!receiptMessage) {
+    // Nothing to escalate — there's no evidence for a human to review
+    // either. The right move is just asking the customer to send some.
+    return {
+      verified: false,
+      status: "needs_correction" as const,
+      reason: "No payment evidence has been sent in this conversation yet — ask the customer to send a screenshot, PDF, or the text of their bank alert.",
+    };
   }
 
-  let storedImageUrl = receiptMessage.mediaUrl;
+  let storedImageUrl: string | null = receiptMessage.type === "TEXT" ? null : receiptMessage.mediaUrl;
   let extractedAmount: number | null = null;
   let extractedBank: string | null = null;
   let confidence = 0;
-  let reason = "Could not read the receipt image automatically — routed to a human for manual verification.";
+  let looksAltered = false;
+  let amountMatches = false;
+  let accountMatches = false;
+  let transactionSuccessful = false;
+  // Distinguishes a technical/system fault (can't read the evidence at all
+  // — never the customer's fault, always escalates, never counts toward
+  // their retry cap) from a genuine content mismatch below.
+  let technicalFailure = true;
+  // A format we structurally can't parse (e.g. a non-PDF document) — the
+  // customer's own choice, so it's correctable like a mismatch, but never
+  // counts as a "technical" fault.
+  let unsupportedFormat = false;
+  let reason = "Could not read the payment evidence automatically — routed to a human for manual verification.";
 
   try {
-    const mediaId = receiptMessage.mediaUrl.startsWith("whatsapp-media:")
-      ? receiptMessage.mediaUrl.slice("whatsapp-media:".length)
-      : null;
+    if (receiptMessage.type === "TEXT") {
+      const extraction = await verifyReceiptContent({
+        content: { kind: "text", text: receiptMessage.content ?? "" },
+        expectedAmount,
+        paymentAccounts,
+      });
+      technicalFailure = false;
+      ({ extractedAmount, extractedBank, looksAltered, confidence, reason, amountMatches, accountMatches, transactionSuccessful } =
+        applyExtraction(extraction, expectedAmount, paymentAccounts, reason));
+    } else if (!receiptMessage.mediaUrl) {
+      reason = "Could not read the payment evidence automatically — routed to a human for manual verification.";
+    } else {
+      const mediaId = receiptMessage.mediaUrl.startsWith("whatsapp-media:")
+        ? receiptMessage.mediaUrl.slice("whatsapp-media:".length)
+        : null;
 
-    if (mediaId) {
-      const downloaded = await downloadWhatsAppMedia(mediaId);
-      if (downloaded) {
-        storedImageUrl = await persistReceiptImage(downloaded.buffer, downloaded.mimeType, mediaId);
-        await prisma.message.update({ where: { id: receiptMessage.id }, data: { mediaUrl: storedImageUrl } });
+      if (mediaId) {
+        const downloaded = await downloadWhatsAppMedia(mediaId);
+        if (downloaded) {
+          storedImageUrl = await persistReceiptImage(downloaded.buffer, downloaded.mimeType, mediaId);
+          await prisma.message.update({ where: { id: receiptMessage.id }, data: { mediaUrl: storedImageUrl } });
 
-        const extraction = await verifyReceiptImage({
-          imageBase64: downloaded.buffer.toString("base64"),
-          mimeType: downloaded.mimeType,
-          expectedAmount,
-          paymentAccounts,
-        });
-
-        extractedAmount = extraction.extractedAmount;
-        extractedBank = extraction.extractedBank;
-
-        const amountMatches =
-          extraction.extractedAmount !== null &&
-          Math.abs(extraction.extractedAmount - expectedAmount) <= expectedAmount * 0.02;
-        const accountMatches =
-          extraction.extractedAccountNumber !== null &&
-          paymentAccounts.some((a) => a.accountNumber === extraction.extractedAccountNumber);
-
-        // The platform enforces the hard match, not just the model's own
-        // self-reported confidence — a receipt the model likes the look of
-        // but with the wrong amount or account is never trusted.
-        confidence =
-          amountMatches && accountMatches && extraction.transactionStatus === "successful"
-            ? extraction.modelConfidence
-            : Math.min(extraction.modelConfidence, 0.3);
-
-        reason = extraction.reasoning || reason;
-      } else {
-        reason =
-          "WhatsApp media access isn't configured yet — routed to a human for manual verification.";
+          if (receiptMessage.type === "IMAGE") {
+            const extraction = await verifyReceiptContent({
+              content: {
+                kind: "image",
+                base64: downloaded.buffer.toString("base64"),
+                mimeType: downloaded.mimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
+              },
+              expectedAmount,
+              paymentAccounts,
+            });
+            technicalFailure = false;
+            ({ extractedAmount, extractedBank, looksAltered, confidence, reason, amountMatches, accountMatches, transactionSuccessful } =
+              applyExtraction(extraction, expectedAmount, paymentAccounts, reason));
+          } else if (downloaded.mimeType === "application/pdf") {
+            const extraction = await verifyReceiptContent({
+              content: { kind: "document", base64: downloaded.buffer.toString("base64") },
+              expectedAmount,
+              paymentAccounts,
+            });
+            technicalFailure = false;
+            ({ extractedAmount, extractedBank, looksAltered, confidence, reason, amountMatches, accountMatches, transactionSuccessful } =
+              applyExtraction(extraction, expectedAmount, paymentAccounts, reason));
+          } else {
+            technicalFailure = false;
+            unsupportedFormat = true;
+            reason = "This file type isn't something I can read automatically.";
+          }
+        } else {
+          reason =
+            "WhatsApp media access isn't configured yet — routed to a human for manual verification.";
+        }
       }
     }
   } catch (error) {
@@ -215,53 +263,238 @@ async function requestPaymentVerification(ctx: ActionContext, productId: string,
     reason = "Automatic receipt verification failed — routed to a human for manual verification.";
   }
 
-  const verified = confidence >= config.escalationConfidenceThreshold;
+  // The platform enforces the hard match, not just the model's own
+  // self-reported confidence — a receipt the model likes the look of but
+  // with the wrong amount or account is never trusted. Anything flagged as
+  // altered is never verified regardless of how well the numbers line up.
+  const hardMatch = amountMatches && accountMatches && transactionSuccessful;
+  const verified = !technicalFailure && !unsupportedFormat && !looksAltered && hardMatch && confidence >= config.escalationConfidenceThreshold;
 
+  if (verified) {
+    return finalizeVerifiedOrder(ctx, productId, expectedAmount, {
+      receiptImageUrl: storedImageUrl,
+      extractedAmount,
+      extractedBank,
+      confidence,
+    });
+  }
+
+  // Tampering signs and technical faults always escalate — never something
+  // to hand back to the customer as "please fix and resend," and never
+  // subject to the retry cap (there's nothing correctable to count).
+  if (technicalFailure || looksAltered) {
+    return recordEscalatedOrder(ctx, productId, expectedAmount, {
+      receiptImageUrl: storedImageUrl,
+      confidence,
+      threshold: config.escalationConfidenceThreshold,
+      // Deliberately generic for anything the customer will see relayed —
+      // never surface "looks altered" to them, which would either accuse an
+      // honest customer or coach an actual fraudster on what to fix next.
+      reason: looksAltered
+        ? "This receipt needs manual review."
+        : reason,
+    });
+  }
+
+  // A correctable issue: wrong amount, wrong account, unclear evidence,
+  // transaction not completed, or a format we can't parse (e.g. a non-PDF
+  // document). Self-correct if this business has opted in and hasn't
+  // burned its retry cap on this conversation yet; otherwise fall back to
+  // escalating, same as before this feature existed.
+  const priorRejections = await prisma.order.count({
+    where: { conversationId: ctx.conversationId, status: "REJECTED" },
+  });
+
+  if (config.aiHandlesReceiptIssues && priorRejections < RECEIPT_RETRY_LIMIT) {
+    return recordRejectedOrder(ctx, productId, expectedAmount, {
+      receiptImageUrl: storedImageUrl,
+      extractedAmount,
+      extractedBank,
+      confidence,
+      reason: unsupportedFormat
+        ? "I can't read that file automatically — could you send a screenshot, PDF, or the text of your bank alert instead?"
+        : describeReceiptMismatch({
+            extractedAmount,
+            confidence,
+            expectedAmount,
+            amountMatches,
+            accountMatches,
+            transactionSuccessful,
+          }),
+    });
+  }
+
+  return recordEscalatedOrder(ctx, productId, expectedAmount, {
+    receiptImageUrl: storedImageUrl,
+    confidence,
+    threshold: config.escalationConfidenceThreshold,
+    reason,
+  });
+}
+
+// Shared post-processing for any successful extraction (image, PDF, or
+// text) — computes the hard-match signals the platform enforces itself,
+// never trusting the model's own confidence alone.
+function applyExtraction(
+  extraction: ReceiptExtraction,
+  expectedAmount: number,
+  paymentAccounts: PaymentAccountRef[],
+  fallbackReason: string
+) {
+  const amountMatches =
+    extraction.extractedAmount !== null &&
+    Math.abs(extraction.extractedAmount - expectedAmount) <= expectedAmount * 0.02;
+  const accountMatches =
+    extraction.extractedAccountNumber !== null &&
+    paymentAccounts.some((a) => accountNumberPlausiblyMatches(extraction.extractedAccountNumber!, a.accountNumber));
+  const transactionSuccessful = extraction.transactionStatus === "successful";
+
+  return {
+    extractedAmount: extraction.extractedAmount,
+    extractedBank: extraction.extractedBank,
+    looksAltered: extraction.looksAltered,
+    confidence: extraction.modelConfidence,
+    reason: extraction.reasoning || fallbackReason,
+    amountMatches,
+    accountMatches,
+    transactionSuccessful,
+  };
+}
+
+// Bank SMS/debit alerts commonly mask part of the account number (e.g.
+// "142****141") — an exact-string match would never pass a genuinely
+// correct one. Treat masked positions (* or x) as wildcards; every other
+// character must match exactly, at the same position.
+function accountNumberPlausiblyMatches(extracted: string, configured: string): boolean {
+  if (extracted === configured) return true;
+  if (extracted.length !== configured.length) return false;
+  if (!/[*x]/i.test(extracted)) return false;
+  for (let i = 0; i < extracted.length; i++) {
+    const c = extracted[i];
+    if (c === "*" || c.toLowerCase() === "x") continue;
+    if (c !== configured[i]) return false;
+  }
+  return true;
+}
+
+// Customer-safe wording for a correctable mismatch — specific enough to act
+// on, never accusatory, and ordered so the AI relays one clear thing rather
+// than a checklist.
+function describeReceiptMismatch(params: {
+  extractedAmount: number | null;
+  confidence: number;
+  expectedAmount: number;
+  amountMatches: boolean;
+  accountMatches: boolean;
+  transactionSuccessful: boolean;
+}): string {
+  const { extractedAmount, confidence, expectedAmount, amountMatches, accountMatches, transactionSuccessful } = params;
+  if (extractedAmount === null || confidence < 0.5) {
+    return "I couldn't find clear payment details there — could you send a screenshot, PDF, or the text of your bank alert?";
+  }
+  if (!accountMatches) {
+    return "This receipt shows a different account than the one we shared — could you confirm you sent it to the account we gave you, and resend the receipt?";
+  }
+  if (!amountMatches) {
+    return `The amount on this receipt shows ₦${extractedAmount.toLocaleString("en-NG")}, but we're expecting ₦${expectedAmount.toLocaleString("en-NG")} — could you double-check and resend the correct receipt?`;
+  }
+  if (!transactionSuccessful) {
+    return "This receipt doesn't show a completed transaction yet — could you check and resend once the transfer has gone through?";
+  }
+  return "I wasn't able to verify this receipt — could you resend it, or send a clearer copy?";
+}
+
+async function finalizeVerifiedOrder(
+  ctx: ActionContext,
+  productId: string,
+  expectedAmount: number,
+  info: { receiptImageUrl: string | null; extractedAmount: number | null; extractedBank: string | null; confidence: number }
+) {
   const order = await prisma.order.create({
     data: {
       conversationId: ctx.conversationId,
       productId,
       expectedAmount,
-      receiptImageUrl: storedImageUrl,
-      extractedAmount,
-      extractedBank,
-      verificationConfidence: confidence,
-      status: verified ? "VERIFIED" : "ESCALATED",
-      verifiedAt: verified ? new Date() : null,
+      receiptImageUrl: info.receiptImageUrl,
+      extractedAmount: info.extractedAmount,
+      extractedBank: info.extractedBank,
+      verificationConfidence: info.confidence,
+      status: "VERIFIED",
+      verifiedAt: new Date(),
     },
   });
 
   await prisma.$transaction([
     prisma.conversation.update({
       where: { id: ctx.conversationId },
-      data: verified
-        ? { currentStage: "PAYMENT_VERIFIED", confidence }
-        : { currentStage: "HUMAN_REVIEW_REQUIRED", confidence },
+      data: { currentStage: "PAYMENT_VERIFIED", confidence: info.confidence },
     }),
     prisma.event.create({
       data: {
         conversationId: ctx.conversationId,
-        type: verified ? "PAYMENT_VERIFIED" : "PAYMENT_ESCALATED",
-        payload: {
-          orderId: order.id,
-          confidence,
-          threshold: config.escalationConfidenceThreshold,
-          extractedAmount,
-          extractedBank,
-        },
+        type: "PAYMENT_VERIFIED",
+        payload: { orderId: order.id, confidence: info.confidence },
       },
     }),
   ]);
 
+  // Customer.lifetimePurchases/returningCustomer (read into the AI's brain —
+  // conversation-brain.ts — and shown on the Customer Profile page) were
+  // never actually written anywhere, so every customer looked first-time
+  // forever. This is the one place a payment actually becomes verified.
+  const updatedCustomer = await prisma.customer.update({
+    where: { businessId_phoneNumber: { businessId: ctx.businessId, phoneNumber: ctx.customerPhoneNumber } },
+    data: { lifetimePurchases: { increment: 1 } },
+  });
+  if (updatedCustomer.lifetimePurchases > 1 && !updatedCustomer.returningCustomer) {
+    await prisma.customer.update({
+      where: { id: updatedCustomer.id },
+      data: { returningCustomer: true },
+    });
+  }
+
   return {
-    verified,
-    confidence,
-    extractedAmount,
-    extractedBank,
-    reason: verified
-      ? "Payment verified against the receipt image."
-      : `${reason} A human will confirm this payment.`,
+    verified: true,
+    status: "verified" as const,
+    confidence: info.confidence,
+    extractedAmount: info.extractedAmount,
+    extractedBank: info.extractedBank,
+    reason: "Payment verified against the receipt image.",
   };
+}
+
+// A correctable mismatch the customer can fix themselves — logged for
+// visibility (Customer Profile / conversation Review already render Order
+// rows) but deliberately doesn't touch currentStage: the AI stays in the
+// same back-and-forth it was already in, same as any other objection.
+async function recordRejectedOrder(
+  ctx: ActionContext,
+  productId: string,
+  expectedAmount: number,
+  info: { receiptImageUrl: string | null; extractedAmount: number | null; extractedBank: string | null; confidence: number; reason: string }
+) {
+  const order = await prisma.order.create({
+    data: {
+      conversationId: ctx.conversationId,
+      productId,
+      expectedAmount,
+      receiptImageUrl: info.receiptImageUrl,
+      extractedAmount: info.extractedAmount,
+      extractedBank: info.extractedBank,
+      verificationConfidence: info.confidence,
+      status: "REJECTED",
+    },
+  });
+
+  await prisma.event.create({
+    data: {
+      conversationId: ctx.conversationId,
+      type: "PAYMENT_REJECTED",
+      payload: { orderId: order.id, confidence: info.confidence, reason: info.reason },
+    },
+  });
+
+  return { verified: false, status: "needs_correction" as const, confidence: info.confidence, reason: info.reason };
 }
 
 async function recordEscalatedOrder(
@@ -295,7 +528,12 @@ async function recordEscalatedOrder(
     }),
   ]);
 
-  return { verified: false, confidence: info.confidence, reason: info.reason };
+  return {
+    verified: false,
+    status: "escalated" as const,
+    confidence: info.confidence,
+    reason: `${info.reason} A member of our team will confirm this shortly.`,
+  };
 }
 
 async function updateStage(ctx: ActionContext, newStage: ConversationStage, objective?: string) {
@@ -330,11 +568,16 @@ async function recordFact(ctx: ActionContext, kind: FactKind, key: string, value
   return { recorded: true };
 }
 
-async function createFollowup(ctx: ActionContext, days: number, message: string) {
-  const existingCount = await prisma.followup.count({ where: { conversationId: ctx.conversationId } });
-  const scheduledFor = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+// The AI only ever creates step 1 — a scheduled sequence auto-advances
+// itself from there (the follow-up worker schedules step 2+ directly when
+// each step fires with no reply, up to BusinessConfig.maxFollowups). This
+// call is just the entry point: "start following up on this
+// conversation," optionally at a specific time if the customer gave one
+// (e.g. "I'll pay this evening").
+async function createFollowup(ctx: ActionContext, hours: number, message: string) {
+  const scheduledFor = new Date(Date.now() + hours * 60 * 60 * 1000);
   const followup = await prisma.followup.create({
-    data: { conversationId: ctx.conversationId, step: existingCount + 1, message, scheduledFor },
+    data: { conversationId: ctx.conversationId, step: 1, message, scheduledFor },
   });
 
   const boss = await getBoss();
@@ -364,18 +607,6 @@ async function escalateToHuman(ctx: ActionContext, reason: string, summary: stri
 }
 
 async function tagCustomer(ctx: ActionContext, tag: string) {
-  const conversation = await prisma.conversation.findUniqueOrThrow({
-    where: { id: ctx.conversationId },
-    select: { customerId: true },
-  });
-  const customer = await prisma.customer.findUniqueOrThrow({ where: { id: conversation.customerId } });
-  const existingTags = Array.isArray(customer.tags) ? (customer.tags as string[]) : [];
-  const tags = existingTags.includes(tag) ? existingTags : [...existingTags, tag];
-  await prisma.$transaction([
-    prisma.customer.update({ where: { id: customer.id }, data: { tags } }),
-    prisma.event.create({
-      data: { conversationId: ctx.conversationId, type: "TAG_APPLIED", payload: { tag } },
-    }),
-  ]);
+  const tags = await addCustomerTag(ctx.conversationId, tag);
   return { tagged: true, tags };
 }

@@ -87,7 +87,7 @@ export const actionContractTools: Anthropic.Tool[] = [
   {
     name: "request_payment_verification",
     description:
-      "Ask the platform to verify a payment receipt the customer sent. You must never declare payment confirmed yourself — only report what this tool's result says.",
+      "Ask the platform to verify payment evidence the customer sent — a screenshot, a forwarded PDF receipt, or a pasted bank SMS/debit-alert as plain text all work; the platform reads whichever the customer most recently sent, so you don't need to ask for a specific format. You must never declare payment confirmed yourself — only report what this tool's result says. If the evidence has a fixable problem (wrong amount, wrong account, unclear/unreadable), the result may ask you to relay that to the customer and wait for a corrected resend, rather than confirming or escalating — see your instructions for how to handle each possible result.",
     input_schema: {
       type: "object",
       properties: {
@@ -134,14 +134,22 @@ export const actionContractTools: Anthropic.Tool[] = [
   },
   {
     name: "create_followup",
-    description: "Schedule a follow-up message for a customer who paused before completing their purchase.",
+    description:
+      "Start a follow-up sequence for a customer who paused before completing their purchase — this schedules only the first check-in; the platform automatically continues the rest of the sequence (with decreasing frequency over several days) if the customer stays quiet, up to this business's configured limit, without you needing to call this again. If the customer gave a specific time (\"I'll pay this evening\", \"tomorrow morning\"), set hours to match that instead of the default.",
     input_schema: {
       type: "object",
       properties: {
-        days: { type: "integer", description: "Days from now to send the follow-up (typically 1, 3, or 7)." },
-        message: { type: "string", description: "The follow-up message to send when it fires." },
+        hours: {
+          type: "number",
+          description:
+            "Hours from now to send the first check-in. Default to 1 for a routine pause; match the customer's own stated time if they gave one (e.g. ~5 for \"this evening\", ~15 for \"tomorrow morning\").",
+        },
+        message: {
+          type: "string",
+          description: "What you'd say in this first check-in — used as a fallback if composing fresh isn't possible when it fires.",
+        },
       },
-      required: ["days", "message"],
+      required: ["hours", "message"],
     },
   },
   {

@@ -39,6 +39,49 @@ export async function sendWhatsAppText(to: string, text: string): Promise<void> 
 }
 
 /**
+ * Sends a Meta-approved WhatsApp Message Template — the only way to reach
+ * a customer outside the 24-hour customer service window (see
+ * src/lib/whatsapp-window.ts). Unlike sendWhatsAppText, the body content
+ * is fixed and pre-approved by Meta; this can invoke a template by name
+ * but can't send arbitrary text.
+ * https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-message-templates
+ */
+export async function sendWhatsAppTemplate(to: string, templateName: string, languageCode: string): Promise<void> {
+  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+
+  if (!accessToken || !phoneNumberId) {
+    console.log(`[whatsapp-send:dry-run] to=${to} template=${templateName} lang=${languageCode}`);
+    return;
+  }
+
+  const response = await fetch(
+    `https://graph.facebook.com/${GRAPH_API_VERSION}/${phoneNumberId}/messages`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to,
+        type: "template",
+        template: {
+          name: templateName,
+          language: { code: languageCode },
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`WhatsApp template send failed (${response.status}): ${body}`);
+  }
+}
+
+/**
  * Sends a document as a real WhatsApp attachment (native PDF-in-chat
  * experience), not a text message with a link pasted into it. WhatsApp
  * fetches `link` once and re-hosts it — the customer never sees the URL

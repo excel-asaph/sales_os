@@ -2,14 +2,25 @@ import "dotenv/config";
 import { prisma } from "@/lib/prisma";
 import { getBoss, FOLLOWUP_QUEUE, type FollowupJobData } from "@/lib/queue";
 import { runAIEmployeeTurn } from "@/lib/ai-runtime";
-import { sendWhatsAppText } from "@/lib/whatsapp-send";
+import { sendWhatsAppText, sendWhatsAppTemplate } from "@/lib/whatsapp-send";
+import { isWithinCustomerServiceWindow } from "@/lib/whatsapp-window";
+import { FOLLOWUP_SEQUENCE, stepDefinition, clampMaxFollowups } from "@/lib/followup-sequence";
+import { addCustomerTag } from "@/lib/customer-tags";
 import type { ConversationStage } from "@/generated/prisma/client";
+
+// The one Meta-approved re-engagement template — used when a follow-up
+// needs to fire outside the 24-hour customer service window, where
+// free-form text (including anything the AI would compose) is rejected
+// by WhatsApp outright.
+const FOLLOWUP_TEMPLATE_NAME = process.env.WHATSAPP_FOLLOWUP_TEMPLATE_NAME;
+const FOLLOWUP_TEMPLATE_LANG = process.env.WHATSAPP_FOLLOWUP_TEMPLATE_LANG || "en_US";
+
+const DEFAULT_FALLBACK_MESSAGE =
+  "Hi! Just checking in — are you still interested? Let us know if you have any questions.";
 
 // Stages where a scheduled follow-up no longer makes sense: the sale
 // already completed one way or another, or a human already owns this
-// conversation and the AI shouldn't jump back in on its own (ARCHITECTURE.md
-// §9: "checks whether the order has since completed... or the follow-up
-// was cancelled").
+// conversation and the AI shouldn't jump back in on its own.
 const BLOCKS_FOLLOWUP = new Set<ConversationStage>([
   "SALE_COMPLETED",
   "LOST_LEAD",
@@ -20,21 +31,32 @@ const BLOCKS_FOLLOWUP = new Set<ConversationStage>([
   "HUMAN_ASSIGNED",
 ]);
 
-/**
- * The Follow-Up Engine worker (PRD 8.6, ARCHITECTURE.md §9, §11). A
- * separate long-running process (run via `npm run worker`) that consumes
- * pg-boss jobs scheduled by create_followup (src/lib/actions.ts) once
- * their delay elapses. Deliberately not folded into the Next.js process —
- * this is the "one worker process" ARCHITECTURE.md §11 calls for.
- */
-async function handleFollowup(followupId: string) {
-  const followup = await prisma.followup.findUnique({
+async function loadFollowup(followupId: string) {
+  return prisma.followup.findUnique({
     where: { id: followupId },
     include: { conversation: { include: { customer: true, orders: true } } },
   });
+}
+
+type LoadedFollowup = NonNullable<Awaited<ReturnType<typeof loadFollowup>>>;
+
+/**
+ * The Follow-Up Engine worker (PRD 8.6, ARCHITECTURE.md §9, §11). A
+ * separate long-running process (run via `npm run worker`) that consumes
+ * pg-boss jobs. The AI only ever creates step 1 (src/lib/actions.ts,
+ * create_followup) — everything past that is orchestrated here: each
+ * step that fires with no reply schedules the next one itself, following
+ * the fixed sequence in src/lib/followup-sequence.ts, up to this
+ * business's configured `maxFollowups`. No AI judgment is needed to keep
+ * a sequence going, only to start one.
+ */
+async function handleFollowup(followupId: string) {
+  const followup = await loadFollowup(followupId);
 
   // Already handled (e.g. a retried redelivery of the same job) or
-  // explicitly cancelled elsewhere — nothing to do.
+  // cancelled — a reply from the customer cancels every pending follow-up
+  // for a conversation (ingest-message.ts), since the whole premise of a
+  // follow-up is "they went quiet," and now they haven't.
   if (!followup || followup.sent || followup.cancelled) return;
 
   const { conversation } = followup;
@@ -58,14 +80,90 @@ async function handleFollowup(followupId: string) {
     return;
   }
 
-  const note = `[Scheduled follow-up firing now (step ${followup.step}). The customer has not completed their purchase since this was scheduled. You planned to say something like: "${followup.message}" — decide whether a follow-up is still appropriate given everything above; if so, send it naturally via send_message (you don't have to reuse this exact wording). If the situation has changed and no follow-up makes sense, do nothing.]`;
+  const config = await prisma.businessConfig.findUnique({
+    where: { businessId: conversation.customer.businessId },
+  });
+  const maxSteps = clampMaxFollowups(config?.maxFollowups ?? FOLLOWUP_SEQUENCE.length);
+
+  // A step beyond the business's configured cap is a silent "did they
+  // ever come back?" check scheduled a day after the real sequence's
+  // last message — nothing to send, just decide whether to give up. If
+  // we got here, nothing cancelled it via a reply in the meantime.
+  if (followup.step > maxSteps) {
+    await prisma.$transaction([
+      prisma.followup.update({ where: { id: followup.id }, data: { sent: true } }),
+      prisma.conversation.update({ where: { id: conversation.id }, data: { currentStage: "LOST_LEAD" } }),
+      prisma.event.create({
+        data: {
+          conversationId: conversation.id,
+          type: "FOLLOWUP_SEQUENCE_EXHAUSTED",
+          payload: { afterStep: maxSteps },
+        },
+      }),
+    ]);
+    await addCustomerTag(conversation.id, "Uninterested");
+    return;
+  }
+
+  const delivery = await deliverFollowup(followup);
+  if (delivery === "skipped") return; // stays unsent — retried whenever this job is next redelivered
+
+  await prisma.$transaction([
+    prisma.followup.update({ where: { id: followup.id }, data: { sent: true } }),
+    prisma.event.create({
+      data: {
+        conversationId: conversation.id,
+        type: "FOLLOWUP_SENT",
+        payload: { followupId: followup.id, step: followup.step, viaTemplate: delivery === "template" },
+      },
+    }),
+  ]);
+
+  await scheduleNext(followup, maxSteps);
+}
+
+type DeliveryResult = "composed" | "template" | "skipped";
+
+/**
+ * Sends the current step: re-enters the AI runtime inside the 24-hour
+ * customer service window (normal case — it composes fresh, using this
+ * step's angle, rather than reusing any previously planned wording), or
+ * falls back to the approved re-engagement template outside it, where
+ * free-form text is rejected by WhatsApp regardless of what generated it.
+ */
+async function deliverFollowup(followup: LoadedFollowup): Promise<DeliveryResult> {
+  const { conversation } = followup;
+
+  if (!(await isWithinCustomerServiceWindow(conversation.id))) {
+    if (!FOLLOWUP_TEMPLATE_NAME) {
+      console.error(
+        `Follow-up ${followup.id}: outside the 24h customer service window and WHATSAPP_FOLLOWUP_TEMPLATE_NAME isn't configured — cannot send anything yet.`
+      );
+      return "skipped";
+    }
+    await sendWhatsAppTemplate(conversation.customer.phoneNumber, FOLLOWUP_TEMPLATE_NAME, FOLLOWUP_TEMPLATE_LANG);
+    await prisma.message.create({
+      data: {
+        conversationId: conversation.id,
+        direction: "OUTBOUND",
+        sender: "AI",
+        type: "TEXT",
+        content:
+          "[Re-engagement template sent — outside the 24h messaging window, so a fixed pre-approved message went out instead of a composed follow-up.]",
+      },
+    });
+    return "template";
+  }
+
+  const angle = stepDefinition(followup.step)?.angle ?? "A brief, low-pressure check-in.";
+  const note = `[Scheduled follow-up firing now (step ${followup.step} of this sequence). The customer has not replied since this was scheduled. This step's intent: ${angle} Compose it fresh via send_message — you don't have to reuse any previously planned wording. If the situation has genuinely changed (they already replied, paid, or a follow-up no longer fits), do nothing instead.]`;
 
   try {
     await runAIEmployeeTurn(conversation.id, note);
   } catch (error) {
-    // Template fallback if generation fails (ARCHITECTURE.md §9) — the
-    // customer still gets the reminder even if the Claude call errors.
-    console.error(`Follow-up ${followup.id}: AI runtime failed, sending fallback template`, error);
+    // Template fallback if generation fails — the customer still gets a
+    // reminder even if the Claude call errors.
+    console.error(`Follow-up ${followup.id}: AI runtime failed, sending fallback message`, error);
     await sendWhatsAppText(conversation.customer.phoneNumber, followup.message);
     await prisma.message.create({
       data: {
@@ -77,13 +175,49 @@ async function handleFollowup(followupId: string) {
       },
     });
   }
+  return "composed";
+}
 
-  await prisma.$transaction([
-    prisma.followup.update({ where: { id: followup.id }, data: { sent: true } }),
-    prisma.event.create({
-      data: { conversationId: conversation.id, type: "FOLLOWUP_SENT", payload: { followupId: followup.id } },
-    }),
-  ]);
+/**
+ * Schedules the next step in the sequence, or — once the business's
+ * configured limit is reached — a final silent check a day later before
+ * actually giving up (rather than declaring the lead lost the instant
+ * the last message is sent; they might reply ten minutes later).
+ */
+async function scheduleNext(followup: LoadedFollowup, maxSteps: number) {
+  const { conversation } = followup;
+  const nextStep = followup.step + 1;
+  const boss = await getBoss();
+
+  if (nextStep <= maxSteps) {
+    const nextStepDef = stepDefinition(nextStep) ?? FOLLOWUP_SEQUENCE[FOLLOWUP_SEQUENCE.length - 1];
+    const scheduledFor = new Date(Date.now() + nextStepDef.deltaHours * 60 * 60 * 1000);
+
+    const config = await prisma.businessConfig.findUnique({
+      where: { businessId: conversation.customer.businessId },
+    });
+    const playbook = (config?.playbook as Record<string, string> | null) ?? {};
+    const fallbackMessage = playbook.payment_followup || DEFAULT_FALLBACK_MESSAGE;
+
+    const next = await prisma.followup.create({
+      data: { conversationId: conversation.id, step: nextStep, message: fallbackMessage, scheduledFor },
+    });
+    await boss.send(FOLLOWUP_QUEUE, { followupId: next.id }, { startAfter: scheduledFor });
+    await prisma.event.create({
+      data: {
+        conversationId: conversation.id,
+        type: "FOLLOWUP_SCHEDULED",
+        payload: { followupId: next.id, step: nextStep, scheduledFor },
+      },
+    });
+    return;
+  }
+
+  const checkAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const check = await prisma.followup.create({
+    data: { conversationId: conversation.id, step: nextStep, message: "", scheduledFor: checkAt },
+  });
+  await boss.send(FOLLOWUP_QUEUE, { followupId: check.id }, { startAfter: checkAt });
 }
 
 async function main() {
