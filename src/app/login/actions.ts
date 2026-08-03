@@ -8,7 +8,7 @@ import { verifyPassword, createSessionToken, newSessionExpiry, SESSION_COOKIE } 
 export async function login(formData: FormData) {
   const contact = String(formData.get("contact") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const next = String(formData.get("next") ?? "/dashboard");
+  const next = String(formData.get("next") ?? "/home");
 
   const agent = contact
     ? await prisma.humanAgent.findFirst({ where: { contact, active: true } })
@@ -33,5 +33,5 @@ export async function login(formData: FormData) {
     maxAge: 30 * 24 * 60 * 60,
   });
 
-  redirect(next.startsWith("/") ? next : "/dashboard");
+  redirect(next.startsWith("/") ? next : "/home");
 }

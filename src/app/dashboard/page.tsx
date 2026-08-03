@@ -1,31 +1,20 @@
 import Link from "next/link";
+import { MessageCircleMore, UserRound, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-import { DashboardNav } from "@/components/DashboardNav";
-import type { ConversationStage } from "@/generated/prisma/client";
+import { AppShell } from "@/components/app-shell";
+import { StatTile } from "@/components/stat-tile";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { HUMAN_STAGES, TERMINAL_STAGES, stageStyle } from "@/lib/stage-display";
+import { clampMaxFollowups, FOLLOWUP_SEQUENCE } from "@/lib/followup-sequence";
+import { relativeTime } from "@/lib/relative-time";
 
 // Dashboard "Monitor" view (ARCHITECTURE.md §10, PRD 13.3): active
 // conversations, today's counts, conversations awaiting a human. This is
 // the missing other half of escalate_to_human (src/lib/actions.ts) — right
 // now a conversation can reach HUMAN_REVIEW_REQUIRED with nothing pointing
 // a human at it. This page is that pointer.
-const HUMAN_STAGES: ConversationStage[] = ["HUMAN_REVIEW_REQUIRED", "HUMAN_ASSIGNED"];
-const TERMINAL_STAGES: ConversationStage[] = ["SALE_COMPLETED", "LOST_LEAD", "RESOLVED"];
-
-const STAGE_COLORS: Partial<Record<ConversationStage, string>> = {
-  HUMAN_REVIEW_REQUIRED: "#b91c1c",
-  HUMAN_ASSIGNED: "#c2410c",
-  WAITING_FOR_PAYMENT: "#a16207",
-  RECEIPT_RECEIVED: "#a16207",
-  SALE_COMPLETED: "#15803d",
-  PRODUCT_DELIVERED: "#15803d",
-  PAYMENT_VERIFIED: "#15803d",
-  LOST_LEAD: "#6b7280",
-};
-
-function stageColor(stage: ConversationStage): string {
-  return STAGE_COLORS[stage] ?? "#374151";
-}
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -36,17 +25,24 @@ export default async function DashboardPage() {
 
   const businessScope = { customer: { businessId: session.businessId } };
 
-  const [conversations, awaitingHumanCount, completedTodayCount] = await Promise.all([
+  const [conversations, awaitingHumanCount, completedTodayCount, businessConfig] = await Promise.all([
     prisma.conversation.findMany({
       where: { ...businessScope, NOT: { currentStage: { in: TERMINAL_STAGES } } },
-      include: { customer: true, messages: { orderBy: { createdAt: "desc" }, take: 1 } },
+      include: {
+        customer: true,
+        messages: { orderBy: { createdAt: "desc" }, take: 1 },
+        followups: { orderBy: { step: "desc" }, take: 1 },
+      },
       orderBy: { updatedAt: "desc" },
     }),
     prisma.conversation.count({ where: { ...businessScope, currentStage: { in: HUMAN_STAGES } } }),
     prisma.conversation.count({
       where: { ...businessScope, currentStage: "SALE_COMPLETED", updatedAt: { gte: startOfToday } },
     }),
+    prisma.businessConfig.findUnique({ where: { businessId: session.businessId } }),
   ]);
+
+  const maxFollowups = clampMaxFollowups(businessConfig?.maxFollowups ?? FOLLOWUP_SEQUENCE.length);
 
   // Conversations needing a human float to the top regardless of recency —
   // that's the whole point of this view.
@@ -57,87 +53,103 @@ export default async function DashboardPage() {
   });
 
   return (
-    <main style={{ padding: 32, fontFamily: "sans-serif", maxWidth: 900, margin: "0 auto" }}>
-      <DashboardNav isAdmin={session.isAdmin} />
-      <h1>Dashboard</h1>
-
-      <div style={{ display: "flex", gap: 16, margin: "24px 0" }}>
-        <SummaryCard label="Active conversations" value={conversations.length} />
-        <SummaryCard label="Awaiting a human" value={awaitingHumanCount} tone={awaitingHumanCount > 0 ? "warn" : undefined} />
-        <SummaryCard label="Sales completed today" value={completedTodayCount} tone="good" />
-      </div>
-
-      {sorted.length === 0 ? (
-        <p style={{ color: "#666" }}>No active conversations.</p>
-      ) : (
-        <div style={{ border: "1px solid #ddd", borderRadius: 8, overflow: "hidden" }}>
-          {sorted.map((conversation) => {
-            const latest = conversation.messages[0];
-            return (
-              <Link
-                key={conversation.id}
-                href={`/dashboard/${conversation.id}`}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: 16,
-                  padding: "12px 16px",
-                  borderBottom: "1px solid #eee",
-                  textDecoration: "none",
-                  color: "inherit",
-                }}
-              >
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 600 }}>
-                    {conversation.customer.name || conversation.customer.phoneNumber}
-                  </div>
-                  <div
-                    style={{
-                      color: "#666",
-                      fontSize: 14,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      maxWidth: 480,
-                    }}
-                  >
-                    {latest ? `${latest.direction === "INBOUND" ? "Customer" : latest.sender}: ${latest.content ?? "(no text)"}` : "No messages yet"}
-                  </div>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-                  <span style={{ color: "#999", fontSize: 13 }}>
-                    {conversation.updatedAt.toLocaleString()}
-                  </span>
-                  <span
-                    style={{
-                      color: "white",
-                      background: stageColor(conversation.currentStage),
-                      borderRadius: 999,
-                      padding: "4px 10px",
-                      fontSize: 12,
-                      fontWeight: 600,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {conversation.currentStage.replaceAll("_", " ")}
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
+    <AppShell
+      active="conversations"
+      title="Conversations"
+      description="Everything the AI is currently handling, plus anything waiting on you"
+    >
+      <div className="mx-auto flex max-w-5xl flex-col gap-8">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <StatTile
+            label="Active conversations"
+            value={conversations.length}
+            icon={MessageCircleMore}
+            tone="default"
+          />
+          <StatTile
+            label="Awaiting a human"
+            value={awaitingHumanCount}
+            icon={AlertTriangle}
+            tone={awaitingHumanCount > 0 ? "warn" : "default"}
+          />
+          <StatTile
+            label="Sales completed today"
+            value={completedTodayCount}
+            icon={CheckCircle2}
+            tone="good"
+          />
         </div>
-      )}
-    </main>
-  );
-}
 
-function SummaryCard({ label, value, tone }: { label: string; value: number; tone?: "warn" | "good" }) {
-  const color = tone === "warn" ? "#b91c1c" : tone === "good" ? "#15803d" : "#111";
-  return (
-    <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16, flex: 1 }}>
-      <div style={{ fontSize: 28, fontWeight: 700, color }}>{value}</div>
-      <div style={{ color: "#666", fontSize: 14 }}>{label}</div>
-    </div>
+        {sorted.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center text-sm text-muted-foreground">
+              No active conversations.
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="py-0">
+            <div className="divide-y [&>a:first-child]:rounded-t-xl [&>a:last-child]:rounded-b-xl">
+              {sorted.map((conversation) => {
+                const latest = conversation.messages[0];
+                const name = conversation.customer.name || conversation.customer.phoneNumber;
+                const urgent = HUMAN_STAGES.includes(conversation.currentStage);
+                const latestFollowup = conversation.followups[0];
+                const followupInProgress =
+                  latestFollowup && !latestFollowup.cancelled && latestFollowup.step <= maxFollowups
+                    ? latestFollowup
+                    : null;
+                return (
+                  <Link
+                    key={conversation.id}
+                    href={`/dashboard/${conversation.id}`}
+                    className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 transition-colors hover:bg-muted/50"
+                  >
+                    <div
+                      className={`flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
+                        urgent
+                          ? "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400"
+                          : "bg-secondary text-secondary-foreground"
+                      }`}
+                    >
+                      {urgent ? <UserRound className="size-4" /> : name.slice(0, 1).toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-medium">
+                        {conversation.customer.name ?? conversation.customer.phoneNumber}
+                        {conversation.customer.name && (
+                          <span className="ml-1.5 font-normal text-muted-foreground">
+                            {conversation.customer.phoneNumber}
+                          </span>
+                        )}
+                      </div>
+                      <div className="truncate text-sm text-muted-foreground">
+                        {latest
+                          ? `${latest.direction === "INBOUND" ? "Customer" : latest.sender === "AI" ? "AI" : "You"}: ${latest.content ?? "(no text)"}`
+                          : "No messages yet"}
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                      <div className="flex items-center gap-1.5">
+                        {followupInProgress && (
+                          <Badge variant="outline" className="font-medium text-muted-foreground">
+                            Follow-up {followupInProgress.step}/{maxFollowups}
+                          </Badge>
+                        )}
+                        <Badge className={`${stageStyle(conversation.currentStage)} border-transparent font-medium`}>
+                          {conversation.currentStage.replaceAll("_", " ")}
+                        </Badge>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {relativeTime(conversation.updatedAt)}
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </Card>
+        )}
+      </div>
+    </AppShell>
   );
 }

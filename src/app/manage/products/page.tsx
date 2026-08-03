@@ -1,6 +1,19 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-import { DashboardNav } from "@/components/DashboardNav";
+import { AppShell } from "@/components/app-shell";
+import { SubmitButton } from "@/components/submit-button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { createProduct, toggleProductAvailable, deleteProduct } from "./actions";
 
 export default async function ProductsPage() {
@@ -13,83 +26,105 @@ export default async function ProductsPage() {
   });
 
   return (
-    <main style={{ padding: 32, fontFamily: "sans-serif", maxWidth: 700, margin: "0 auto" }}>
-      <DashboardNav isAdmin={session.isAdmin} />
-      <h1>Products</h1>
+    <AppShell active="products" title="Products" description="What the AI can sell">
+      <div className="mx-auto flex max-w-3xl flex-col gap-8">
+        <Card className="py-0">
+          {products.length === 0 ? (
+            <CardContent className="py-12 text-center text-sm text-muted-foreground">
+              No products yet.
+            </CardContent>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {products.map((product) => (
+                  <TableRow key={product.id}>
+                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell>
+                      {product.currency} {product.price.toString()}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{product.category ?? "—"}</TableCell>
+                    <TableCell>
+                      <Badge variant={product.available ? "default" : "secondary"}>
+                        {product.available ? "Available" : "Unavailable"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <form action={toggleProductAvailable}>
+                          <input type="hidden" name="productId" value={product.id} />
+                          <SubmitButton
+                            variant="outline"
+                            size="sm"
+                            pendingLabel="Updating…"
+                            successMessage={product.available ? "Marked unavailable" : "Marked available"}
+                          >
+                            {product.available ? "Mark unavailable" : "Mark available"}
+                          </SubmitButton>
+                        </form>
+                        <form action={deleteProduct}>
+                          <input type="hidden" name="productId" value={product.id} />
+                          <SubmitButton
+                            variant="destructive"
+                            size="sm"
+                            pendingLabel="Deleting…"
+                            successMessage="Product deleted"
+                          >
+                            Delete
+                          </SubmitButton>
+                        </form>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </Card>
 
-      {products.length === 0 ? (
-        <p style={{ color: "#666" }}>No products yet.</p>
-      ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 24 }}>
-          <thead>
-            <tr style={{ textAlign: "left", borderBottom: "1px solid #ddd" }}>
-              <th style={{ padding: "6px 8px" }}>Name</th>
-              <th style={{ padding: "6px 8px" }}>Price</th>
-              <th style={{ padding: "6px 8px" }}>Category</th>
-              <th style={{ padding: "6px 8px" }}>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product) => (
-              <tr key={product.id} style={{ borderBottom: "1px solid #eee" }}>
-                <td style={{ padding: "6px 8px" }}>{product.name}</td>
-                <td style={{ padding: "6px 8px" }}>
-                  {product.currency} {product.price.toString()}
-                </td>
-                <td style={{ padding: "6px 8px" }}>{product.category ?? "—"}</td>
-                <td style={{ padding: "6px 8px" }}>{product.available ? "Available" : "Unavailable"}</td>
-                <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>
-                  <form action={toggleProductAvailable} style={{ display: "inline" }}>
-                    <input type="hidden" name="productId" value={product.id} />
-                    <button type="submit" style={{ marginRight: 8 }}>
-                      {product.available ? "Mark unavailable" : "Mark available"}
-                    </button>
-                  </form>
-                  <form action={deleteProduct} style={{ display: "inline" }}>
-                    <input type="hidden" name="productId" value={product.id} />
-                    <button type="submit">Delete</button>
-                  </form>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
-      <h2>Add a product</h2>
-      <form action={createProduct}>
-        <label style={{ display: "block", marginBottom: 8 }}>
-          Name
-          <input type="text" name="name" required style={{ display: "block", width: "100%", padding: 6 }} />
-        </label>
-        <label style={{ display: "block", marginBottom: 8 }}>
-          Description
-          <textarea name="description" rows={2} style={{ display: "block", width: "100%", padding: 6 }} />
-        </label>
-        <label style={{ display: "block", marginBottom: 8 }}>
-          Price (NGN)
-          <input
-            type="number"
-            name="price"
-            required
-            min={0}
-            step="0.01"
-            style={{ display: "block", width: "100%", padding: 6 }}
-          />
-        </label>
-        <label style={{ display: "block", marginBottom: 8 }}>
-          File URL (where the product itself lives, sent to customers on delivery)
-          <input type="text" name="fileUrl" style={{ display: "block", width: "100%", padding: 6 }} />
-        </label>
-        <label style={{ display: "block", marginBottom: 12 }}>
-          Category
-          <input type="text" name="category" style={{ display: "block", width: "100%", padding: 6 }} />
-        </label>
-        <button type="submit" style={{ padding: "8px 16px" }}>
-          Add product
-        </button>
-      </form>
-    </main>
+        <Card>
+          <CardHeader>
+            <CardTitle>Add a product</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form action={createProduct} className="flex flex-col gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="name">Name</Label>
+                  <Input id="name" name="name" required />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="price">Price (NGN)</Label>
+                  <Input id="price" name="price" type="number" required min={0} step="0.01" />
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="description">Description</Label>
+                <Input id="description" name="description" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="fileUrl">File URL</Label>
+                <Input id="fileUrl" name="fileUrl" placeholder="Where the product lives, sent to customers on delivery" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="category">Category</Label>
+                <Input id="category" name="category" />
+              </div>
+              <SubmitButton className="self-start" pendingLabel="Adding…" successMessage="Product added">
+                Add product
+              </SubmitButton>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </AppShell>
   );
 }

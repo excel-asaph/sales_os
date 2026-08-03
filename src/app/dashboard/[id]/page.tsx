@@ -1,8 +1,23 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Check, ExternalLink, AlertTriangle, UserX2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-import { DashboardNav } from "@/components/DashboardNav";
+import { formatNaira } from "@/lib/currency";
+import type { ConversationStage } from "@/generated/prisma/client";
+import { AppShell } from "@/components/app-shell";
+import { SubmitButton } from "@/components/submit-button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Field, ReferralDetails } from "@/components/referral-details";
+import {
+  HUMAN_STAGES,
+  PIPELINE_MILESTONES,
+  milestoneIndexForStage,
+} from "@/lib/stage-display";
+import { clampMaxFollowups, FOLLOWUP_SEQUENCE } from "@/lib/followup-sequence";
 import { sendHumanReply, resolveConversation } from "./actions";
 
 // Dashboard "Review" view (ARCHITECTURE.md §10): per-conversation
@@ -35,180 +50,330 @@ export default async function ConversationReviewPage({
   // way so this can't be used to probe which conversation ids exist.
   if (!conversation || conversation.customer.businessId !== session.businessId) return notFound();
 
+  const businessConfig = await prisma.businessConfig.findUnique({
+    where: { businessId: session.businessId },
+  });
+  const maxFollowups = clampMaxFollowups(businessConfig?.maxFollowups ?? FOLLOWUP_SEQUENCE.length);
+  // The step beyond maxFollowups is an internal "did they come back?"
+  // check with no real content (src/worker/followup-worker.ts) — nothing
+  // a human needs to see.
+  const visibleFollowups = conversation.followups.filter((f) => f.step <= maxFollowups);
+
+  const { name, phoneNumber, tags } = conversation.customer;
+  const customerTags = Array.isArray(tags) ? (tags as string[]) : [];
+  const isLost = conversation.currentStage === "LOST_LEAD";
+  const isHumanStage = HUMAN_STAGES.includes(conversation.currentStage);
+
   return (
-    <main style={{ padding: 32, fontFamily: "sans-serif", maxWidth: 800, margin: "0 auto" }}>
-      <DashboardNav isAdmin={session.isAdmin} />
-      <Link href="/dashboard" style={{ color: "#555", fontSize: 14 }}>
-        ← Back to dashboard
-      </Link>
-
-      <h1 style={{ marginBottom: 4 }}>
-        {conversation.customer.name || conversation.customer.phoneNumber}
-      </h1>
-      <p style={{ color: "#666", marginTop: 0 }}>{conversation.customer.phoneNumber}</p>
-
-      <section style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16, marginBottom: 24 }}>
-        <Field label="Stage" value={conversation.currentStage.replaceAll("_", " ")} />
-        <Field label="Objective" value={conversation.currentObjective || "—"} />
-        <Field
-          label="Confidence"
-          value={conversation.confidence != null ? conversation.confidence.toFixed(2) : "—"}
-        />
-        <Field label="Summary" value={conversation.summary || "—"} />
-        <Field label="Assigned to" value={conversation.assignedTo?.name ?? "—"} />
-      </section>
-
-      {conversation.referral != null && (
-        <section style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16, marginBottom: 24 }}>
-          <h2 style={{ marginTop: 0, fontSize: 16 }}>Came from</h2>
-          <ReferralDetails referral={conversation.referral as Record<string, string | undefined>} />
-        </section>
-      )}
-
-      <form action={resolveConversation} style={{ marginBottom: 24 }}>
-        <input type="hidden" name="conversationId" value={conversation.id} />
-        <button type="submit" style={{ padding: "8px 16px" }}>
-          Mark resolved
-        </button>
-        <span style={{ color: "#888", fontSize: 13, marginLeft: 8 }}>
-          Closes this conversation — the customer&apos;s next message starts a new one.
-        </span>
-      </form>
-
-      <h2>Messages</h2>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 24 }}>
-        {conversation.messages.map((message) => {
-          const fromCustomer = message.direction === "INBOUND";
-          return (
-            <div
-              key={message.id}
-              style={{
-                alignSelf: fromCustomer ? "flex-start" : "flex-end",
-                maxWidth: "75%",
-                background: fromCustomer ? "#f1f1f1" : message.sender === "HUMAN" ? "#dbeafe" : "#dcfce7",
-                color: "#111",
-                borderRadius: 10,
-                padding: "8px 12px",
-              }}
+    <AppShell
+      active="conversations"
+      title={name ?? phoneNumber}
+      description={name ? phoneNumber : undefined}
+      actions={
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" render={<Link href={`/customers/${conversation.customer.id}`} />}>
+            Customer profile
+          </Button>
+          <form action={resolveConversation}>
+            <input type="hidden" name="conversationId" value={conversation.id} />
+            <SubmitButton
+              variant="outline"
+              size="sm"
+              pendingLabel="Resolving…"
+              successMessage="Conversation resolved"
             >
-              <div style={{ fontSize: 12, color: "#555", marginBottom: 2 }}>
-                {fromCustomer ? "Customer" : message.sender} · {message.createdAt.toLocaleString()}
-              </div>
-              <div style={{ whiteSpace: "pre-wrap" }}>{message.content ?? `[${message.type}]`}</div>
-              {message.mediaUrl && (
-                <div style={{ fontSize: 12, marginTop: 4 }}>
-                  <a href={message.mediaUrl} target="_blank" rel="noreferrer">
-                    media
-                  </a>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+              Mark resolved
+            </SubmitButton>
+          </form>
+        </div>
+      }
+    >
+      <div className="mx-auto flex max-w-6xl flex-col gap-8">
+        {isHumanStage || isLost ? (
+          <StatusBanner
+            tone={isLost ? "muted" : conversation.currentStage === "HUMAN_ASSIGNED" ? "assigned" : "urgent"}
+            title={
+              isLost
+                ? "Lost lead"
+                : conversation.currentStage === "HUMAN_ASSIGNED"
+                  ? `Assigned to ${conversation.assignedTo?.name ?? "a human agent"}`
+                  : "Needs a human — the AI has paused on this conversation"
+            }
+            description={conversation.summary ?? undefined}
+          />
+        ) : (
+          <PipelineTracker currentStage={conversation.currentStage} />
+        )}
 
-      <form action={sendHumanReply} style={{ marginBottom: 32 }}>
-        <input type="hidden" name="conversationId" value={conversation.id} />
-        <textarea
-          name="text"
-          placeholder="Reply as a human agent…"
-          rows={3}
-          style={{ width: "100%", padding: 8, fontFamily: "inherit", fontSize: 14 }}
-        />
-        <button type="submit" style={{ marginTop: 8, padding: "8px 16px" }}>
-          Send reply
-        </button>
-        <p style={{ color: "#888", fontSize: 13 }}>
-          The AI will not respond to this conversation while it&apos;s awaiting/assigned to a human.
-        </p>
-      </form>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
+          <div className="flex min-w-0 flex-col gap-5">
+            <Card>
+              <CardContent className="flex flex-col gap-4">
+                {conversation.messages.map((message) => {
+                  const fromCustomer = message.direction === "INBOUND";
+                  const fromHuman = message.sender === "HUMAN";
+                  return (
+                    <div
+                      key={message.id}
+                      className={`flex flex-col ${fromCustomer ? "items-start" : "items-end"}`}
+                    >
+                      <div
+                        className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${
+                          fromCustomer
+                            ? "rounded-bl-sm bg-muted"
+                            : fromHuman
+                              ? "rounded-br-sm bg-blue-50 dark:bg-blue-500/10"
+                              : "rounded-br-sm bg-emerald-50 dark:bg-emerald-500/10"
+                        }`}
+                      >
+                        <div className="mb-0.5 text-[11px] font-medium text-muted-foreground">
+                          {fromCustomer ? "Customer" : fromHuman ? "You" : "AI"} ·{" "}
+                          {message.createdAt.toLocaleString()}
+                        </div>
+                        <div className="whitespace-pre-wrap">{message.content ?? `[${message.type}]`}</div>
+                        {message.mediaUrl && (
+                          <a
+                            href={message.mediaUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-1 inline-flex items-center gap-1 text-xs font-medium underline"
+                          >
+                            View media <ExternalLink className="size-3" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
 
-      {conversation.facts.length > 0 && (
-        <>
-          <h2>Remembered facts</h2>
-          <ul style={{ marginBottom: 24 }}>
-            {conversation.facts.map((fact) => {
-              const payload = fact.payload as { key?: string; value?: string };
-              return (
-                <li key={fact.id}>
-                  <strong>{fact.kind}</strong> — {payload.key}: {payload.value}
-                </li>
-              );
-            })}
-          </ul>
-        </>
-      )}
+            <Card>
+              <CardContent>
+                <form action={sendHumanReply} className="flex flex-col gap-3">
+                  <input type="hidden" name="conversationId" value={conversation.id} />
+                  <Textarea name="text" placeholder="Reply as a human agent…" rows={3} />
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">
+                      The AI will not respond here while it&apos;s awaiting/assigned to a human.
+                    </p>
+                    <SubmitButton size="sm" pendingLabel="Sending…" successMessage="Reply sent">
+                      Send reply
+                    </SubmitButton>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
 
-      {conversation.orders.length > 0 && (
-        <>
-          <h2>Orders</h2>
-          <ul style={{ marginBottom: 24 }}>
-            {conversation.orders.map((order) => (
-              <li key={order.id}>
-                {order.product.name} — expected ₦{order.expectedAmount.toString()}, extracted{" "}
-                {order.extractedAmount ? `₦${order.extractedAmount.toString()}` : "—"} via{" "}
-                {order.extractedBank ?? "—"} — confidence{" "}
-                {order.verificationConfidence?.toFixed(2) ?? "—"} —{" "}
-                <strong>{order.status}</strong>
-                {order.receiptImageUrl && (
-                  <>
-                    {" "}
-                    ·{" "}
-                    <a href={order.receiptImageUrl} target="_blank" rel="noreferrer">
-                      receipt
-                    </a>
-                  </>
+          <div className="flex flex-col gap-5">
+            <Card>
+              <CardHeader>
+                <CardTitle>Record</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3 text-sm">
+                {customerTags.length > 0 && (
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs text-muted-foreground">Tags</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {customerTags.map((tag) => (
+                        <Badge
+                          key={tag}
+                          variant={tag === "Uninterested" ? "secondary" : "default"}
+                          className="font-medium"
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
                 )}
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
+                <Field label="Objective" value={conversation.currentObjective || "—"} />
+                <Field
+                  label="Confidence"
+                  value={conversation.confidence != null ? conversation.confidence.toFixed(2) : "—"}
+                />
+                <Field label="Summary" value={conversation.summary || "—"} />
+                <Field label="Assigned to" value={conversation.assignedTo?.name ?? "—"} />
+              </CardContent>
+            </Card>
 
-      {conversation.followups.length > 0 && (
-        <>
-          <h2>Follow-ups</h2>
-          <ul>
-            {conversation.followups.map((followup) => (
-              <li key={followup.id}>
-                Step {followup.step} — {followup.scheduledFor.toLocaleString()} —{" "}
-                {followup.cancelled ? "cancelled" : followup.sent ? "sent" : "pending"}
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-    </main>
+            {conversation.referral != null && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Came from</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ReferralDetails referral={conversation.referral as Record<string, string | undefined>} />
+                </CardContent>
+              </Card>
+            )}
+
+            {conversation.facts.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Remembered facts</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-3">
+                  {conversation.facts.map((fact) => {
+                    const payload = fact.payload as { key?: string; value?: string };
+                    return (
+                      <div key={fact.id} className="flex items-start gap-2 text-sm">
+                        <Badge variant="secondary" className="mt-0.5 shrink-0">
+                          {fact.kind}
+                        </Badge>
+                        <span className="min-w-0 text-muted-foreground">
+                          <span className="font-medium text-foreground">{payload.key}</span>
+                          {payload.value ? `: ${payload.value}` : ""}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            )}
+
+            {conversation.orders.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Orders</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-3">
+                  {conversation.orders.map((order) => (
+                    <div key={order.id} className="flex flex-col gap-1 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">{order.product.name}</span>
+                        <Badge
+                          variant={
+                            order.status === "VERIFIED"
+                              ? "default"
+                              : order.status === "ESCALATED"
+                                ? "destructive"
+                                : order.status === "REJECTED"
+                                  ? "outline"
+                                  : "secondary"
+                          }
+                        >
+                          {order.status}
+                        </Badge>
+                      </div>
+                      <div className="text-muted-foreground">
+                        Expected {formatNaira(Number(order.expectedAmount))}, extracted{" "}
+                        {order.extractedAmount ? formatNaira(Number(order.extractedAmount)) : "—"} via{" "}
+                        {order.extractedBank ?? "—"}
+                      </div>
+                      <div className="text-muted-foreground">
+                        Confidence {order.verificationConfidence?.toFixed(2) ?? "—"}
+                        {order.receiptImageUrl && (
+                          <>
+                            {" "}
+                            ·{" "}
+                            <a
+                              href={order.receiptImageUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 font-medium underline"
+                            >
+                              receipt <ExternalLink className="size-3" />
+                            </a>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {visibleFollowups.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Follow-ups</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-3 text-sm">
+                  {visibleFollowups.map((followup) => (
+                    <div key={followup.id} className="flex items-center justify-between gap-2">
+                      <span className="text-muted-foreground">
+                        Step {followup.step} of {maxFollowups} · {followup.scheduledFor.toLocaleString()}
+                      </span>
+                      <Badge variant={followup.cancelled ? "secondary" : followup.sent ? "default" : "outline"}>
+                        {followup.cancelled ? "cancelled" : followup.sent ? "sent" : "pending"}
+                      </Badge>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      </div>
+    </AppShell>
   );
 }
 
-function Field({ label, value }: { label: string; value: string }) {
+function StatusBanner({
+  tone,
+  title,
+  description,
+}: {
+  tone: "urgent" | "assigned" | "muted";
+  title: string;
+  description?: string;
+}) {
+  const styles = {
+    urgent: "border-red-200 bg-red-50 text-red-900 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300",
+    assigned:
+      "border-orange-200 bg-orange-50 text-orange-900 dark:border-orange-500/20 dark:bg-orange-500/10 dark:text-orange-300",
+    muted: "border-border bg-muted text-muted-foreground",
+  }[tone];
+  const Icon = tone === "muted" ? UserX2 : AlertTriangle;
+
   return (
-    <div style={{ marginBottom: 8 }}>
-      <span style={{ color: "#666", fontSize: 13 }}>{label}: </span>
-      <span>{value}</span>
+    <div className={`flex items-start gap-3 rounded-xl border px-5 py-4 ${styles}`}>
+      <Icon className="mt-0.5 size-4 shrink-0" />
+      <div>
+        <div className="text-sm font-semibold">{title}</div>
+        {description && <div className="mt-0.5 text-sm opacity-90">{description}</div>}
+      </div>
     </div>
   );
 }
 
-// Which ad/post started this conversation (src/lib/whatsapp.ts's `referral`
-// type) — useful for a human deciding how to handle a lead, and eventually
-// for attributing sales back to ad spend, neither of which this MVP does
-// yet beyond just keeping the raw data around.
-function ReferralDetails({ referral }: { referral: Record<string, string | undefined> }) {
+function PipelineTracker({ currentStage }: { currentStage: ConversationStage }) {
+  const activeIndex = milestoneIndexForStage(currentStage);
+
   return (
-    <>
-      <Field label="Type" value={referral.source_type ?? "—"} />
-      <Field label="Ad/post headline" value={referral.headline ?? "—"} />
-      <Field label="Ad/post body" value={referral.body ?? "—"} />
-      {referral.source_url && (
-        <div style={{ marginBottom: 8 }}>
-          <span style={{ color: "#666", fontSize: 13 }}>Source: </span>
-          <a href={referral.source_url} target="_blank" rel="noreferrer">
-            {referral.source_url}
-          </a>
-        </div>
-      )}
-    </>
+    <div className="flex items-center rounded-xl border bg-card px-6 py-5">
+      {PIPELINE_MILESTONES.map((milestone, index) => {
+        const done = index < activeIndex;
+        const active = index === activeIndex;
+        const isLast = index === PIPELINE_MILESTONES.length - 1;
+        return (
+          <div key={milestone.key} className={`flex items-center ${isLast ? "" : "flex-1"}`}>
+            <div className="flex flex-col items-center gap-1.5">
+              <div
+                className={`flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+                  done
+                    ? "bg-emerald-600 text-white"
+                    : active
+                      ? "bg-primary text-primary-foreground ring-4 ring-primary/15"
+                      : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {done ? <Check className="size-3.5" /> : index + 1}
+              </div>
+              <span
+                className={`text-xs whitespace-nowrap ${active ? "font-semibold text-foreground" : "text-muted-foreground"}`}
+              >
+                {milestone.label}
+              </span>
+            </div>
+            {!isLast && (
+              <div className={`mx-2 h-0.5 flex-1 ${done ? "bg-emerald-600" : "bg-border"}`} />
+            )}
+          </div>
+        );
+      })}
+    </div>
   );
 }

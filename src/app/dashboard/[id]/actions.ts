@@ -1,7 +1,8 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { sendWhatsAppText } from "@/lib/whatsapp-send";
+import { sendWhatsAppText, sendWhatsAppTemplate } from "@/lib/whatsapp-send";
+import { isWithinCustomerServiceWindow } from "@/lib/whatsapp-window";
 import { revalidatePath } from "next/cache";
 import { requireSession } from "@/lib/auth";
 
@@ -25,7 +26,31 @@ export async function sendHumanReply(formData: FormData) {
   const conversation = await loadOwnedConversation(conversationId, session.businessId);
   const agent = await prisma.humanAgent.findUniqueOrThrow({ where: { id: session.agentId } });
 
-  await sendWhatsAppText(conversation.customer.phoneNumber, text);
+  const withinWindow = await isWithinCustomerServiceWindow(conversationId);
+
+  if (withinWindow) {
+    await sendWhatsAppText(conversation.customer.phoneNumber, text);
+  } else {
+    // Free-form text — including a human's own typed reply — is rejected
+    // by WhatsApp outside the 24-hour customer service window. The exact
+    // wording can't be forced through a fixed template, so send the
+    // approved re-engagement template to keep the door open instead of
+    // losing contact entirely; the human is told clearly afterward
+    // (thrown error below) rather than this silently pretending their
+    // typed reply went out.
+    const templateName = process.env.WHATSAPP_FOLLOWUP_TEMPLATE_NAME;
+    if (!templateName) {
+      throw new Error(
+        "This customer hasn't messaged in over 24 hours — WhatsApp only allows a pre-approved template to reach them now, and none is configured (WHATSAPP_FOLLOWUP_TEMPLATE_NAME). Nothing was sent."
+      );
+    }
+    await sendWhatsAppTemplate(
+      conversation.customer.phoneNumber,
+      templateName,
+      process.env.WHATSAPP_FOLLOWUP_TEMPLATE_LANG || "en_US"
+    );
+  }
+
   await prisma.$transaction([
     prisma.message.create({
       data: {
@@ -33,7 +58,9 @@ export async function sendHumanReply(formData: FormData) {
         direction: "OUTBOUND",
         sender: "HUMAN",
         type: "TEXT",
-        content: text,
+        content: withinWindow
+          ? text
+          : `[Re-engagement template sent — this customer hasn't messaged in over 24 hours, so WhatsApp only allowed the approved template through, not this text. Intended reply: "${text}"]`,
       },
     }),
     // Picking up a HUMAN_REVIEW_REQUIRED conversation by replying to it is
@@ -49,13 +76,19 @@ export async function sendHumanReply(formData: FormData) {
       data: {
         conversationId,
         type: "HUMAN_REPLY_SENT",
-        payload: { text, humanAgentId: agent.id, humanAgentName: agent.name },
+        payload: { text, humanAgentId: agent.id, humanAgentName: agent.name, viaTemplate: !withinWindow },
       },
     }),
   ]);
 
   revalidatePath(`/dashboard/${conversationId}`);
   revalidatePath("/dashboard");
+
+  if (!withinWindow) {
+    throw new Error(
+      "This customer hasn't messaged in over 24 hours, so WhatsApp only allowed a pre-approved re-engagement template through — not your typed message. That template was sent instead; you'll be able to send your actual reply once they respond."
+    );
+  }
 }
 
 // Closes out the conversation (PRD 5.11: exactly one active workflow). The
