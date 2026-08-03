@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check, ExternalLink, AlertTriangle, UserX2 } from "lucide-react";
+import { Check, ExternalLink, FileText, AlertTriangle, UserX2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { formatNaira } from "@/lib/currency";
-import type { ConversationStage } from "@/generated/prisma/client";
+import type { ConversationStage, MessageType } from "@/generated/prisma/client";
 import { AppShell } from "@/components/app-shell";
 import { SubmitButton } from "@/components/submit-button";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,7 @@ import {
   milestoneIndexForStage,
 } from "@/lib/stage-display";
 import { clampMaxFollowups, FOLLOWUP_SEQUENCE } from "@/lib/followup-sequence";
-import { sendHumanReply, resolveConversation } from "./actions";
+import { sendHumanReply, resolveConversation, deleteConversation } from "./actions";
 
 // Dashboard "Review" view (ARCHITECTURE.md §10): per-conversation
 // drill-down — summary, stage, message history, Conversation Brain facts —
@@ -85,6 +85,14 @@ export default async function ConversationReviewPage({
               Mark resolved
             </SubmitButton>
           </form>
+          {session.isAdmin && conversation.orders.length === 0 && (
+            <form action={deleteConversation}>
+              <input type="hidden" name="conversationId" value={conversation.id} />
+              <SubmitButton variant="destructive" size="sm" pendingLabel="Deleting…">
+                Delete
+              </SubmitButton>
+            </form>
+          )}
         </div>
       }
     >
@@ -130,16 +138,13 @@ export default async function ConversationReviewPage({
                           {fromCustomer ? "Customer" : fromHuman ? "You" : "AI"} ·{" "}
                           {message.createdAt.toLocaleString()}
                         </div>
-                        <div className="whitespace-pre-wrap">{message.content ?? `[${message.type}]`}</div>
+                        {!(message.mediaUrl && message.type === "DOCUMENT") && (
+                          <div className="whitespace-pre-wrap">
+                            {message.content ?? (message.mediaUrl ? null : `[${message.type}]`)}
+                          </div>
+                        )}
                         {message.mediaUrl && (
-                          <a
-                            href={message.mediaUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="mt-1 inline-flex items-center gap-1 text-xs font-medium underline"
-                          >
-                            View media <ExternalLink className="size-3" />
-                          </a>
+                          <MessageMedia url={message.mediaUrl} type={message.type} filename={message.content} />
                         )}
                       </div>
                     </div>
@@ -308,6 +313,54 @@ export default async function ConversationReviewPage({
         </div>
       </div>
     </AppShell>
+  );
+}
+
+// Inline media, matching how WhatsApp/Gemini/etc. render an attachment in
+// place rather than as a bare "View media" link — an image thumbnail, a
+// file card for documents, an inline player for voice notes. Inbound media
+// only gets a real, servable URL once something (today: receipt
+// verification) has downloaded and persisted it — until then `mediaUrl` is
+// still the raw WhatsApp media reference, which isn't a fetchable link.
+function MessageMedia({
+  url,
+  type,
+  filename,
+}: {
+  url: string;
+  type: MessageType;
+  filename: string | null;
+}) {
+  if (url.startsWith("whatsapp-media:")) {
+    return (
+      <div className="mt-1.5 text-xs text-muted-foreground italic">Media received — not yet available to preview</div>
+    );
+  }
+
+  if (type === "IMAGE") {
+    return (
+      <a href={url} target="_blank" rel="noreferrer" className="mt-1.5 block">
+        {/* eslint-disable-next-line @next/next/no-img-element -- external/self-hosted media URL, not a local asset Next can optimize */}
+        <img src={url} alt="" className="max-h-64 w-auto max-w-full rounded-lg border object-cover" />
+      </a>
+    );
+  }
+
+  if (type === "VOICE") {
+    return <audio controls src={url} className="mt-1.5 h-9 max-w-full" />;
+  }
+
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+      className="mt-1.5 flex items-center gap-2 rounded-lg border bg-background/60 px-3 py-2 text-xs font-medium hover:bg-background"
+    >
+      <FileText className="size-4 shrink-0" />
+      <span className="min-w-0 truncate">{filename ?? "Attachment"}</span>
+      <ExternalLink className="size-3 shrink-0 text-muted-foreground" />
+    </a>
   );
 }
 

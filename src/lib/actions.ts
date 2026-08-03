@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { sendWhatsAppText, sendWhatsAppDocument } from "@/lib/whatsapp-send";
 import { getPaymentAccounts, getBusinessConfig, searchProducts } from "@/lib/knowledge";
-import { downloadWhatsAppMedia, persistReceiptImage } from "@/lib/media-storage";
+import { downloadWhatsAppMedia, persistMediaFile, readPersistedMedia } from "@/lib/media-storage";
 import { verifyReceiptContent, type ReceiptExtraction, type PaymentAccountRef } from "@/lib/receipt-verification";
 import { getBoss, FOLLOWUP_QUEUE } from "@/lib/queue";
 import { addCustomerTag } from "@/lib/customer-tags";
@@ -215,47 +215,41 @@ async function requestPaymentVerification(ctx: ActionContext, productId: string,
     } else if (!receiptMessage.mediaUrl) {
       reason = "Could not read the payment evidence automatically — routed to a human for manual verification.";
     } else {
-      const mediaId = receiptMessage.mediaUrl.startsWith("whatsapp-media:")
-        ? receiptMessage.mediaUrl.slice("whatsapp-media:".length)
-        : null;
+      const media = await resolveMediaBytes(receiptMessage.mediaUrl, receiptMessage.id);
 
-      if (mediaId) {
-        const downloaded = await downloadWhatsAppMedia(mediaId);
-        if (downloaded) {
-          storedImageUrl = await persistReceiptImage(downloaded.buffer, downloaded.mimeType, mediaId);
-          await prisma.message.update({ where: { id: receiptMessage.id }, data: { mediaUrl: storedImageUrl } });
+      if (media) {
+        storedImageUrl = media.storedUrl;
 
-          if (receiptMessage.type === "IMAGE") {
-            const extraction = await verifyReceiptContent({
-              content: {
-                kind: "image",
-                base64: downloaded.buffer.toString("base64"),
-                mimeType: downloaded.mimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
-              },
-              expectedAmount,
-              paymentAccounts,
-            });
-            technicalFailure = false;
-            ({ extractedAmount, extractedBank, looksAltered, confidence, reason, amountMatches, accountMatches, transactionSuccessful } =
-              applyExtraction(extraction, expectedAmount, paymentAccounts, reason));
-          } else if (downloaded.mimeType === "application/pdf") {
-            const extraction = await verifyReceiptContent({
-              content: { kind: "document", base64: downloaded.buffer.toString("base64") },
-              expectedAmount,
-              paymentAccounts,
-            });
-            technicalFailure = false;
-            ({ extractedAmount, extractedBank, looksAltered, confidence, reason, amountMatches, accountMatches, transactionSuccessful } =
-              applyExtraction(extraction, expectedAmount, paymentAccounts, reason));
-          } else {
-            technicalFailure = false;
-            unsupportedFormat = true;
-            reason = "This file type isn't something I can read automatically.";
-          }
+        if (receiptMessage.type === "IMAGE") {
+          const extraction = await verifyReceiptContent({
+            content: {
+              kind: "image",
+              base64: media.buffer.toString("base64"),
+              mimeType: media.mimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
+            },
+            expectedAmount,
+            paymentAccounts,
+          });
+          technicalFailure = false;
+          ({ extractedAmount, extractedBank, looksAltered, confidence, reason, amountMatches, accountMatches, transactionSuccessful } =
+            applyExtraction(extraction, expectedAmount, paymentAccounts, reason));
+        } else if (media.mimeType === "application/pdf") {
+          const extraction = await verifyReceiptContent({
+            content: { kind: "document", base64: media.buffer.toString("base64") },
+            expectedAmount,
+            paymentAccounts,
+          });
+          technicalFailure = false;
+          ({ extractedAmount, extractedBank, looksAltered, confidence, reason, amountMatches, accountMatches, transactionSuccessful } =
+            applyExtraction(extraction, expectedAmount, paymentAccounts, reason));
         } else {
-          reason =
-            "WhatsApp media access isn't configured yet — routed to a human for manual verification.";
+          technicalFailure = false;
+          unsupportedFormat = true;
+          reason = "This file type isn't something I can read automatically.";
         }
+      } else {
+        reason =
+          "WhatsApp media access isn't configured yet — routed to a human for manual verification.";
       }
     }
   } catch (error) {
@@ -332,6 +326,30 @@ async function requestPaymentVerification(ctx: ActionContext, productId: string,
   });
 }
 
+// Gets the bytes for whatever evidence the customer sent, reusing already-
+// persisted media (ingest-message.ts downloads and re-hosts inbound media
+// the moment it arrives) instead of hitting WhatsApp's API a second time.
+// Falls back to a fresh WhatsApp download only if that eager persistence
+// hasn't happened yet for some reason (e.g. it failed, or this is an older
+// message from before that existed).
+async function resolveMediaBytes(
+  mediaUrl: string,
+  messageId: string
+): Promise<{ buffer: Buffer; mimeType: string; storedUrl: string } | null> {
+  if (!mediaUrl.startsWith("whatsapp-media:")) {
+    const media = await readPersistedMedia(mediaUrl);
+    return media ? { ...media, storedUrl: mediaUrl } : null;
+  }
+
+  const mediaId = mediaUrl.slice("whatsapp-media:".length);
+  const downloaded = await downloadWhatsAppMedia(mediaId);
+  if (!downloaded) return null;
+
+  const storedUrl = await persistMediaFile(downloaded.buffer, downloaded.mimeType, mediaId);
+  await prisma.message.update({ where: { id: messageId }, data: { mediaUrl: storedUrl } });
+  return { ...downloaded, storedUrl };
+}
+
 // Shared post-processing for any successful extraction (image, PDF, or
 // text) — computes the hard-match signals the platform enforces itself,
 // never trusting the model's own confidence alone.
@@ -344,9 +362,16 @@ function applyExtraction(
   const amountMatches =
     extraction.extractedAmount !== null &&
     Math.abs(extraction.extractedAmount - expectedAmount) <= expectedAmount * 0.02;
+  // Two ways to satisfy this: a real number match (tolerant of masking), or
+  // — since plenty of genuine Nigerian bank debit alerts never show a
+  // recipient account number at all, only the sender's own — the model's
+  // own semantic judgment that whatever DOES identify the recipient (name,
+  // description) plausibly matches. Requiring a number every time would
+  // make verification impossible for a large share of real receipts.
   const accountMatches =
-    extraction.extractedAccountNumber !== null &&
-    paymentAccounts.some((a) => accountNumberPlausiblyMatches(extraction.extractedAccountNumber!, a.accountNumber));
+    (extraction.extractedAccountNumber !== null &&
+      paymentAccounts.some((a) => accountNumberPlausiblyMatches(extraction.extractedAccountNumber!, a.accountNumber))) ||
+    extraction.recipientIdentityPlausible;
   const transactionSuccessful = extraction.transactionStatus === "successful";
 
   return {
@@ -361,20 +386,35 @@ function applyExtraction(
   };
 }
 
-// Bank SMS/debit alerts commonly mask part of the account number (e.g.
-// "142****141") — an exact-string match would never pass a genuinely
-// correct one. Treat masked positions (* or x) as wildcards; every other
-// character must match exactly, at the same position.
+// Bank SMS/debit alerts mask account numbers in at least two different
+// conventions seen in real messages: fixed-length positional masking
+// ("142****141", same length as the real number, wildcards in place) and
+// prefix-only masking with a revealed suffix ("**83793" — an unknown
+// number of leading digits hidden, only the tail shown). An exact-string
+// match would never pass either on a genuinely correct account.
 function accountNumberPlausiblyMatches(extracted: string, configured: string): boolean {
   if (extracted === configured) return true;
-  if (extracted.length !== configured.length) return false;
   if (!/[*x]/i.test(extracted)) return false;
-  for (let i = 0; i < extracted.length; i++) {
-    const c = extracted[i];
-    if (c === "*" || c.toLowerCase() === "x") continue;
-    if (c !== configured[i]) return false;
+
+  if (extracted.length === configured.length) {
+    let positionalMatch = true;
+    for (let i = 0; i < extracted.length; i++) {
+      const c = extracted[i];
+      if (c === "*" || c.toLowerCase() === "x") continue;
+      if (c !== configured[i]) {
+        positionalMatch = false;
+        break;
+      }
+    }
+    if (positionalMatch) return true;
   }
-  return true;
+
+  const visibleSuffix = extracted.replace(/^[*x]+/i, "");
+  if (visibleSuffix.length >= 4 && !/[*x]/i.test(visibleSuffix) && configured.endsWith(visibleSuffix)) {
+    return true;
+  }
+
+  return false;
 }
 
 // Customer-safe wording for a correctable mismatch — specific enough to act

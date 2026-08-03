@@ -10,7 +10,15 @@ const EXTENSION_BY_MIME: Record<string, string> = {
   "image/png": "png",
   "image/webp": "webp",
   "application/pdf": "pdf",
+  "audio/ogg": "ogg",
+  "audio/mpeg": "mp3",
+  "audio/mp4": "m4a",
+  "audio/amr": "amr",
 };
+
+export const MIME_BY_EXTENSION: Record<string, string> = Object.fromEntries(
+  Object.entries(EXTENSION_BY_MIME).map(([mime, extension]) => [extension, mime])
+);
 
 export interface DownloadedMedia {
   buffer: Buffer;
@@ -81,14 +89,17 @@ function getS3Client(config: ObjectStorageConfig): S3Client {
 }
 
 /**
- * Persists a downloaded receipt image so we have a stable, re-servable URL
- * for it. Uploads to real S3-compatible object storage (Cloudflare R2 or
- * AWS S3, ARCHITECTURE.md §3) when `STORAGE_*` env vars are configured;
- * otherwise falls back to local disk — the same kind of dry-run fallback
- * whatsapp-send.ts uses when WhatsApp credentials aren't set, not a
- * permanent choice, just what makes local dev possible without a bucket.
+ * Persists a downloaded WhatsApp media asset (receipt image, delivered
+ * product file re-hosting isn't needed here, an inbound voice note, etc.)
+ * so we have a stable, re-servable URL for it instead of the short-lived
+ * WhatsApp media reference. Uploads to real S3-compatible object storage
+ * (Cloudflare R2 or AWS S3, ARCHITECTURE.md §3) when `STORAGE_*` env vars
+ * are configured; otherwise falls back to local disk — the same kind of
+ * dry-run fallback whatsapp-send.ts uses when WhatsApp credentials aren't
+ * set, not a permanent choice, just what makes local dev possible without
+ * a bucket.
  */
-export async function persistReceiptImage(buffer: Buffer, mimeType: string, mediaId: string): Promise<string> {
+export async function persistMediaFile(buffer: Buffer, mimeType: string, mediaId: string): Promise<string> {
   const extension = EXTENSION_BY_MIME[mimeType] ?? "bin";
   const filename = `${mediaId}.${extension}`;
 
@@ -114,4 +125,32 @@ export async function persistReceiptImage(buffer: Buffer, mimeType: string, medi
 
 export function receiptStorageDir(): string {
   return RECEIPT_STORAGE_DIR;
+}
+
+/**
+ * Reads back a URL previously returned by `persistMediaFile`, whichever
+ * backend produced it. A server-side `fetch` can't resolve the local-disk
+ * fallback's relative `/api/media/receipts/...` path (no host to resolve
+ * against outside a browser) — that case reads the file directly; a real
+ * object-storage URL just fetches. Used when re-verifying already-stored
+ * evidence (src/lib/actions.ts) instead of re-downloading from WhatsApp.
+ */
+export async function readPersistedMedia(url: string): Promise<DownloadedMedia | null> {
+  if (url.startsWith("/api/media/receipts/")) {
+    const filename = path.basename(url.slice("/api/media/receipts/".length));
+    try {
+      const buffer = await fs.readFile(path.join(RECEIPT_STORAGE_DIR, filename));
+      const extension = filename.split(".").pop()?.toLowerCase() ?? "";
+      return { buffer, mimeType: MIME_BY_EXTENSION[extension] ?? "application/octet-stream" };
+    } catch {
+      return null;
+    }
+  }
+
+  const response = await fetch(url);
+  if (!response.ok) return null;
+  return {
+    buffer: Buffer.from(await response.arrayBuffer()),
+    mimeType: response.headers.get("content-type") ?? "application/octet-stream",
+  };
 }

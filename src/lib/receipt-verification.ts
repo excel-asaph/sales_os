@@ -17,6 +17,19 @@ export interface ReceiptExtraction {
   modelConfidence: number;
   /** Signs of tampering specifically — inconsistent fonts/misaligned elements/editing artifacts on an image or PDF, or formatting inconsistent with a genuine bank SMS template on text. Distinct from modelConfidence on purpose: a fraud signal must never be treated as "just ask them to resend." */
   looksAltered: boolean;
+  /**
+   * Many real Nigerian bank debit alerts never show a recipient account
+   * number at all — only the sender's own (masked) account, with the
+   * recipient identified solely by name in a free-text description (e.g.
+   * "TRF TO JAI/BAWAK INTEGRATED SER"). This is the model's own semantic
+   * judgment — accounting for bank-SMS abbreviation, truncation, and typos
+   * — on whether whatever identifies the recipient (name, description, or
+   * account) plausibly matches one of the configured accounts it was
+   * given. Reported separately from extractedAccountNumber so the
+   * platform can accept this as corroboration when no recipient account
+   * number was ever shown, rather than only ever trusting a number match.
+   */
+  recipientIdentityPlausible: boolean;
   reasoning: string;
 }
 
@@ -49,11 +62,11 @@ const REPORT_TOOL: Anthropic.Tool = {
       extracted_account_number: {
         type: ["string", "null"],
         description:
-          "The recipient account number shown, exactly as displayed — including any masking (e.g. \"142****141\"). Do not try to unmask it. Null if unreadable.",
+          "The RECIPIENT/beneficiary account number, exactly as displayed — including any masking (e.g. \"142****141\" or \"**83793\"). Do not try to unmask it. Null if no recipient account number is shown. Important: many bank debit alerts only show the SENDER's own account being debited (often labeled just \"Acc:\" with no \"beneficiary\"/\"Ben.\" qualifier) — that is NOT the recipient account. Never report the sender's own account here; leave this null if the recipient's account number isn't actually shown, even if some other account-shaped number is present.",
       },
       extracted_account_name: {
         type: ["string", "null"],
-        description: "The recipient account name shown. Null if unreadable.",
+        description: "The recipient/beneficiary account name shown, if explicitly labeled as such. Null if unreadable or not shown.",
       },
       transaction_status: {
         type: "string",
@@ -70,6 +83,11 @@ const REPORT_TOOL: Anthropic.Tool = {
         description:
           "True if there are actual signs of tampering — for an image/PDF: inconsistent fonts, misaligned or overlapping elements, mismatched compression/artifacts around specific text, anything pasted-in rather than a genuine capture. For text: formatting/structure inconsistent with a real bank SMS/debit-alert template, or content that reads as invented. False for evidence that's simply blurry, low-quality, or shows a genuine mismatch — those aren't tampering.",
       },
+      recipient_identity_plausible: {
+        type: "boolean",
+        description:
+          "Does whatever identifies the recipient — an explicit beneficiary account number, a beneficiary name field, or a transfer description/narration mentioning who was paid (e.g. \"TRF TO JAI/BAWAK INTEGRATED SER\") — plausibly refer to ONE of this business's configured accounts listed above? Judge this the way a person familiar with Nigerian bank SMS conventions would: account for truncation, all-caps abbreviation, common typos, and a bank name prefix bleeding into the recipient name. True only if there's a real, specific reference to compare, not just because nothing contradicts it — false if no recipient is identified at all, or if what's named is clearly a different business.",
+      },
       reasoning: {
         type: "string",
         description: "Briefly explain what you saw — both legibility and any tampering signs.",
@@ -83,18 +101,19 @@ const REPORT_TOOL: Anthropic.Tool = {
       "transaction_status",
       "confidence",
       "looks_altered",
+      "recipient_identity_plausible",
       "reasoning",
     ],
   },
 };
 
 function instructionFor(content: ReceiptContent, expectedAmount: number, accountsList: string): string {
-  const shared = `The expected amount is NGN ${expectedAmount}. This business's own accounts are:\n${accountsList || "(none configured)"}\n\nDon't assume it matches what was expected; say so plainly if it doesn't. Separately report legibility (confidence) and tampering signs (looks_altered) as two distinct things.`;
+  const shared = `The expected amount is NGN ${expectedAmount}. This business's own accounts are:\n${accountsList || "(none configured)"}\n\nDon't assume it matches what was expected; say so plainly if it doesn't. Separately report legibility (confidence), tampering signs (looks_altered), and recipient identity (recipient_identity_plausible) as three distinct judgments — a genuine debit alert that simply doesn't show a recipient account number is a normal bank-SMS format, not a red flag, so judge recipient_identity_plausible from whatever recipient information actually is present (name, description, or account).`;
 
   if (content.kind === "text") {
-    return `A customer sent this WhatsApp message as evidence of payment (a forwarded bank SMS/debit-alert, not an image):\n"""\n${content.text}\n"""\n\nExamine it carefully and report exactly what it shows — the real amount, bank, account number and name, and whether it indicates a completed transaction. ${shared}`;
+    return `A customer sent this WhatsApp message as evidence of payment (a forwarded bank SMS/debit-alert, not an image):\n"""\n${content.text}\n"""\n\nExamine it carefully and report exactly what it shows — the amount, bank, and whatever identifies the recipient — and whether it indicates a completed transaction. Many Nigerian bank debit alerts only show the account being DEBITED (the sender's own, often masked) with no recipient account number at all — the recipient is then identified only by name or in a transfer description/narration. Don't confuse the sender's account for the recipient's. ${shared}`;
   }
-  return `This is payment evidence a customer sent on WhatsApp. Examine it carefully and report exactly what it shows — the real amount, bank, account number and name, and whether it indicates success. ${shared}`;
+  return `This is payment evidence a customer sent on WhatsApp. Examine it carefully and report exactly what it shows — the amount, bank, and whatever identifies the recipient — and whether it indicates success. ${shared}`;
 }
 
 /**
@@ -156,6 +175,7 @@ export async function verifyReceiptContent(params: {
       transactionStatus: "unclear",
       modelConfidence: 0,
       looksAltered: false,
+      recipientIdentityPlausible: false,
       reasoning: "Model did not return a structured extraction.",
     };
   }
@@ -175,6 +195,7 @@ export async function verifyReceiptContent(params: {
     modelConfidence:
       typeof input.confidence === "number" ? Math.max(0, Math.min(1, input.confidence)) : 0,
     looksAltered: input.looks_altered === true,
+    recipientIdentityPlausible: input.recipient_identity_plausible === true,
     reasoning: typeof input.reasoning === "string" ? input.reasoning : "",
   };
 }
