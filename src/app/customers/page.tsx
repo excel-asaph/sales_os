@@ -8,10 +8,10 @@ import { stageStyle } from "@/lib/stage-display";
 import { clampMaxFollowups } from "@/lib/followup-sequence";
 import { getBusinessConfig } from "@/lib/knowledge";
 import { AppShell } from "@/components/app-shell";
+import { FollowupCountdownBar } from "@/components/followup-countdown-bar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import {
   Table,
   TableBody,
@@ -149,6 +149,7 @@ export default async function CustomersPage({
         lastActivity,
         stage: latestConversation?.currentStage ?? null,
         followupStep: activeFollowup?.step ?? null,
+        followupCreatedAt: activeFollowup?.createdAt ?? null,
         followupDue: activeFollowup?.scheduledFor ?? null,
         followupEndLabel: lastFollowupEvent
           ? describeFollowupEnd(lastFollowupEvent.type, lastFollowupEvent.payload)
@@ -215,14 +216,18 @@ export default async function CustomersPage({
                           <Badge className={`${stageStyle(row.stage)} w-fit border-transparent font-medium`}>
                             {row.stage.replaceAll("_", " ")}
                           </Badge>
-                          {row.followupStep !== null && row.followupDue ? (
+                          {row.followupStep !== null && row.followupCreatedAt && row.followupDue ? (
                             <div className="flex flex-col gap-0.5">
                               <div className="flex items-center justify-between text-xs text-muted-foreground">
                                 <span>
                                   {row.followupStep}/{maxFollowups} · next {relativeTime(row.followupDue)}
                                 </span>
                               </div>
-                              <Progress value={(row.followupStep / maxFollowups) * 100} className="w-24" />
+                              <FollowupCountdownBar
+                                createdAt={row.followupCreatedAt.toISOString()}
+                                scheduledFor={row.followupDue.toISOString()}
+                                className="w-24"
+                              />
                             </div>
                           ) : row.followupEndLabel ? (
                             <span className="text-xs text-muted-foreground">{row.followupEndLabel}</span>

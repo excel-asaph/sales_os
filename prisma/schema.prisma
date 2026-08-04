@@ -312,6 +312,10 @@ model Followup {
   /// §9); it's used as the fallback template if that generation fails.
   message        String
   reason         FollowupReason @default(GENERAL)
+  /// When this step's countdown actually started (not when the row was
+  /// written — the two are always the same in practice, but this is what
+  /// the Customers list's live countdown bar measures elapsed time from).
+  createdAt      DateTime  @default(now()) @map("created_at")
   scheduledFor   DateTime  @map("scheduled_for")
   sent           Boolean   @default(false)
   cancelled      Boolean   @default(false)
