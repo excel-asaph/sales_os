@@ -69,6 +69,16 @@ export async function ingestInboundMessage(
   });
 
   const { messageType, content, mediaRef } = normalizeContent(message);
+  // A reaction (an emoji tapped onto a prior message, not typed content) is
+  // categorically different from every other "unsupported" type below —
+  // it's not a reply and has nothing for the AI to act on. Left to run the
+  // normal turn, the AI would see "[unsupported message type: reaction]" as
+  // if the customer had typed it, and — as actually happened in testing —
+  // spiral into repeatedly asking them to "just reply yes" to a thumbs-up.
+  // It's still recorded as a message/event, just never handed to the AI or
+  // treated as "the customer replied" (which would cancel a pending
+  // follow-up over what's really silence with an emoji on top).
+  const isReaction = message.type === "reaction";
   let inboundMessageId: string | null = null;
 
   await prisma.$transaction(async (tx) => {
@@ -111,11 +121,20 @@ export async function ingestInboundMessage(
     // follow-up is "they went quiet," and now they haven't). The worker
     // already checks `cancelled` before sending, so flagging it here is
     // enough; no need to also touch the already-queued pg-boss job.
-    await tx.followup.updateMany({
-      where: { conversationId: conversation.id, sent: false, cancelled: false },
-      data: { cancelled: true },
-    });
+    // A reaction doesn't count — it's not a real reply, so it shouldn't
+    // cancel a check-in that's still owed.
+    if (!isReaction) {
+      await tx.followup.updateMany({
+        where: { conversationId: conversation.id, sent: false, cancelled: false },
+        data: { cancelled: true },
+      });
+    }
   });
+
+  // Nothing further to do for a bare reaction — it's logged above for
+  // anyone reviewing the transcript, but doesn't warrant re-engaging the
+  // AI (there's no media to persist and no reply to generate).
+  if (isReaction) return;
 
   // Download and re-host media now, not just when something later chooses
   // to inspect it (e.g. payment verification) — otherwise anything the AI

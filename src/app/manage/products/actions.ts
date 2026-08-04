@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/lib/auth";
+import { normalizeFileUrl } from "@/lib/file-url";
 
 async function requireOwnedProduct(productId: string, businessId: string) {
   const product = await prisma.product.findUniqueOrThrow({ where: { id: productId } });
@@ -22,7 +23,7 @@ export async function createProduct(formData: FormData) {
       name,
       description: String(formData.get("description") ?? "").trim() || null,
       price,
-      fileUrl: String(formData.get("fileUrl") ?? "").trim() || null,
+      fileUrl: normalizeFileUrl(String(formData.get("fileUrl") ?? "")) || null,
       category: String(formData.get("category") ?? "").trim() || null,
     },
   });
@@ -54,7 +55,7 @@ export async function updateProduct(formData: FormData) {
       name,
       description: String(formData.get("description") ?? "").trim() || null,
       price,
-      fileUrl: String(formData.get("fileUrl") ?? "").trim() || null,
+      fileUrl: normalizeFileUrl(String(formData.get("fileUrl") ?? "")) || null,
       category: String(formData.get("category") ?? "").trim() || null,
     },
   });
