@@ -6,6 +6,7 @@ import type {
 import type { WhatsAppChangeValue } from "@/lib/whatsapp";
 import { runAIEmployeeTurn } from "@/lib/ai-runtime";
 import { downloadWhatsAppMedia, persistMediaFile } from "@/lib/media-storage";
+import { withCustomerLock } from "@/lib/customer-lock";
 
 // Media worth saving so a human reviewing the conversation later can
 // actually see it, not just a WhatsApp media reference that expires.
@@ -45,6 +46,10 @@ export async function ingestInboundMessage(
   const contactName = value.contacts?.find((c) => c.wa_id === message.from)
     ?.profile.name;
 
+  // Upsert is atomic and idempotent on its own — safe to run before the
+  // lock below, which exists to serialize everything AFTER this (the part
+  // that actually matters: whether two near-simultaneous messages from the
+  // same customer can each independently trigger a full AI turn).
   const customer = await prisma.customer.upsert({
     where: {
       businessId_phoneNumber: {
@@ -60,9 +65,33 @@ export async function ingestInboundMessage(
     update: contactName ? { name: contactName } : {},
   });
 
+  await withCustomerLock(customer.id, () => processInboundMessage(customer.id, message));
+}
+
+async function processInboundMessage(
+  customerId: string,
+  message: NonNullable<WhatsAppChangeValue["messages"]>[number]
+) {
+  // A WhatsApp webhook redelivery of a message already fully processed
+  // (Meta retries when it doesn't get a fast 200 — the turn below can
+  // easily run long enough to trigger that, especially one involving a
+  // receipt-verification vision call) must never be reprocessed as new:
+  // in production this produced 3 duplicate VERIFIED orders and a phantom
+  // conversation from ONE real payment. The per-customer lock above
+  // serializes concurrent delivery of the *same* message with itself, so
+  // this check reliably catches it rather than racing against a still-
+  // in-flight duplicate.
+  const alreadyProcessed = await prisma.message.findUnique({
+    where: { whatsappMessageId: message.id },
+  });
+  if (alreadyProcessed) {
+    console.warn(`WhatsApp message ${message.id} already processed as ${alreadyProcessed.id} — skipping redelivery.`);
+    return;
+  }
+
   let conversation = await prisma.conversation.findFirst({
     where: {
-      customerId: customer.id,
+      customerId,
       NOT: { currentStage: { in: TERMINAL_STAGES } },
     },
     orderBy: { updatedAt: "desc" },
@@ -85,7 +114,7 @@ export async function ingestInboundMessage(
     if (!conversation) {
       conversation = await tx.conversation.create({
         data: {
-          customerId: customer.id,
+          customerId,
           currentStage: "NEW_LEAD",
           // Only present on the message that actually started this
           // conversation (a "click to WhatsApp" ad/post) — never
@@ -104,6 +133,7 @@ export async function ingestInboundMessage(
         type: messageType,
         content,
         mediaUrl: mediaRef,
+        whatsappMessageId: message.id,
       },
     });
     inboundMessageId = inboundMessage.id;
@@ -187,7 +217,7 @@ export async function ingestInboundMessage(
   const RATE_LIMIT_MAX_MESSAGES = 15;
   const recentInboundCount = await prisma.message.count({
     where: {
-      conversation: { customerId: customer.id },
+      conversation: { customerId },
       direction: "INBOUND",
       createdAt: { gte: new Date(Date.now() - RATE_LIMIT_WINDOW_MS) },
     },
@@ -195,7 +225,7 @@ export async function ingestInboundMessage(
 
   if (recentInboundCount > RATE_LIMIT_MAX_MESSAGES) {
     console.warn(
-      `Rate limit hit for customer ${customer.id} (${recentInboundCount} inbound messages in the last minute) — skipping AI turn for message ${message.id}`
+      `Rate limit hit for customer ${customerId} (${recentInboundCount} inbound messages in the last minute) — skipping AI turn for message ${message.id}`
     );
     await prisma.event.create({
       data: {

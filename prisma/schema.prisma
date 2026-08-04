@@ -257,6 +257,11 @@ model Message {
   type           MessageType       @default(TEXT)
   content        String?
   mediaUrl       String?           @map("media_url")
+  /// WhatsApp's own message id (wamid), inbound only — lets ingest-message.ts
+  /// recognize a webhook redelivery of a message already processed instead
+  /// of reprocessing it as new. Null for outbound messages, which have no
+  /// wamid of their own at creation time.
+  whatsappMessageId String?        @unique @map("whatsapp_message_id")
   createdAt      DateTime          @default(now()) @map("created_at")
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
