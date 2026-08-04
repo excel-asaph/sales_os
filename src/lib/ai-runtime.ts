@@ -59,23 +59,7 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
     ? `${renderConversationBrain(brain)}\n\n${followupNote}`
     : renderConversationBrain(brain);
 
-  // A rich turn loops several times below, resending the growing
-  // messages array in full each time — the same waste the system+tools
-  // caching above targets, just in the messages tier instead. `cacheTail`
-  // tracks the single block currently marked as the cache breakpoint; it's
-  // moved (not accumulated) to the newest block each iteration, since only
-  // the most recent marker is needed — the cache lookup walks backward
-  // through the growing prefix on its own (shared/prompt-caching.md's
-  // 20-block lookback). Keeping exactly one here means at most 3
-  // breakpoints total per request (tools + system + this), under the
-  // API's 4-per-request cap.
-  const initialBlock: Anthropic.TextBlockParam = {
-    type: "text",
-    text: brainContent,
-    cache_control: { type: "ephemeral" },
-  };
-  const messages: Anthropic.MessageParam[] = [{ role: "user", content: [initialBlock] }];
-  let cacheTail: { cache_control?: Anthropic.CacheControlEphemeral | null } = initialBlock;
+  const messages: Anthropic.MessageParam[] = [{ role: "user", content: brainContent }];
 
   for (let iteration = 0; iteration < MAX_TOOL_ITERATIONS; iteration++) {
     const response = await claude.messages.create({
@@ -86,13 +70,21 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
       // it (and the tools list, tools.ts) means every iteration of this
       // loop past the first, and every subsequent customer message within
       // the cache window, mostly reads from cache instead of paying full
-      // input price for the same ~1-2K tokens again. See
-      // src/lib/tools.ts's cache_control comment for the tools half of
-      // this — a breakpoint here also covers tools, since tools render
-      // before system, but keeping both lets the tools cache survive even
-      // when a different business's system prompt text misses.
+      // input price for the same ~1-2K tokens again. A breakpoint here also
+      // covers tools (tools render before system), but keeping an explicit
+      // one on tools too (tools.ts) lets that half survive even when a
+      // different business's system prompt text misses.
       system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
       tools: actionContractTools,
+      // Automatic caching: the API places (and moves) this breakpoint on
+      // the last cacheable block itself as `messages` grows across this
+      // loop's iterations, so the turn's own tool-calling history is
+      // cached too without hand-tracking a moving marker. It's additive to
+      // the two explicit breakpoints above (they use separate slots, well
+      // under the 4-per-request cap) — this is the officially recommended
+      // way to combine "explicit for the stable prefix, automatic for the
+      // growing conversation" (docs.claude.com/prompt-caching).
+      cache_control: { type: "ephemeral" },
       messages,
     });
 
@@ -148,11 +140,6 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
       }
     }
     messages.push({ role: "user", content: toolResults });
-
-    cacheTail.cache_control = undefined;
-    const newTail = toolResults[toolResults.length - 1];
-    newTail.cache_control = { type: "ephemeral" };
-    cacheTail = newTail;
   }
 
   console.warn(`AI Employee Runtime: exceeded ${MAX_TOOL_ITERATIONS} tool iterations on conversation ${conversationId}`);
