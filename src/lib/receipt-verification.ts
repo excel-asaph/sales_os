@@ -147,6 +147,12 @@ export async function verifyReceiptContent(params: {
           }
         : null;
 
+  // Not a prompt-caching candidate: the image/document/text is the very
+  // first content block and is different on every single call (a distinct
+  // receipt each time), so there's no reusable prefix to mark a breakpoint
+  // on — see shared/prompt-caching.md's "prompts that change from the
+  // beginning every time" guidance. Usage is still logged for cost
+  // visibility, since vision calls are a real, recurring cost center.
   const response = await claude.messages.create({
     model: CLAUDE_MODEL,
     max_tokens: 1024,
@@ -162,6 +168,11 @@ export async function verifyReceiptContent(params: {
       },
     ],
   });
+
+  console.log(
+    `[claude-usage] receipt-verification kind=${params.content.kind} model=${CLAUDE_MODEL} ` +
+      `input=${response.usage.input_tokens} output=${response.usage.output_tokens}`
+  );
 
   const toolUse = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"

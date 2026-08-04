@@ -59,16 +59,44 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
     ? `${renderConversationBrain(brain)}\n\n${followupNote}`
     : renderConversationBrain(brain);
 
-  const messages: Anthropic.MessageParam[] = [{ role: "user", content: brainContent }];
+  // A rich turn loops several times below, resending the growing
+  // messages array in full each time — the same waste the system+tools
+  // caching above targets, just in the messages tier instead. `cacheTail`
+  // tracks the single block currently marked as the cache breakpoint; it's
+  // moved (not accumulated) to the newest block each iteration, since only
+  // the most recent marker is needed — the cache lookup walks backward
+  // through the growing prefix on its own (shared/prompt-caching.md's
+  // 20-block lookback). Keeping exactly one here means at most 3
+  // breakpoints total per request (tools + system + this), under the
+  // API's 4-per-request cap.
+  const initialBlock: Anthropic.TextBlockParam = {
+    type: "text",
+    text: brainContent,
+    cache_control: { type: "ephemeral" },
+  };
+  const messages: Anthropic.MessageParam[] = [{ role: "user", content: [initialBlock] }];
+  let cacheTail: { cache_control?: Anthropic.CacheControlEphemeral | null } = initialBlock;
 
   for (let iteration = 0; iteration < MAX_TOOL_ITERATIONS; iteration++) {
     const response = await claude.messages.create({
       model: CLAUDE_MODEL,
       max_tokens: 4096,
-      system,
+      // The system prompt is identical for every turn of every customer of
+      // this business until an admin edits Settings/products/FAQ — caching
+      // it (and the tools list, tools.ts) means every iteration of this
+      // loop past the first, and every subsequent customer message within
+      // the cache window, mostly reads from cache instead of paying full
+      // input price for the same ~1-2K tokens again. See
+      // src/lib/tools.ts's cache_control comment for the tools half of
+      // this — a breakpoint here also covers tools, since tools render
+      // before system, but keeping both lets the tools cache survive even
+      // when a different business's system prompt text misses.
+      system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
       tools: actionContractTools,
       messages,
     });
+
+    logClaudeUsage(conversationId, iteration, response.usage);
 
     if (response.stop_reason === "refusal") {
       console.warn(`AI Employee Runtime: refusal on conversation ${conversationId}`);
@@ -120,6 +148,11 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
       }
     }
     messages.push({ role: "user", content: toolResults });
+
+    cacheTail.cache_control = undefined;
+    const newTail = toolResults[toolResults.length - 1];
+    newTail.cache_control = { type: "ephemeral" };
+    cacheTail = newTail;
   }
 
   console.warn(`AI Employee Runtime: exceeded ${MAX_TOOL_ITERATIONS} tool iterations on conversation ${conversationId}`);
@@ -127,5 +160,20 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
     "escalate_to_human",
     { reason: "tool_loop_limit", summary: "The AI took too many actions in one turn without finishing; needs human review." },
     ctx
+  );
+}
+
+// Visibility into whether prompt caching is actually working — until this
+// existed, there was no way to see cache hit rate short of trusting the
+// dashboard's aggregate numbers. `input_tokens` is the *uncached* remainder
+// only; a healthy warm cache should show most of the system+tools prefix
+// showing up under cache_read rather than input on iteration > 0 (and on
+// iteration 0 too, once another turn for this business has warmed it within
+// the last 5 minutes).
+function logClaudeUsage(conversationId: string, iteration: number, usage: Anthropic.Usage) {
+  console.log(
+    `[claude-usage] conversation=${conversationId} iter=${iteration} model=${CLAUDE_MODEL} ` +
+      `input=${usage.input_tokens} cache_write=${usage.cache_creation_input_tokens ?? 0} ` +
+      `cache_read=${usage.cache_read_input_tokens ?? 0} output=${usage.output_tokens}`
   );
 }

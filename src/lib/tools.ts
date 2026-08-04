@@ -181,5 +181,13 @@ export const actionContractTools: Anthropic.Tool[] = [
       },
       required: ["tag"],
     },
+    // This tool list is 100% static — identical on every single request,
+    // for every business. Marking a cache breakpoint on the last entry
+    // caches the whole list (prompt caching is a prefix match: tools
+    // render before system/messages, ARCHITECTURE-level detail worth
+    // knowing before moving this breakpoint), so it's reused across every
+    // turn, every conversation, every business, for as long as it stays
+    // warm — the closest thing to a free win the API offers.
+    cache_control: { type: "ephemeral" },
   },
 ];
