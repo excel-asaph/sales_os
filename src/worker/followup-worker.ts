@@ -21,11 +21,19 @@ const DEFAULT_FALLBACK_MESSAGE =
 // Stages where a scheduled follow-up no longer makes sense: the sale
 // already completed one way or another, or a human already owns this
 // conversation and the AI shouldn't jump back in on its own.
+//
+// PRODUCT_DELIVERED is deliberately NOT here, even though it sounds
+// terminal: for a deliver-before-payment business (BusinessConfig.
+// deliverBeforePayment), sendProduct() sets this stage the moment the file
+// goes out, which is often BEFORE payment — the business.playbook's
+// payment_followup template exists specifically for "delivered on trust,
+// payment gone quiet." Blocking follow-ups here would silently defeat that
+// entire flow. Only PAYMENT_VERIFIED (or later) actually means nothing is
+// still owed.
 const BLOCKS_FOLLOWUP = new Set<ConversationStage>([
   "SALE_COMPLETED",
   "LOST_LEAD",
   "RESOLVED",
-  "PRODUCT_DELIVERED",
   "PAYMENT_VERIFIED",
   "HUMAN_REVIEW_REQUIRED",
   "HUMAN_ASSIGNED",

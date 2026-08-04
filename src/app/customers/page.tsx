@@ -23,18 +23,36 @@ import {
 
 // Follow-up sequence events worth surfacing once a sequence is no longer
 // active, so the column doesn't just go blank the moment it stops — see
-// src/worker/followup-worker.ts for where each of these is written.
+// src/worker/followup-worker.ts and src/lib/ingest-message.ts for where
+// each of these is written.
 const FOLLOWUP_END_EVENT_TYPES = [
   "FOLLOWUP_CANCELLED",
   "FOLLOWUP_SEQUENCE_EXHAUSTED",
   "FOLLOWUP_SEQUENCE_EXHAUSTED_ESCALATED",
 ] as const;
 
-const FOLLOWUP_END_LABELS: Record<(typeof FOLLOWUP_END_EVENT_TYPES)[number], string> = {
-  FOLLOWUP_CANCELLED: "Stopped — customer replied",
-  FOLLOWUP_SEQUENCE_EXHAUSTED: "Sequence ended — no reply",
-  FOLLOWUP_SEQUENCE_EXHAUSTED_ESCALATED: "Sequence ended — escalated to a human",
-};
+// FOLLOWUP_CANCELLED alone doesn't say why — it's written both when the
+// customer actually replies (ingest-message.ts) AND when a scheduled
+// check-in fires into a stage that no longer needs one, e.g. payment
+// already verified (followup-worker.ts) — two unrelated situations
+// sharing one event type. `reason` in the payload is what actually
+// distinguishes them; a previous version of this page ignored it and
+// labeled every cancellation "customer replied," which was wrong for
+// anything that stopped for a stage/order reason instead.
+function describeFollowupEnd(type: string, payload: unknown): string {
+  if (type === "FOLLOWUP_SEQUENCE_EXHAUSTED") return "Sequence ended — no reply";
+  if (type === "FOLLOWUP_SEQUENCE_EXHAUSTED_ESCALATED") return "Sequence ended — escalated to a human";
+  if (type !== "FOLLOWUP_CANCELLED") return "Stopped";
+
+  const reason = (payload as { reason?: string } | null)?.reason;
+  if (reason === "customer_replied") return "Stopped — customer replied";
+  if (reason === "order_already_verified") return "Stopped — payment already verified";
+  if (reason?.startsWith("conversation_stage_")) {
+    const stage = reason.slice("conversation_stage_".length).replaceAll("_", " ").toLowerCase();
+    return `Stopped — moved to ${stage}`;
+  }
+  return "Stopped";
+}
 
 // Customers directory — the "browse everyone" complement to the Customer
 // Profile page (/customers/[id]): before this, a customer was only
@@ -99,10 +117,10 @@ export default async function CustomersPage({
         where: { conversationId: { in: conversationsNeedingLastEvent }, type: { in: [...FOLLOWUP_END_EVENT_TYPES] } },
         orderBy: { createdAt: "desc" },
         distinct: ["conversationId"],
-        select: { conversationId: true, type: true },
+        select: { conversationId: true, type: true, payload: true },
       })
     : [];
-  const lastEventByConversation = new Map(lastEvents.map((e) => [e.conversationId, e.type]));
+  const lastEventByConversation = new Map(lastEvents.map((e) => [e.conversationId, e]));
 
   const rows = customers
     .map((customer) => {
@@ -118,9 +136,7 @@ export default async function CustomersPage({
 
       const latestConversation = customer.conversations[0] ?? null;
       const activeFollowup = latestConversation?.followups[0] ?? null;
-      const lastFollowupEvent = latestConversation
-        ? (lastEventByConversation.get(latestConversation.id) as (typeof FOLLOWUP_END_EVENT_TYPES)[number] | undefined)
-        : undefined;
+      const lastFollowupEvent = latestConversation ? lastEventByConversation.get(latestConversation.id) : undefined;
 
       return {
         id: customer.id,
@@ -134,7 +150,9 @@ export default async function CustomersPage({
         stage: latestConversation?.currentStage ?? null,
         followupStep: activeFollowup?.step ?? null,
         followupDue: activeFollowup?.scheduledFor ?? null,
-        followupEndLabel: lastFollowupEvent ? FOLLOWUP_END_LABELS[lastFollowupEvent] : null,
+        followupEndLabel: lastFollowupEvent
+          ? describeFollowupEnd(lastFollowupEvent.type, lastFollowupEvent.payload)
+          : null,
       };
     })
     .sort((a, b) => (b.lastActivity?.getTime() ?? 0) - (a.lastActivity?.getTime() ?? 0));

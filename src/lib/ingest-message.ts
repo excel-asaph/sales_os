@@ -120,14 +120,33 @@ export async function ingestInboundMessage(
     // silence is stale the moment they reply (the entire premise of a
     // follow-up is "they went quiet," and now they haven't). The worker
     // already checks `cancelled` before sending, so flagging it here is
-    // enough; no need to also touch the already-queued pg-boss job.
-    // A reaction doesn't count — it's not a real reply, so it shouldn't
+    // enough; no need to also touch the already-queued pg-boss job. A
+    // reaction doesn't count — it's not a real reply, so it shouldn't
     // cancel a check-in that's still owed.
+    //
+    // This is also the ONLY place that cancels a follow-up because the
+    // customer replied — followup-worker.ts separately writes its own
+    // FOLLOWUP_CANCELLED event when a scheduled check-in fires into a
+    // stage that no longer needs one (payment verified, sale closed,
+    // etc.), for a completely different reason. Both share the event
+    // type; `reason` in the payload is what actually distinguishes them —
+    // src/app/customers/page.tsx reads it to label the Customers list
+    // correctly instead of assuming every FOLLOWUP_CANCELLED means "they
+    // replied," which it doesn't.
     if (!isReaction) {
-      await tx.followup.updateMany({
+      const { count } = await tx.followup.updateMany({
         where: { conversationId: conversation.id, sent: false, cancelled: false },
         data: { cancelled: true },
       });
+      if (count > 0) {
+        await tx.event.create({
+          data: {
+            conversationId: conversation.id,
+            type: "FOLLOWUP_CANCELLED",
+            payload: { reason: "customer_replied" },
+          },
+        });
+      }
     }
   });
 
