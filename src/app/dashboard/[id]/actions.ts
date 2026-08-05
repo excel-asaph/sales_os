@@ -94,7 +94,8 @@ export async function sendHumanReply(formData: FormData) {
 
 // Closes out the conversation (PRD 5.11: exactly one active workflow). The
 // next inbound message from this customer starts a fresh conversation
-// (ingest-message.ts's TERMINAL_STAGES) rather than reopening this one.
+// (ingest-message.ts's CONVERSATION_ENDING_STAGES) rather than reopening
+// this one — RESOLVED is a deliberate human decision to end the thread.
 export async function resolveConversation(formData: FormData) {
   const session = await requireSession();
   const conversationId = String(formData.get("conversationId"));

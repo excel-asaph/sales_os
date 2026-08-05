@@ -101,10 +101,16 @@ async function sendProduct(ctx: ActionContext, productId: string) {
   if (!product) return { delivered: false, reason: "product not found" };
 
   if (!config.deliverBeforePayment) {
-    const verifiedOrder = await prisma.order.findFirst({
-      where: { conversationId: ctx.conversationId, productId, status: "VERIFIED" },
+    // The most recent order for this product, not "does a verified one
+    // exist anywhere, ever" — conversations now persist across multiple
+    // purchases (they no longer fork a new one on SALE_COMPLETED), so an
+    // unordered existence check would let a second, unpaid purchase of the
+    // same product ride through on the first purchase's old verified order.
+    const latestOrderForProduct = await prisma.order.findFirst({
+      where: { conversationId: ctx.conversationId, productId },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     });
-    if (!verifiedOrder) {
+    if (!latestOrderForProduct || latestOrderForProduct.status !== "VERIFIED") {
       return { delivered: false, reason: "payment has not been verified for this product yet" };
     }
   }
@@ -300,8 +306,23 @@ async function requestPaymentVerification(ctx: ActionContext, productId: string,
   // document). Self-correct if this business has opted in and hasn't
   // burned its retry cap on this conversation yet; otherwise fall back to
   // escalating, same as before this feature existed.
+  //
+  // Scoped to this product AND to attempts since the last verified order
+  // on this conversation — conversations now persist across multiple
+  // purchases, so an unscoped all-time count would let rejections from a
+  // completed, unrelated earlier purchase burn this purchase's retry
+  // budget (or a different product's rejections burn this product's).
+  const lastVerifiedOrder = await prisma.order.findFirst({
+    where: { conversationId: ctx.conversationId, status: "VERIFIED" },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+  });
   const priorRejections = await prisma.order.count({
-    where: { conversationId: ctx.conversationId, status: "REJECTED" },
+    where: {
+      conversationId: ctx.conversationId,
+      productId,
+      status: "REJECTED",
+      ...(lastVerifiedOrder ? { createdAt: { gt: lastVerifiedOrder.createdAt } } : {}),
+    },
   });
 
   if (config.aiHandlesReceiptIssues && priorRejections < RECEIPT_RETRY_LIMIT) {

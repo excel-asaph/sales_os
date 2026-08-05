@@ -12,11 +12,14 @@ import { withCustomerLock } from "@/lib/customer-lock";
 // actually see it, not just a WhatsApp media reference that expires.
 const PERSISTABLE_MEDIA_TYPES: MessageType[] = ["IMAGE", "DOCUMENT", "VOICE"];
 
-// Workflow stages that mean "this conversation is done" — a new inbound
-// message should start a fresh conversation rather than reopen one of these
-// (PRD 5.11: every customer has exactly one *active* primary workflow).
-const TERMINAL_STAGES: ConversationStage[] = [
-  "SALE_COMPLETED",
+// Stages that genuinely end this conversation thread — a human closed it
+// (RESOLVED) or gave up on it (LOST_LEAD). A new inbound message after one
+// of these starts a fresh conversation. SALE_COMPLETED is deliberately NOT
+// here: WhatsApp is one continuous thread per customer, and a completed
+// sale doesn't retire it — the same conversation carries forward so a
+// second message minutes later (or a second purchase weeks later) isn't
+// treated as a brand-new lead with no memory of the customer.
+const CONVERSATION_ENDING_STAGES: ConversationStage[] = [
   "LOST_LEAD",
   "RESOLVED",
 ];
@@ -92,7 +95,7 @@ async function processInboundMessage(
   let conversation = await prisma.conversation.findFirst({
     where: {
       customerId,
-      NOT: { currentStage: { in: TERMINAL_STAGES } },
+      NOT: { currentStage: { in: CONVERSATION_ENDING_STAGES } },
     },
     orderBy: { updatedAt: "desc" },
   });

@@ -68,7 +68,13 @@ async function handleFollowup(followupId: string) {
   if (!followup || followup.sent || followup.cancelled) return;
 
   const { conversation } = followup;
-  const orderVerified = conversation.orders.some((order) => order.status === "VERIFIED");
+  // Verified SINCE this follow-up was scheduled, not "ever" — conversations
+  // now persist across multiple purchases, so an all-time check would let
+  // a stale verified order from an earlier, completed purchase wrongly
+  // cancel a follow-up for a genuinely new, still-unpaid one.
+  const orderVerified = conversation.orders.some(
+    (order) => order.status === "VERIFIED" && order.verifiedAt !== null && order.verifiedAt > followup.createdAt
+  );
   const stageBlocksFollowup = BLOCKS_FOLLOWUP.has(conversation.currentStage);
 
   if (orderVerified || stageBlocksFollowup) {
