@@ -165,20 +165,42 @@ const RECEIPT_RETRY_LIMIT = 3;
 
 // A customer's receipt "evidence" can arrive as any inbound message type —
 // a screenshot, a forwarded PDF, or a pasted bank SMS/debit-alert as plain
-// text. Whichever is most recent is what the customer is pointing at when
-// the AI checks; VOICE is excluded since there's nothing to extract from
-// audio without transcription (out of scope).
-const RECEIPT_MESSAGE_TYPES = ["IMAGE", "DOCUMENT", "TEXT"] as const;
+// text. VOICE is excluded since there's nothing to extract from audio
+// without transcription (out of scope).
+//
+// A short trailing acknowledgment typed right after the real attachment
+// ("Sent", "Here it is", "Done") must never outrank the attachment itself
+// just for being more recent — found via a real customer test where typing
+// "Sent" two seconds after a receipt PDF caused verification to run
+// against the word "Sent" instead of the PDF, and fail for no real reason.
+// Real Nigerian bank debit alerts run well over 100 characters (amount,
+// account, narration, date); this floor only needs to clear a short
+// acknowledgment, not identify genuine alert text precisely.
+const MIN_PLAUSIBLE_RECEIPT_TEXT_LENGTH = 40;
 
 async function requestPaymentVerification(ctx: ActionContext, productId: string, expectedAmount: number) {
-  const receiptMessage = await prisma.message.findFirst({
-    where: {
-      conversationId: ctx.conversationId,
-      direction: "INBOUND",
-      type: { in: [...RECEIPT_MESSAGE_TYPES] },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const [attachmentMessage, textMessage] = await Promise.all([
+    prisma.message.findFirst({
+      where: { conversationId: ctx.conversationId, direction: "INBOUND", type: { in: ["IMAGE", "DOCUMENT"] } },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.message.findFirst({
+      where: { conversationId: ctx.conversationId, direction: "INBOUND", type: "TEXT" },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
+
+  // Prefer the attachment unless a later text message is substantial
+  // enough to plausibly be pasted alert content itself (or there's no
+  // attachment to prefer in the first place) — see comment above.
+  let receiptMessage = attachmentMessage;
+  const textIsMoreRecent = textMessage && (!attachmentMessage || textMessage.createdAt > attachmentMessage.createdAt);
+  if (textIsMoreRecent) {
+    const looksSubstantial = (textMessage.content?.trim().length ?? 0) >= MIN_PLAUSIBLE_RECEIPT_TEXT_LENGTH;
+    if (looksSubstantial || !attachmentMessage) {
+      receiptMessage = textMessage;
+    }
+  }
 
   const [config, paymentAccounts] = await Promise.all([
     getBusinessConfig(ctx.businessId),
