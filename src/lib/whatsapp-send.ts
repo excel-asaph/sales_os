@@ -119,3 +119,45 @@ export async function sendWhatsAppDocument(to: string, link: string, filename: s
     throw new Error(`WhatsApp document send failed (${response.status}): ${body}`);
   }
 }
+
+/**
+ * Marks an inbound message as read and shows the "typing…" indicator to
+ * the customer — visible for up to 25 seconds or until a real reply is
+ * sent, whichever comes first (Meta's own limit, not configurable). Used
+ * so a customer isn't left staring at silence during the debounce window
+ * (src/lib/message-debounce.ts) before the AI actually replies. Never
+ * call this unless a reply is actually coming (Meta's own guidance) —
+ * ingest-message.ts skips it for reactions, which never get a reply.
+ * https://developers.facebook.com/docs/whatsapp/cloud-api/typing-indicators
+ */
+export async function sendTypingIndicator(messageId: string): Promise<void> {
+  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+
+  if (!accessToken || !phoneNumberId) {
+    console.log(`[whatsapp-send:dry-run] typing-indicator for message=${messageId}`);
+    return;
+  }
+
+  const response = await fetch(
+    `https://graph.facebook.com/${GRAPH_API_VERSION}/${phoneNumberId}/messages`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        status: "read",
+        message_id: messageId,
+        typing_indicator: { type: "text" },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`WhatsApp typing-indicator send failed (${response.status}): ${body}`);
+  }
+}

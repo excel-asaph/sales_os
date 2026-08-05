@@ -7,6 +7,8 @@ import type { WhatsAppChangeValue } from "@/lib/whatsapp";
 import { runAIEmployeeTurn } from "@/lib/ai-runtime";
 import { downloadWhatsAppMedia, persistMediaFile } from "@/lib/media-storage";
 import { withCustomerLock } from "@/lib/customer-lock";
+import { scheduleDebounced } from "@/lib/message-debounce";
+import { sendTypingIndicator } from "@/lib/whatsapp-send";
 
 // Media worth saving so a human reviewing the conversation later can
 // actually see it, not just a WhatsApp media reference that expires.
@@ -188,6 +190,15 @@ async function processInboundMessage(
   // AI (there's no media to persist and no reply to generate).
   if (isReaction) return;
 
+  // Show "typing…" as early as possible — a reply is coming (Meta's own
+  // guidance is to never show this otherwise), and the debounce window
+  // below means the customer would otherwise sit in silence for several
+  // seconds before seeing any sign of life. Fire-and-forget: this is a
+  // courtesy indicator, not something worth failing the whole turn over.
+  sendTypingIndicator(message.id).catch((error) =>
+    console.error(`Failed to send typing indicator for message ${message.id}`, error)
+  );
+
   // Download and re-host media now, not just when something later chooses
   // to inspect it (e.g. payment verification) — otherwise anything the AI
   // never verifies (a non-receipt photo, a voice note) is stuck as an
@@ -240,16 +251,27 @@ async function processInboundMessage(
     return;
   }
 
-  // The Channel Gateway's job ends at normalization. Running the AI
-  // Employee Runtime here (rather than via a queue) is a deliberate MVP
-  // simplification — ARCHITECTURE.md §3 notes pg-boss isn't wired up yet,
-  // so this is synchronous for now. A failure here must not roll back the
-  // message/event that were already committed above.
-  try {
-    await runAIEmployeeTurn(conversation!.id);
-  } catch (error) {
-    console.error(`AI Employee Runtime failed for conversation ${conversation!.id}`, error);
-  }
+  // The Channel Gateway's job ends at normalization. The actual AI turn is
+  // debounced (src/lib/message-debounce.ts) rather than run immediately —
+  // real customers routinely send a thought across two or three messages
+  // seconds apart, and running a full turn per message means the second
+  // one often lands before the customer has even seen the reply to the
+  // first. Scheduling (not awaiting) here also means this function returns
+  // quickly, which matters for the webhook handler's own reasoning about
+  // Meta's redelivery timeout. The debounced call re-acquires the
+  // customer lock itself when it actually fires (this function has
+  // already returned by then, releasing the lock this call is running
+  // under) — it still needs it, to stay serialized against a follow-up or
+  // another burst's turn landing at the same moment.
+  scheduleDebounced(customerId, () =>
+    withCustomerLock(customerId, async () => {
+      try {
+        await runAIEmployeeTurn(conversation!.id);
+      } catch (error) {
+        console.error(`AI Employee Runtime failed for conversation ${conversation!.id}`, error);
+      }
+    })
+  );
 }
 
 function normalizeContent(
