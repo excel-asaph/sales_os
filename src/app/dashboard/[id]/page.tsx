@@ -9,6 +9,7 @@ import type { ConversationStage, MessageType } from "@/generated/prisma/client";
 import { AppShell } from "@/components/app-shell";
 import { SubmitButton } from "@/components/submit-button";
 import { ResolveConversationButton } from "@/components/resolve-conversation-button";
+import { DeleteConversationButton } from "@/components/delete-conversation-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,7 +22,7 @@ import {
   milestoneIndexForStage,
 } from "@/lib/stage-display";
 import { clampMaxFollowups, FOLLOWUP_SEQUENCE } from "@/lib/followup-sequence";
-import { sendHumanReply, deleteConversation } from "./actions";
+import { sendHumanReply } from "./actions";
 
 // Dashboard "Review" view (ARCHITECTURE.md §10): per-conversation
 // drill-down — summary, stage, message history, Conversation Brain facts —
@@ -106,12 +107,7 @@ export default async function ConversationReviewPage({
           </Button>
           <ResolveConversationButton conversationId={conversation.id} requiresWarning={requiresResolveWarning} />
           {session.isAdmin && conversation.orders.length === 0 && (
-            <form action={deleteConversation}>
-              <input type="hidden" name="conversationId" value={conversation.id} />
-              <SubmitButton variant="destructive" size="sm" pendingLabel="Deleting…">
-                Delete
-              </SubmitButton>
-            </form>
+            <DeleteConversationButton conversationId={conversation.id} />
           )}
         </div>
       }
