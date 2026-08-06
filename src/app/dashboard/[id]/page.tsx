@@ -8,6 +8,7 @@ import { formatNaira } from "@/lib/currency";
 import type { ConversationStage, MessageType } from "@/generated/prisma/client";
 import { AppShell } from "@/components/app-shell";
 import { SubmitButton } from "@/components/submit-button";
+import { ResolveConversationButton } from "@/components/resolve-conversation-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,11 +16,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Field, ReferralDetails } from "@/components/referral-details";
 import {
   HUMAN_STAGES,
+  TERMINAL_STAGES,
   PIPELINE_MILESTONES,
   milestoneIndexForStage,
 } from "@/lib/stage-display";
 import { clampMaxFollowups, FOLLOWUP_SEQUENCE } from "@/lib/followup-sequence";
-import { sendHumanReply, resolveConversation, deleteConversation } from "./actions";
+import { sendHumanReply, deleteConversation } from "./actions";
 
 // Dashboard "Review" view (ARCHITECTURE.md §10): per-conversation
 // drill-down — summary, stage, message history, Conversation Brain facts —
@@ -82,6 +84,10 @@ export default async function ConversationReviewPage({
   const customerTags = Array.isArray(tags) ? (tags as string[]) : [];
   const isLost = conversation.currentStage === "LOST_LEAD";
   const isHumanStage = HUMAN_STAGES.includes(conversation.currentStage);
+  // Safe to resolve without a strong warning: a human already owns it, or
+  // the outcome is already final. Anything else means the AI is still
+  // actively mid-sale, expecting the customer's next move.
+  const requiresResolveWarning = ![...HUMAN_STAGES, ...TERMINAL_STAGES].includes(conversation.currentStage);
 
   return (
     <AppShell
@@ -98,17 +104,7 @@ export default async function ConversationReviewPage({
           >
             Customer profile
           </Button>
-          <form action={resolveConversation}>
-            <input type="hidden" name="conversationId" value={conversation.id} />
-            <SubmitButton
-              variant="outline"
-              size="sm"
-              pendingLabel="Resolving…"
-              successMessage="Conversation resolved"
-            >
-              Mark resolved
-            </SubmitButton>
-          </form>
+          <ResolveConversationButton conversationId={conversation.id} requiresWarning={requiresResolveWarning} />
           {session.isAdmin && conversation.orders.length === 0 && (
             <form action={deleteConversation}>
               <input type="hidden" name="conversationId" value={conversation.id} />
@@ -183,10 +179,12 @@ export default async function ConversationReviewPage({
                   <input type="hidden" name="conversationId" value={conversation.id} />
                   <Textarea name="text" placeholder="Reply as a human agent…" rows={3} />
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">
-                      The AI will not respond here while it&apos;s awaiting/assigned to a human.
-                    </p>
-                    <SubmitButton size="sm" pendingLabel="Sending…" successMessage="Reply sent">
+                    {isHumanStage && (
+                      <p className="text-xs text-muted-foreground">
+                        The AI will not respond here while it&apos;s awaiting/assigned to a human.
+                      </p>
+                    )}
+                    <SubmitButton size="sm" pendingLabel="Sending…" successMessage="Reply sent" className="ml-auto">
                       Send reply
                     </SubmitButton>
                   </div>
