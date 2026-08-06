@@ -11,30 +11,36 @@ const ADMIN_ONLY_PREFIXES = ["/settings", "/manage"];
 // Server Action behind these paths re-checks the session itself too (see
 // auth.ts's requireSession/requireAdminSession) since a matcher change here
 // could otherwise silently stop protecting them.
+// request.url's host reflects Railway's internal container address, not
+// the public domain it's actually reached at, so NextResponse.redirect(new
+// URL(path, request.url)) sends browsers to an address they can't reach.
+// A raw Response with a relative Location header (the fix used in
+// api/number-filter/route.ts and logout/route.ts) isn't an option here —
+// Proxy's runtime requires an actual NextResponse and 500s on a bare
+// Response. So instead: trust X-Forwarded-Host/X-Forwarded-Proto, which
+// Railway's edge sets to the real public host, and build the absolute URL
+// from that instead of request.url.
+function publicOrigin(request: NextRequest): string {
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  const proto = request.headers.get("x-forwarded-proto") ?? "https";
+  return `${proto}://${host}`;
+}
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const session = verifySessionToken(request.cookies.get(SESSION_COOKIE)?.value);
+  const origin = publicOrigin(request);
 
-  // Relative Location headers, not NextResponse.redirect(new URL(path,
-  // request.url)) — Proxy runs on the Node.js runtime by default in this
-  // Next.js version (same as Route Handlers), and behind Railway's proxy
-  // request.url reflects the container's internal address, not the
-  // public domain, so an absolute URL built from it redirects to a host
-  // the browser can't reach (same issue found and fixed in
-  // api/number-filter/route.ts and logout/route.ts). A relative Location
-  // is resolved by the browser against whatever origin it's actually on
-  // instead.
   if (!session) {
-    return new Response(null, {
-      status: 302,
-      headers: { Location: `/login?next=${encodeURIComponent(pathname)}` },
-    });
+    const loginUrl = new URL("/login", origin);
+    loginUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   const isAdminOnly = ADMIN_ONLY_PREFIXES.some((prefix) => pathname.startsWith(prefix));
   if (isAdminOnly && !session.isAdmin) {
-    return new Response(null, { status: 302, headers: { Location: "/dashboard" } });
+    return NextResponse.redirect(new URL("/dashboard", origin));
   }
 
   return NextResponse.next();
