@@ -11,6 +11,7 @@ export interface ActionContext {
   conversationId: string;
   businessId: string;
   customerPhoneNumber: string;
+  whatsappPhoneNumberId: string;
 }
 
 /**
@@ -59,7 +60,7 @@ export async function executeAction(
 }
 
 async function sendMessage(ctx: ActionContext, text: string) {
-  await sendWhatsAppText(ctx.customerPhoneNumber, text);
+  await sendWhatsAppText(ctx.customerPhoneNumber, text, ctx.whatsappPhoneNumberId);
   await prisma.$transaction([
     prisma.message.create({
       data: {
@@ -120,7 +121,7 @@ async function sendProduct(ctx: ActionContext, productId: string) {
   }
 
   const filename = `${product.name}.pdf`;
-  await sendWhatsAppDocument(ctx.customerPhoneNumber, product.fileUrl, filename);
+  await sendWhatsAppDocument(ctx.customerPhoneNumber, product.fileUrl, filename, ctx.whatsappPhoneNumberId);
   await prisma.$transaction([
     prisma.message.create({
       data: {

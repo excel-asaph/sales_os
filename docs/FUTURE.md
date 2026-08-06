@@ -21,6 +21,10 @@ Ideas, gaps, and deferred decisions surfaced during real work on this project �
 - **Usage/cost visibility in-app** — the Opus→Sonnet cost issue was caught by the user noticing it in the Anthropic Console, not from anything in this dashboard. A "conversations this month, spend this month" tile is cheap and closes that blind spot.
 - **Dark mode toggle** — shadcn's `.dark`-class tokens are already wired up, but no toggle exists; the app is deliberately light-only since every reference design provided was light-mode. Build if asked.
 
+## Multi-Branch Support
+
+- **First-class `Branch` entity + per-agent access enforcement** — the business now runs two WhatsApp numbers as two branches (`Business.whatsappPhoneNumberId`/`additionalWhatsappPhoneNumberIds`, `Conversation.whatsappPhoneNumberId`), with Home/Conversations/Customers all scoped to whichever branch the sidebar switcher selects (a cookie — `src/lib/number-filter.ts`). That scoping is currently just a UI default, not real access control: any logged-in team member can switch the sidebar to either branch, and nothing at the query level stops them. A proper version would add a real `Branch` model (id, businessId, an actual name, its phone_number_id, room for branch-specific config later — hours, escalation thresholds, etc.), a real `Conversation.branchId` foreign key instead of a loose string match, and a `HumanAgent` → branch relationship enforced server-side (not just defaulted in the UI). Deferred because nothing is being harmed by the gap today — small team, presumably already trusted with full visibility — and production currently has ~0 customers, so the eventual migration/backfill is as cheap as it will ever be. **Trigger to revisit: the moment a login is about to be created for someone who should be restricted to only one branch** — build the real model before that onboarding, not after they're already using the system.
+
 ## Infrastructure
 
 - **R2 custom domain** — currently serving receipt images via the bucket's `r2.dev` public development URL, which Cloudflare flags as rate-limited and meant for lighter use. Fine at current traffic; move to a real custom domain if volume grows.

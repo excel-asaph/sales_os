@@ -10,7 +10,7 @@ import { requireSession, requireAdminSession } from "@/lib/auth";
 async function loadOwnedConversation(conversationId: string, businessId: string) {
   const conversation = await prisma.conversation.findUniqueOrThrow({
     where: { id: conversationId },
-    include: { customer: true },
+    include: { customer: { include: { business: true } } },
   });
   if (conversation.customer.businessId !== businessId) {
     throw new Error("Conversation does not belong to this business");
@@ -28,9 +28,10 @@ export async function sendHumanReply(formData: FormData) {
   const agent = await prisma.humanAgent.findUniqueOrThrow({ where: { id: session.agentId } });
 
   const withinWindow = await isWithinCustomerServiceWindow(conversationId);
+  const phoneNumberId = conversation.whatsappPhoneNumberId ?? conversation.customer.business.whatsappPhoneNumberId ?? "";
 
   if (withinWindow) {
-    await sendWhatsAppText(conversation.customer.phoneNumber, text);
+    await sendWhatsAppText(conversation.customer.phoneNumber, text, phoneNumberId);
   } else {
     // Free-form text — including a human's own typed reply — is rejected
     // by WhatsApp outside the 24-hour customer service window. The exact
@@ -48,7 +49,8 @@ export async function sendHumanReply(formData: FormData) {
     await sendWhatsAppTemplate(
       conversation.customer.phoneNumber,
       templateName,
-      process.env.WHATSAPP_FOLLOWUP_TEMPLATE_LANG || "en_US"
+      process.env.WHATSAPP_FOLLOWUP_TEMPLATE_LANG || "en_US",
+      phoneNumberId
     );
   }
 

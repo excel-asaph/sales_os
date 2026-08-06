@@ -92,6 +92,19 @@ model Business {
   id                    String   @id @default(cuid())
   name                  String
   whatsappPhoneNumberId String?  @map("whatsapp_phone_number_id")
+  /// Extra WhatsApp Cloud API phone_number_ids beyond the primary one above
+  /// — same business, same AI/catalog/team, just additional lines customers
+  /// can reach it on (Meta allows up to 2 numbers per WABA pre-verification,
+  /// 20 after). ingest-message.ts matches an inbound webhook's
+  /// phone_number_id against the primary field OR this list.
+  additionalWhatsappPhoneNumberIds String[] @default([]) @map("additional_whatsapp_phone_number_ids")
+  /// Maps a phone_number_id (primary or additional, above) to a
+  /// human-readable label (e.g. "+234 810 573 4894") for display in the
+  /// dashboard's number switcher — Meta's ids alone aren't meaningful to a
+  /// business owner. Json rather than a join table since it's small,
+  /// read-only-in-practice reference data, same rationale as
+  /// Conversation.referral.
+  whatsappPhoneNumberLabels Json? @map("whatsapp_phone_number_labels")
   timezone              String   @default("Africa/Lagos")
   createdAt             DateTime @default(now()) @map("created_at")
 
@@ -229,6 +242,13 @@ model Conversation {
   confidence       Float?
   assignedHumanId  String?           @map("assigned_human_id")
   summary          String?
+  /// Which of the business's WhatsApp numbers (Business.whatsappPhoneNumberId
+  /// or .additionalWhatsappPhoneNumberIds) this conversation came in on — set
+  /// once, from whichever number started it, same pattern as `referral`
+  /// below. Every outbound reply in this thread goes out on this same
+  /// number rather than switching, so the customer sees one consistent
+  /// identity for the life of the conversation.
+  whatsappPhoneNumberId String?      @map("whatsapp_phone_number_id")
   /// Ad/post attribution (Meta's `referral` webhook object) — set once,
   /// from whatever the *first* inbound message of this conversation
   /// carried. A flexible Json field (like BusinessConfig.playbook) rather

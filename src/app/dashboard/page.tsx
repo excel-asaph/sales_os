@@ -9,6 +9,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { HUMAN_STAGES, TERMINAL_STAGES, stageStyle } from "@/lib/stage-display";
 import { clampMaxFollowups, FOLLOWUP_SEQUENCE } from "@/lib/followup-sequence";
 import { relativeTime } from "@/lib/relative-time";
+import { getBusinessNumbers } from "@/lib/whatsapp-numbers";
+import { getNumberFilterCookie } from "@/lib/number-filter";
 
 // Dashboard "Monitor" view (ARCHITECTURE.md §10, PRD 13.3): active
 // conversations, today's counts, conversations awaiting a human. This is
@@ -23,7 +25,27 @@ export default async function DashboardPage() {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
-  const businessScope = { customer: { businessId: session.businessId } };
+  // The number filter is a cookie (app-shell.tsx's switcher, via
+  // /api/number-filter), not a URL param — it has to agree with what the
+  // sidebar shows regardless of which page set it last. No cookie at all
+  // (first visit) defaults to the business's primary number.
+  const [business, numberFilter] = await Promise.all([
+    prisma.business.findUniqueOrThrow({
+      where: { id: session.businessId },
+      select: { whatsappPhoneNumberId: true, additionalWhatsappPhoneNumberIds: true, whatsappPhoneNumberLabels: true },
+    }),
+    getNumberFilterCookie(),
+  ]);
+  const effectiveNumber =
+    numberFilter === "all" ? undefined : (numberFilter ?? business.whatsappPhoneNumberId ?? undefined);
+
+  // Applied to every count/list below so the stat tiles and the list agree
+  // with each other once a number is selected — filtering the list alone
+  // and leaving the tiles business-wide would make them contradict it.
+  const businessScope = {
+    customer: { businessId: session.businessId },
+    ...(effectiveNumber ? { whatsappPhoneNumberId: effectiveNumber } : {}),
+  };
 
   const [conversations, awaitingHumanCount, completedTodayCount, businessConfig] = await Promise.all([
     prisma.conversation.findMany({
@@ -43,6 +65,10 @@ export default async function DashboardPage() {
   ]);
 
   const maxFollowups = clampMaxFollowups(businessConfig?.maxFollowups ?? FOLLOWUP_SEQUENCE.length);
+  // Only worth labeling rows once there's more than one number to tell
+  // apart — a single-number business gets no visual change at all.
+  const numberLabels = new Map(getBusinessNumbers(business).map((n) => [n.id, n.label]));
+  const showNumberBadge = numberLabels.size > 1;
 
   // Conversations needing a human float to the top regardless of recency —
   // that's the whole point of this view.
@@ -130,6 +156,11 @@ export default async function DashboardPage() {
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-2">
                       <div className="flex items-center gap-1.5">
+                        {showNumberBadge && conversation.whatsappPhoneNumberId && (
+                          <Badge variant="outline" className="font-medium text-muted-foreground">
+                            {numberLabels.get(conversation.whatsappPhoneNumberId) ?? conversation.whatsappPhoneNumberId}
+                          </Badge>
+                        )}
                         {followupInProgress && (
                           <Badge variant="outline" className="font-medium text-muted-foreground">
                             Follow-up {followupInProgress.step}/{maxFollowups}

@@ -42,7 +42,7 @@ const BLOCKS_FOLLOWUP = new Set<ConversationStage>([
 async function loadFollowup(followupId: string) {
   return prisma.followup.findUnique({
     where: { id: followupId },
-    include: { conversation: { include: { customer: true, orders: true } } },
+    include: { conversation: { include: { customer: { include: { business: true } }, orders: true } } },
   });
 }
 
@@ -162,6 +162,7 @@ type DeliveryResult = "composed" | "template" | "skipped";
  */
 async function deliverFollowup(followup: LoadedFollowup): Promise<DeliveryResult> {
   const { conversation } = followup;
+  const phoneNumberId = conversation.whatsappPhoneNumberId ?? conversation.customer.business.whatsappPhoneNumberId ?? "";
 
   if (!(await isWithinCustomerServiceWindow(conversation.id))) {
     if (!FOLLOWUP_TEMPLATE_NAME) {
@@ -170,7 +171,7 @@ async function deliverFollowup(followup: LoadedFollowup): Promise<DeliveryResult
       );
       return "skipped";
     }
-    await sendWhatsAppTemplate(conversation.customer.phoneNumber, FOLLOWUP_TEMPLATE_NAME, FOLLOWUP_TEMPLATE_LANG);
+    await sendWhatsAppTemplate(conversation.customer.phoneNumber, FOLLOWUP_TEMPLATE_NAME, FOLLOWUP_TEMPLATE_LANG, phoneNumberId);
     await prisma.message.create({
       data: {
         conversationId: conversation.id,
@@ -193,7 +194,7 @@ async function deliverFollowup(followup: LoadedFollowup): Promise<DeliveryResult
     // Template fallback if generation fails — the customer still gets a
     // reminder even if the Claude call errors.
     console.error(`Follow-up ${followup.id}: AI runtime failed, sending fallback message`, error);
-    await sendWhatsAppText(conversation.customer.phoneNumber, followup.message);
+    await sendWhatsAppText(conversation.customer.phoneNumber, followup.message, phoneNumberId);
     await prisma.message.create({
       data: {
         conversationId: conversation.id,

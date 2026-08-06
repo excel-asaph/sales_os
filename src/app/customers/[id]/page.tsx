@@ -6,6 +6,7 @@ import { getSession } from "@/lib/auth";
 import { formatNaira } from "@/lib/currency";
 import { relativeTime } from "@/lib/relative-time";
 import { AppShell } from "@/components/app-shell";
+import { getNumberFilterCookie } from "@/lib/number-filter";
 import { StatTile } from "@/components/stat-tile";
 import { Field, ReferralDetails } from "@/components/referral-details";
 import { Badge } from "@/components/ui/badge";
@@ -38,10 +39,26 @@ export default async function CustomerProfilePage({
 
   const { id } = await params;
 
+  // Two branches sharing one business — a customer who messaged both
+  // numbers is really two separate branch relationships, not one merged
+  // history, so this profile is scoped to whichever branch the sidebar has
+  // selected (same cookie as Dashboard/Customers/Home), same as everywhere
+  // else. "All numbers" is the only view that shows both together.
+  const [business, numberFilter] = await Promise.all([
+    prisma.business.findUniqueOrThrow({
+      where: { id: session.businessId },
+      select: { whatsappPhoneNumberId: true },
+    }),
+    getNumberFilterCookie(),
+  ]);
+  const effectiveNumber =
+    numberFilter === "all" ? undefined : (numberFilter ?? business.whatsappPhoneNumberId ?? undefined);
+
   const customer = await prisma.customer.findUnique({
     where: { id },
     include: {
       conversations: {
+        where: effectiveNumber ? { whatsappPhoneNumberId: effectiveNumber } : undefined,
         orderBy: { createdAt: "asc" },
         include: {
           orders: { include: { product: true }, orderBy: { createdAt: "desc" } },

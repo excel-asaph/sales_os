@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { getNumberFilterCookie } from "@/lib/number-filter";
 import { Check, ExternalLink, FileText, AlertTriangle, UserX2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
@@ -50,6 +51,24 @@ export default async function ConversationReviewPage({
   // way so this can't be used to probe which conversation ids exist.
   if (!conversation || conversation.customer.businessId !== session.businessId) return notFound();
 
+  // Two branches sharing one business (see number-filter.ts) — a
+  // conversation belongs to whichever number it came in on, and someone
+  // scoped to the other branch (a stale link, a shared URL) shouldn't land
+  // on it while still thinking they're looking at their own branch's data.
+  // Conversations from before multi-number support existed have no number
+  // stamped at all (null) and stay reachable regardless of filter, same as
+  // they always have been. Resolved the same way as every other page: no
+  // cookie yet defaults to the primary number, same as the sidebar shows.
+  const [business, numberFilter] = await Promise.all([
+    prisma.business.findUnique({ where: { id: session.businessId }, select: { whatsappPhoneNumberId: true } }),
+    getNumberFilterCookie(),
+  ]);
+  const effectiveNumber =
+    numberFilter === "all" ? undefined : (numberFilter ?? business?.whatsappPhoneNumberId ?? undefined);
+  if (effectiveNumber && conversation.whatsappPhoneNumberId && conversation.whatsappPhoneNumberId !== effectiveNumber) {
+    redirect("/dashboard");
+  }
+
   const businessConfig = await prisma.businessConfig.findUnique({
     where: { businessId: session.businessId },
   });
@@ -71,7 +90,12 @@ export default async function ConversationReviewPage({
       description={name ? phoneNumber : undefined}
       actions={
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" render={<Link href={`/customers/${conversation.customer.id}`} />}>
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={<Link href={`/customers/${conversation.customer.id}`} />}
+          >
             Customer profile
           </Button>
           <form action={resolveConversation}>

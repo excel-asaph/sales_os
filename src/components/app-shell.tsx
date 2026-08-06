@@ -9,11 +9,16 @@ import {
   Settings as SettingsIcon,
   LogOut,
   Bell,
+  Check,
+  ChevronsUpDown,
+  Phone,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getViewerContext } from "@/lib/viewer";
 import { stageStyle } from "@/lib/stage-display";
 import type { ConversationStage } from "@/generated/prisma/client";
+import { getBusinessNumbers } from "@/lib/whatsapp-numbers";
+import { getNumberFilterCookie } from "@/lib/number-filter";
 import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
@@ -42,6 +47,12 @@ import {
   SheetDescription,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type NavKey = "home" | "conversations" | "customers" | "products" | "payment-accounts" | "team" | "settings" | "manage";
 
@@ -68,6 +79,27 @@ export async function AppShell({
   if (!viewer) return null;
 
   const { session, businessName, agentName } = viewer;
+
+  const business = await prisma.business.findUniqueOrThrow({
+    where: { id: session.businessId },
+    select: {
+      whatsappPhoneNumberId: true,
+      additionalWhatsappPhoneNumberIds: true,
+      whatsappPhoneNumberLabels: true,
+    },
+  });
+  const numbers = getBusinessNumbers(business);
+  // A cookie, not a page-passed prop — the selection has to survive
+  // ordinary navigation between tabs, not just persist within one page's
+  // own URL (see number-filter.ts).
+  const numberFilter = await getNumberFilterCookie();
+  // "all" is an explicit opt-out into the unified view; anything else
+  // (including no param at all, e.g. on pages that don't filter) resolves
+  // to the primary number — that's the business's main line, with any
+  // additional numbers being deliberate opt-ins (e.g. a test number).
+  const defaultNumberId = numbers[0]?.id;
+  const effectiveNumberId = numberFilter === "all" ? null : (numberFilter ?? defaultNumberId);
+  const selectedNumber = effectiveNumberId ? numbers.find((n) => n.id === effectiveNumberId) : undefined;
 
   const awaitingHumanWhere = {
     customer: { businessId: session.businessId },
@@ -143,6 +175,9 @@ export async function AppShell({
     },
   ];
 
+  const activeHref = navItems.find((item) => item.key === active)?.href ?? "/dashboard";
+  const showNumberSwitcher = numbers.length > 1;
+
   return (
     <SidebarProvider>
       <Sidebar collapsible="icon">
@@ -157,7 +192,59 @@ export async function AppShell({
             </div>
           </div>
         </SidebarHeader>
-        <Separator />
+        {showNumberSwitcher && (
+          <div className="px-3 pb-2 group-data-[collapsible=icon]:px-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <button
+                    type="button"
+                    className="flex h-9 w-full items-center gap-2 rounded-lg border bg-sidebar px-2.5 text-sm outline-none hover:bg-sidebar-accent group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+                  />
+                }
+              >
+                <Phone className="size-3.5 shrink-0 text-muted-foreground" />
+                <span className="min-w-0 flex-1 truncate text-left font-medium group-data-[collapsible=icon]:hidden">
+                  {selectedNumber?.label ?? "All numbers"}
+                </span>
+                <ChevronsUpDown className="size-3.5 shrink-0 text-muted-foreground group-data-[collapsible=icon]:hidden" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-64">
+                {/* A plain <a>, not <Link> — this hits a Route Handler that
+                    sets a cookie and redirects, not a page. Next's <Link>
+                    does a client-side soft navigation that can reuse a
+                    cached render of the destination from before the cookie
+                    changed, since the URL itself is unchanged; a real
+                    anchor always forces a fresh full-page load, which is
+                    the only way to reliably see the new cookie on the very
+                    first click. */}
+                <DropdownMenuItem
+                  className="justify-between"
+                  render={
+                    <a href={`/api/number-filter?value=all&redirectTo=${encodeURIComponent(activeHref)}`} />
+                  }
+                >
+                  <span>All numbers</span>
+                  {!selectedNumber && <Check className="size-3.5" />}
+                </DropdownMenuItem>
+                {numbers.map((number) => (
+                  <DropdownMenuItem
+                    key={number.id}
+                    className="justify-between"
+                    render={
+                      <a
+                        href={`/api/number-filter?value=${number.id}&redirectTo=${encodeURIComponent(activeHref)}`}
+                      />
+                    }
+                  >
+                    <span className="truncate">{number.label}</span>
+                    {selectedNumber?.id === number.id && <Check className="size-3.5 shrink-0" />}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
         <SidebarContent className="py-2">
           <SidebarGroup className="px-3 py-2">
             <SidebarGroupLabel className="px-1 pb-1">Workspace</SidebarGroupLabel>

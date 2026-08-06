@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { formatNaira } from "@/lib/currency";
 import { AppShell } from "@/components/app-shell";
+import { getNumberFilterCookie } from "@/lib/number-filter";
 import { StatTile } from "@/components/stat-tile";
 import { RevenueChart } from "@/components/revenue-chart";
 import { Badge } from "@/components/ui/badge";
@@ -34,9 +35,25 @@ export default async function HomePage() {
   chartStart.setDate(chartStart.getDate() - (CHART_DAYS - 1));
   chartStart.setHours(0, 0, 0, 0);
 
-  const orderBusinessScope = {
-    conversation: { customer: { businessId: session.businessId } },
+  // Same cookie-driven filter as Dashboard/Customers (number-filter.ts) —
+  // every aggregate view on this page needs to agree with what the sidebar
+  // switcher shows, or "Recent orders" etc. would keep showing the other
+  // number's activity regardless of what's selected.
+  const [business, numberFilter] = await Promise.all([
+    prisma.business.findUniqueOrThrow({
+      where: { id: session.businessId },
+      select: { whatsappPhoneNumberId: true },
+    }),
+    getNumberFilterCookie(),
+  ]);
+  const effectiveNumber =
+    numberFilter === "all" ? undefined : (numberFilter ?? business.whatsappPhoneNumberId ?? undefined);
+
+  const conversationScope = {
+    customer: { businessId: session.businessId },
+    ...(effectiveNumber ? { whatsappPhoneNumberId: effectiveNumber } : {}),
   };
+  const orderBusinessScope = { conversation: conversationScope };
 
   const [verifiedThisMonth, verifiedForChart, leadsThisMonth, recentOrders, conversationsWithReferral] =
     await Promise.all([
@@ -49,7 +66,7 @@ export default async function HomePage() {
         select: { expectedAmount: true, verifiedAt: true },
       }),
       prisma.conversation.count({
-        where: { customer: { businessId: session.businessId }, createdAt: { gte: startOfMonth } },
+        where: { ...conversationScope, createdAt: { gte: startOfMonth } },
       }),
       prisma.order.findMany({
         where: orderBusinessScope,
@@ -58,7 +75,7 @@ export default async function HomePage() {
         take: 10,
       }),
       prisma.conversation.findMany({
-        where: { customer: { businessId: session.businessId } },
+        where: conversationScope,
         select: { id: true, referral: true, orders: { where: { status: "VERIFIED" }, select: { id: true } } },
       }),
     ]);

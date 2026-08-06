@@ -7,6 +7,8 @@ import { relativeTime } from "@/lib/relative-time";
 import { stageStyle } from "@/lib/stage-display";
 import { clampMaxFollowups } from "@/lib/followup-sequence";
 import { getBusinessConfig } from "@/lib/knowledge";
+import { getBusinessNumbers } from "@/lib/whatsapp-numbers";
+import { getNumberFilterCookie } from "@/lib/number-filter";
 import { AppShell } from "@/components/app-shell";
 import { FollowupCountdownBar } from "@/components/followup-countdown-bar";
 import { Badge } from "@/components/ui/badge";
@@ -69,6 +71,20 @@ export default async function CustomersPage({
   const { q } = await searchParams;
   const query = q?.trim();
 
+  // The number filter is a cookie (app-shell.tsx's switcher, via
+  // /api/number-filter), not a URL param — it has to agree with what the
+  // sidebar shows regardless of which page set it last. No cookie at all
+  // (first visit) defaults to the business's primary number.
+  const [business, numberFilter] = await Promise.all([
+    prisma.business.findUniqueOrThrow({
+      where: { id: session.businessId },
+      select: { whatsappPhoneNumberId: true, additionalWhatsappPhoneNumberIds: true, whatsappPhoneNumberLabels: true },
+    }),
+    getNumberFilterCookie(),
+  ]);
+  const effectiveNumber =
+    numberFilter === "all" ? undefined : (numberFilter ?? business.whatsappPhoneNumberId ?? undefined);
+
   const [customers, config] = await Promise.all([
     prisma.customer.findMany({
       where: {
@@ -81,14 +97,22 @@ export default async function CustomersPage({
               ],
             }
           : {}),
+        ...(effectiveNumber ? { conversations: { some: { whatsappPhoneNumberId: effectiveNumber } } } : {}),
       },
       include: {
         conversations: {
+          // Scoped to the same number the top-level `where` above matched
+          // on — without this, a customer would correctly show up under a
+          // number filter (because they have *some* conversation on it) but
+          // display orders/totals/stage aggregated from ALL their
+          // conversations, including ones from the other number entirely.
+          where: effectiveNumber ? { whatsappPhoneNumberId: effectiveNumber } : undefined,
           orderBy: { updatedAt: "desc" },
           select: {
             id: true,
             updatedAt: true,
             currentStage: true,
+            whatsappPhoneNumberId: true,
             orders: { select: { status: true, expectedAmount: true } },
             followups: {
               where: { sent: false, cancelled: false },
@@ -102,6 +126,8 @@ export default async function CustomersPage({
     getBusinessConfig(session.businessId),
   ]);
   const maxFollowups = clampMaxFollowups(config.maxFollowups);
+  const numberLabels = new Map(getBusinessNumbers(business).map((n) => [n.id, n.label]));
+  const showNumberBadge = numberLabels.size > 1;
 
   // Each customer's most-recent conversation is checked for a pending
   // follow-up; conversations without one fall back to the last time a
@@ -138,10 +164,15 @@ export default async function CustomersPage({
       const activeFollowup = latestConversation?.followups[0] ?? null;
       const lastFollowupEvent = latestConversation ? lastEventByConversation.get(latestConversation.id) : undefined;
 
+      const numberLabel = latestConversation?.whatsappPhoneNumberId
+        ? (numberLabels.get(latestConversation.whatsappPhoneNumberId) ?? latestConversation.whatsappPhoneNumberId)
+        : null;
+
       return {
         id: customer.id,
         name: customer.name,
         phoneNumber: customer.phoneNumber,
+        numberLabel,
         tags,
         conversationCount: customer.conversations.length,
         totalOrders: orders.length,
@@ -159,7 +190,11 @@ export default async function CustomersPage({
     .sort((a, b) => (b.lastActivity?.getTime() ?? 0) - (a.lastActivity?.getTime() ?? 0));
 
   return (
-    <AppShell active="customers" title="Customers" description="Every customer who has ever messaged this business">
+    <AppShell
+      active="customers"
+      title="Customers"
+      description="Every customer who has ever messaged this business"
+    >
       <div className="mx-auto flex max-w-5xl flex-col gap-5">
         <form action="/customers" className="max-w-sm">
           <div className="relative">
@@ -190,10 +225,15 @@ export default async function CustomersPage({
                 {rows.map((row) => (
                   <TableRow key={row.id} className="cursor-pointer">
                     <TableCell className="font-medium">
-                      <Link href={`/customers/${row.id}`} className="flex flex-col hover:underline">
+                      <Link href={`/customers/${row.id}`} className="flex flex-col gap-1 hover:underline">
                         <span>{row.name ?? row.phoneNumber}</span>
                         {row.name && (
                           <span className="text-xs font-normal text-muted-foreground">{row.phoneNumber}</span>
+                        )}
+                        {showNumberBadge && row.numberLabel && (
+                          <Badge variant="outline" className="w-fit font-normal text-muted-foreground">
+                            {row.numberLabel}
+                          </Badge>
                         )}
                       </Link>
                     </TableCell>

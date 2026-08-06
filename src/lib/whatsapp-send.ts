@@ -6,9 +6,8 @@ const GRAPH_API_VERSION = "v21.0";
  * AI Employee Runtime is testable locally before WhatsApp is provisioned
  * (ARCHITECTURE.md §12 prerequisites).
  */
-export async function sendWhatsAppText(to: string, text: string): Promise<void> {
+export async function sendWhatsAppText(to: string, text: string, phoneNumberId: string): Promise<void> {
   const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
   if (!accessToken || !phoneNumberId) {
     console.log(`[whatsapp-send:dry-run] to=${to} text=${JSON.stringify(text)}`);
@@ -46,9 +45,13 @@ export async function sendWhatsAppText(to: string, text: string): Promise<void> 
  * but can't send arbitrary text.
  * https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-message-templates
  */
-export async function sendWhatsAppTemplate(to: string, templateName: string, languageCode: string): Promise<void> {
+export async function sendWhatsAppTemplate(
+  to: string,
+  templateName: string,
+  languageCode: string,
+  phoneNumberId: string
+): Promise<void> {
   const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
   if (!accessToken || !phoneNumberId) {
     console.log(`[whatsapp-send:dry-run] to=${to} template=${templateName} lang=${languageCode}`);
@@ -88,9 +91,13 @@ export async function sendWhatsAppTemplate(to: string, templateName: string, lan
  * itself, only the file appearing in the conversation.
  * https://developers.facebook.com/docs/whatsapp/cloud-api/reference/messages#document-object
  */
-export async function sendWhatsAppDocument(to: string, link: string, filename: string): Promise<void> {
+export async function sendWhatsAppDocument(
+  to: string,
+  link: string,
+  filename: string,
+  phoneNumberId: string
+): Promise<void> {
   const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
   if (!accessToken || !phoneNumberId) {
     console.log(`[whatsapp-send:dry-run] to=${to} document=${filename} link=${link}`);
@@ -130,9 +137,8 @@ export async function sendWhatsAppDocument(to: string, link: string, filename: s
  * ingest-message.ts skips it for reactions, which never get a reply.
  * https://developers.facebook.com/docs/whatsapp/cloud-api/typing-indicators
  */
-export async function sendTypingIndicator(messageId: string): Promise<void> {
+export async function sendTypingIndicator(messageId: string, phoneNumberId: string): Promise<void> {
   const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
   if (!accessToken || !phoneNumberId) {
     console.log(`[whatsapp-send:dry-run] typing-indicator for message=${messageId}`);

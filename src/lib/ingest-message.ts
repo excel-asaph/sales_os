@@ -38,7 +38,12 @@ export async function ingestInboundMessage(
   message: NonNullable<WhatsAppChangeValue["messages"]>[number]
 ) {
   const business = await prisma.business.findFirst({
-    where: { whatsappPhoneNumberId: value.metadata.phone_number_id },
+    where: {
+      OR: [
+        { whatsappPhoneNumberId: value.metadata.phone_number_id },
+        { additionalWhatsappPhoneNumberIds: { has: value.metadata.phone_number_id } },
+      ],
+    },
   });
 
   if (!business) {
@@ -70,12 +75,15 @@ export async function ingestInboundMessage(
     update: contactName ? { name: contactName } : {},
   });
 
-  await withCustomerLock(customer.id, () => processInboundMessage(customer.id, message));
+  await withCustomerLock(customer.id, () =>
+    processInboundMessage(customer.id, message, value.metadata.phone_number_id)
+  );
 }
 
 async function processInboundMessage(
   customerId: string,
-  message: NonNullable<WhatsAppChangeValue["messages"]>[number]
+  message: NonNullable<WhatsAppChangeValue["messages"]>[number],
+  phoneNumberId: string
 ) {
   // A WhatsApp webhook redelivery of a message already fully processed
   // (Meta retries when it doesn't get a fast 200 — the turn below can
@@ -126,6 +134,10 @@ async function processInboundMessage(
           // overwritten on later messages, so it stays a record of how
           // this specific conversation began.
           referral: message.referral ?? undefined,
+          // Same "stamp once, never overwrite" pattern as referral above —
+          // every reply in this thread goes out on whichever of the
+          // business's numbers started it.
+          whatsappPhoneNumberId: phoneNumberId,
         },
       });
     }
@@ -195,7 +207,7 @@ async function processInboundMessage(
   // below means the customer would otherwise sit in silence for several
   // seconds before seeing any sign of life. Fire-and-forget: this is a
   // courtesy indicator, not something worth failing the whole turn over.
-  sendTypingIndicator(message.id).catch((error) =>
+  sendTypingIndicator(message.id, phoneNumberId).catch((error) =>
     console.error(`Failed to send typing indicator for message ${message.id}`, error)
   );
 

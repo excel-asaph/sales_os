@@ -40,6 +40,10 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
     conversationId,
     businessId,
     customerPhoneNumber: conversation.customer.phoneNumber,
+    // Falls back to the business's primary number for conversations from
+    // before multi-number support existed, which never got one stamped.
+    whatsappPhoneNumberId:
+      conversation.whatsappPhoneNumberId ?? conversation.customer.business.whatsappPhoneNumberId ?? "",
   };
 
   const [brain, config, faq] = await Promise.all([
