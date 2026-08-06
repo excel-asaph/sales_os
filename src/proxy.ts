@@ -16,15 +16,25 @@ export function proxy(request: NextRequest) {
 
   const session = verifySessionToken(request.cookies.get(SESSION_COOKIE)?.value);
 
+  // Relative Location headers, not NextResponse.redirect(new URL(path,
+  // request.url)) — Proxy runs on the Node.js runtime by default in this
+  // Next.js version (same as Route Handlers), and behind Railway's proxy
+  // request.url reflects the container's internal address, not the
+  // public domain, so an absolute URL built from it redirects to a host
+  // the browser can't reach (same issue found and fixed in
+  // api/number-filter/route.ts and logout/route.ts). A relative Location
+  // is resolved by the browser against whatever origin it's actually on
+  // instead.
   if (!session) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
+    return new Response(null, {
+      status: 302,
+      headers: { Location: `/login?next=${encodeURIComponent(pathname)}` },
+    });
   }
 
   const isAdminOnly = ADMIN_ONLY_PREFIXES.some((prefix) => pathname.startsWith(prefix));
   if (isAdminOnly && !session.isAdmin) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return new Response(null, { status: 302, headers: { Location: "/dashboard" } });
   }
 
   return NextResponse.next();
