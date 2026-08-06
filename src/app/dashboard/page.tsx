@@ -65,10 +65,11 @@ export default async function DashboardPage() {
   ]);
 
   const maxFollowups = clampMaxFollowups(businessConfig?.maxFollowups ?? FOLLOWUP_SEQUENCE.length);
-  // Only worth labeling rows once there's more than one number to tell
-  // apart — a single-number business gets no visual change at all.
   const numberLabels = new Map(getBusinessNumbers(business).map((n) => [n.id, n.label]));
-  const showNumberBadge = numberLabels.size > 1;
+  // Only worth labeling rows under "All numbers" — once a specific branch
+  // is selected, every row already belongs to it by definition, so the
+  // badge would just repeat the same number on every row.
+  const showNumberBadge = effectiveNumber === undefined;
 
   // Conversations needing a human float to the top regardless of recency —
   // that's the whole point of this view.

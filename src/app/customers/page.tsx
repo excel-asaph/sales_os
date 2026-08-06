@@ -127,7 +127,10 @@ export default async function CustomersPage({
   ]);
   const maxFollowups = clampMaxFollowups(config.maxFollowups);
   const numberLabels = new Map(getBusinessNumbers(business).map((n) => [n.id, n.label]));
-  const showNumberBadge = numberLabels.size > 1;
+  // Only worth labeling rows under "All numbers" — once a specific branch
+  // is selected, every row already belongs to it by definition, so the
+  // badge would just repeat the same number on every row.
+  const showNumberBadge = effectiveNumber === undefined;
 
   // Each customer's most-recent conversation is checked for a pending
   // follow-up; conversations without one fall back to the last time a
