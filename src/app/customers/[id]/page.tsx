@@ -222,19 +222,26 @@ export default async function CustomerProfilePage({
                         </TableCell>
                         <TableCell className="tabular-nums">{formatNaira(Number(order.expectedAmount))}</TableCell>
                         <TableCell>
-                          <Badge
-                            variant={
-                              order.status === "VERIFIED"
-                                ? "default"
-                                : order.status === "ESCALATED"
-                                  ? "destructive"
-                                  : order.status === "REJECTED"
-                                    ? "outline"
-                                    : "secondary"
-                            }
-                          >
-                            {order.status}
-                          </Badge>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <Badge
+                              variant={
+                                order.status === "VERIFIED"
+                                  ? "default"
+                                  : order.status === "ESCALATED"
+                                    ? "destructive"
+                                    : order.status === "REJECTED"
+                                      ? "outline"
+                                      : "secondary"
+                              }
+                            >
+                              {order.status}
+                            </Badge>
+                            {order.metaConversionReportedAt && (
+                              <Badge variant="outline" className="font-medium text-muted-foreground">
+                                Reported to Meta
+                              </Badge>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground">{order.createdAt.toLocaleDateString()}</TableCell>
                       </TableRow>

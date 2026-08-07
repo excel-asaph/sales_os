@@ -318,6 +318,12 @@ model Order {
   status                  OrderStatus     @default(PENDING)
   verifiedAt              DateTime?       @map("verified_at")
   createdAt               DateTime        @default(now()) @map("created_at")
+  /// When this order's sale was successfully reported to Meta's Conversions
+  /// API as a Purchase event (meta-conversions.ts) — null if never attempted,
+  /// the conversation wasn't ad-attributed (no ctwa_clid), or the report
+  /// failed. Lets the dashboard show whether a given sale actually reached
+  /// Meta, not just whether it was verified internally.
+  metaConversionReportedAt DateTime?      @map("meta_conversion_reported_at")
 
   conversation   Conversation    @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   product        Product         @relation(fields: [productId], references: [id])

@@ -5,6 +5,7 @@ import { downloadWhatsAppMedia, persistMediaFile, readPersistedMedia } from "@/l
 import { verifyReceiptContent, type ReceiptExtraction, type PaymentAccountRef } from "@/lib/receipt-verification";
 import { getBoss, FOLLOWUP_QUEUE } from "@/lib/queue";
 import { addCustomerTag } from "@/lib/customer-tags";
+import { reportPurchaseConversion } from "@/lib/meta-conversions";
 import type { ConversationStage, FactKind, FollowupReason } from "@/generated/prisma/client";
 
 export interface ActionContext {
@@ -541,6 +542,29 @@ async function finalizeVerifiedOrder(
       data: { returningCustomer: true },
     });
   }
+
+  // Never blocks or fails the sale itself — this is a side-channel signal
+  // to Meta's ad algorithm, not something the customer-facing flow depends
+  // on. Logged either way (Non-Negotiable 14.5) so it's visible why a given
+  // sale did or didn't reach Meta, not just whether it was internally
+  // verified.
+  const conversionResult = await reportPurchaseConversion({
+    conversationId: ctx.conversationId,
+    value: expectedAmount,
+    currency: "NGN",
+  });
+  await prisma.$transaction([
+    ...(conversionResult.reported
+      ? [prisma.order.update({ where: { id: order.id }, data: { metaConversionReportedAt: new Date() } })]
+      : []),
+    prisma.event.create({
+      data: {
+        conversationId: ctx.conversationId,
+        type: "META_CONVERSION_REPORTED",
+        payload: { orderId: order.id, ...conversionResult },
+      },
+    }),
+  ]);
 
   return {
     verified: true,
