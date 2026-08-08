@@ -287,26 +287,22 @@ export default async function ConversationReviewPage({
       }
     >
       {/*
-        The message list + reply box get their own bounded, internally-
-        scrolling pane at every breakpoint — a docked composer with the
-        thread scrolling above it is the one messaging convention that's
-        arguably more universal on mobile than desktop (WhatsApp, Messenger,
-        Telegram, Slack mobile all do it), so it isn't gated to `lg`. What
-        *is* `lg`-only is the right-hand panel (Record/Facts/Orders): at
-        `lg` and up it's a second independently-scrolling column next to the
-        chat; below `lg` there's no room for two competing scroll regions,
-        so it isn't in the page at all — it only exists inside the Sheet
-        reachable from the header's "Details" action, the same "tap for
-        info" pattern real chat apps use on mobile instead of stacking
-        everything under the thread. The chat pane's mobile height is a
-        fixed viewport fraction (h-[65dvh]) rather than "fill all remaining
-        space" the way `lg:h-full` does on desktop, since there's no longer
-        a right panel below it competing for the rest of the screen — just
-        deliberately short of the full viewport so it's clear the page
-        still scrolls. Only this page opts into any of this; app-shell
-        itself, and every other page's normal page-scrolling, is untouched.
+        The whole pane — pipeline tracker, message list, reply box — is
+        bounded to exactly the viewport at every breakpoint, not just `lg`:
+        the message list gets the only internal scroll, and the composer is
+        simply always on screen as a result, the same way WhatsApp/
+        Messenger/Slack mobile never make you scroll to find the input.
+        That only became possible everywhere once the right-hand panel
+        stopped competing for space below the composer on mobile — it now
+        lives in the header's "Details" Sheet instead of stacking under the
+        thread, so there's nothing left in the page flow to leave room for.
+        `lg` only changes the *columns* (chat next to a persistent Record/
+        Facts/Orders panel instead of alone) — the height-bounding itself
+        is identical at every size. Only this page opts into any of this;
+        app-shell itself, and every other page's normal page-scrolling, is
+        untouched.
       */}
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 lg:h-full">
+      <div className="mx-auto flex h-full max-w-6xl flex-col gap-6">
         {isHumanStage || isLost ? (
           <StatusBanner
             tone={isLost ? "muted" : conversation.currentStage === "HUMAN_ASSIGNED" ? "assigned" : "urgent"}
@@ -323,9 +319,9 @@ export default async function ConversationReviewPage({
           <PipelineTracker currentStage={conversation.currentStage} />
         )}
 
-        <div className="grid grid-cols-1 gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-[1fr_320px]">
-          <div className="flex min-w-0 flex-col gap-5 lg:min-h-0">
-            <Card className="flex h-[65dvh] min-h-0 flex-col overflow-hidden lg:h-auto lg:flex-1">
+        <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
+          <div className="flex min-h-0 min-w-0 flex-col gap-5">
+            <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
               <CardContent className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
                 {conversation.messages.map((message) => {
                   const fromCustomer = message.direction === "INBOUND";
