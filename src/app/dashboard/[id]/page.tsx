@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getNumberFilterCookie } from "@/lib/number-filter";
-import { Check, ExternalLink, FileText, AlertTriangle, UserX2 } from "lucide-react";
+import { Check, ExternalLink, FileText, AlertTriangle, UserX2, UserRound, Info } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { formatNaira } from "@/lib/currency";
@@ -10,11 +10,20 @@ import { AppShell } from "@/components/app-shell";
 import { SubmitButton } from "@/components/submit-button";
 import { ResolveConversationButton } from "@/components/resolve-conversation-button";
 import { DeleteConversationButton } from "@/components/delete-conversation-button";
+import { ScrollToBottomAnchor } from "@/components/scroll-to-bottom-anchor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Field, ReferralDetails } from "@/components/referral-details";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   HUMAN_STAGES,
   TERMINAL_STAGES,
@@ -90,6 +99,151 @@ export default async function ConversationReviewPage({
   // actively mid-sale, expecting the customer's next move.
   const requiresResolveWarning = ![...HUMAN_STAGES, ...TERMINAL_STAGES].includes(conversation.currentStage);
 
+  // Rendered twice: as its own persistent column at `lg` and up, and inside
+  // the mobile Sheet triggered from the header below `lg` (see `actions`)
+  // — same content either way, just a different container around it.
+  const detailsPanel = (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Record</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3 text-sm">
+          {customerTags.length > 0 && (
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs text-muted-foreground">Tags</span>
+              <div className="flex flex-wrap gap-1.5">
+                {customerTags.map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant={tag === "Uninterested" ? "secondary" : "default"}
+                    className="font-medium"
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+          <Field label="Objective" value={conversation.currentObjective || "—"} />
+          <Field
+            label="Confidence"
+            value={conversation.confidence != null ? conversation.confidence.toFixed(2) : "—"}
+          />
+          <Field label="Summary" value={conversation.summary || "—"} />
+          <Field label="Assigned to" value={conversation.assignedTo?.name ?? "—"} />
+        </CardContent>
+      </Card>
+
+      {conversation.referral != null && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Came from</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ReferralDetails referral={conversation.referral as Record<string, string | undefined>} />
+          </CardContent>
+        </Card>
+      )}
+
+      {conversation.facts.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Remembered facts</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3">
+            {conversation.facts.map((fact) => {
+              const payload = fact.payload as { key?: string; value?: string };
+              return (
+                <div key={fact.id} className="flex items-start gap-2 text-sm">
+                  <Badge variant="secondary" className="mt-0.5 shrink-0">
+                    {fact.kind}
+                  </Badge>
+                  <span className="min-w-0 text-muted-foreground">
+                    <span className="font-medium text-foreground">{payload.key}</span>
+                    {payload.value ? `: ${payload.value}` : ""}
+                  </span>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
+
+      {conversation.orders.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Orders</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3">
+            {conversation.orders.map((order) => (
+              <div key={order.id} className="flex flex-col gap-1 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{order.product.name}</span>
+                  <Badge
+                    variant={
+                      order.status === "VERIFIED"
+                        ? "default"
+                        : order.status === "ESCALATED"
+                          ? "destructive"
+                          : order.status === "REJECTED"
+                            ? "outline"
+                            : "secondary"
+                    }
+                  >
+                    {order.status}
+                  </Badge>
+                </div>
+                <div className="text-muted-foreground">
+                  Expected {formatNaira(Number(order.expectedAmount))}, extracted{" "}
+                  {order.extractedAmount ? formatNaira(Number(order.extractedAmount)) : "—"} via{" "}
+                  {order.extractedBank ?? "—"}
+                </div>
+                <div className="text-muted-foreground">
+                  Confidence {order.verificationConfidence?.toFixed(2) ?? "—"}
+                  {order.receiptImageUrl && (
+                    <>
+                      {" "}
+                      ·{" "}
+                      <a
+                        href={order.receiptImageUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 font-medium underline"
+                      >
+                        receipt <ExternalLink className="size-3" />
+                      </a>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {visibleFollowups.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Follow-ups</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3 text-sm">
+            {visibleFollowups.map((followup) => (
+              <div key={followup.id} className="flex items-center justify-between gap-2">
+                <span className="text-muted-foreground">
+                  Step {followup.step} of {maxFollowups} · {followup.scheduledFor.toLocaleString()}
+                </span>
+                <Badge variant={followup.cancelled ? "secondary" : followup.sent ? "default" : "outline"}>
+                  {followup.cancelled ? "cancelled" : followup.sent ? "sent" : "pending"}
+                </Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+    </>
+  );
+
   return (
     <AppShell
       active="conversations"
@@ -97,13 +251,33 @@ export default async function ConversationReviewPage({
       description={name ? phoneNumber : undefined}
       actions={
         <div className="flex items-center gap-2">
+          {/* Below `lg` the Record/Facts/Orders panel isn't in the page
+              flow at all (see the comment on the right-hand column below)
+              — this is the only way to reach it there, the same "tap to
+              reveal info" pattern real chat apps use on mobile instead of
+              stacking it under the thread. Hidden at `lg` and up since the
+              panel is already visible as its own column then. */}
+          <Sheet>
+            <SheetTrigger render={<Button variant="outline" size="sm" className="lg:hidden" />}>
+              <Info />
+              <span className="hidden sm:inline">Details</span>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-full sm:max-w-md">
+              <SheetHeader className="border-b">
+                <SheetTitle>Conversation details</SheetTitle>
+                <SheetDescription>Record, remembered facts, and orders for this conversation</SheetDescription>
+              </SheetHeader>
+              <div className="flex flex-col gap-5 overflow-y-auto px-4 pb-4">{detailsPanel}</div>
+            </SheetContent>
+          </Sheet>
           <Button
             variant="outline"
             size="sm"
             nativeButton={false}
             render={<Link href={`/customers/${conversation.customer.id}`} />}
           >
-            Customer profile
+            <UserRound />
+            <span className="hidden sm:inline">Customer profile</span>
           </Button>
           <ResolveConversationButton conversationId={conversation.id} requiresWarning={requiresResolveWarning} />
           {session.isAdmin && conversation.orders.length === 0 && (
@@ -112,7 +286,27 @@ export default async function ConversationReviewPage({
         </div>
       }
     >
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
+      {/*
+        The message list + reply box get their own bounded, internally-
+        scrolling pane at every breakpoint — a docked composer with the
+        thread scrolling above it is the one messaging convention that's
+        arguably more universal on mobile than desktop (WhatsApp, Messenger,
+        Telegram, Slack mobile all do it), so it isn't gated to `lg`. What
+        *is* `lg`-only is the right-hand panel (Record/Facts/Orders): at
+        `lg` and up it's a second independently-scrolling column next to the
+        chat; below `lg` there's no room for two competing scroll regions,
+        so it isn't in the page at all — it only exists inside the Sheet
+        reachable from the header's "Details" action, the same "tap for
+        info" pattern real chat apps use on mobile instead of stacking
+        everything under the thread. The chat pane's mobile height is a
+        fixed viewport fraction (h-[65dvh]) rather than "fill all remaining
+        space" the way `lg:h-full` does on desktop, since there's no longer
+        a right panel below it competing for the rest of the screen — just
+        deliberately short of the full viewport so it's clear the page
+        still scrolls. Only this page opts into any of this; app-shell
+        itself, and every other page's normal page-scrolling, is untouched.
+      */}
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 lg:h-full">
         {isHumanStage || isLost ? (
           <StatusBanner
             tone={isLost ? "muted" : conversation.currentStage === "HUMAN_ASSIGNED" ? "assigned" : "urgent"}
@@ -129,10 +323,10 @@ export default async function ConversationReviewPage({
           <PipelineTracker currentStage={conversation.currentStage} />
         )}
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
-          <div className="flex min-w-0 flex-col gap-5">
-            <Card>
-              <CardContent className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-[1fr_320px]">
+          <div className="flex min-w-0 flex-col gap-5 lg:min-h-0">
+            <Card className="flex h-[65dvh] min-h-0 flex-col overflow-hidden lg:h-auto lg:flex-1">
+              <CardContent className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
                 {conversation.messages.map((message) => {
                   const fromCustomer = message.direction === "INBOUND";
                   const fromHuman = message.sender === "HUMAN";
@@ -166,14 +360,20 @@ export default async function ConversationReviewPage({
                     </div>
                   );
                 })}
+                <ScrollToBottomAnchor />
               </CardContent>
             </Card>
 
-            <Card>
+            <Card size="sm" className="shrink-0">
               <CardContent>
-                <form action={sendHumanReply} className="flex flex-col gap-3">
+                <form action={sendHumanReply} className="flex flex-col gap-2">
                   <input type="hidden" name="conversationId" value={conversation.id} />
-                  <Textarea name="text" placeholder="Reply as a human agent…" rows={3} />
+                  {/* Textarea already auto-grows with the typed content
+                      (field-sizing-content, textarea.tsx) — rows={2} just
+                      sets a shorter starting height so the composer doesn't
+                      eat more of the pane's vertical budget than an empty
+                      box needs. */}
+                  <Textarea name="text" placeholder="Reply as a human agent…" rows={2} />
                   <div className="flex items-center justify-between">
                     {isHumanStage && (
                       <p className="text-xs text-muted-foreground">
@@ -189,144 +389,19 @@ export default async function ConversationReviewPage({
             </Card>
           </div>
 
-          <div className="flex flex-col gap-5">
-            <Card>
-              <CardHeader>
-                <CardTitle>Record</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-3 text-sm">
-                {customerTags.length > 0 && (
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-xs text-muted-foreground">Tags</span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {customerTags.map((tag) => (
-                        <Badge
-                          key={tag}
-                          variant={tag === "Uninterested" ? "secondary" : "default"}
-                          className="font-medium"
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <Field label="Objective" value={conversation.currentObjective || "—"} />
-                <Field
-                  label="Confidence"
-                  value={conversation.confidence != null ? conversation.confidence.toFixed(2) : "—"}
-                />
-                <Field label="Summary" value={conversation.summary || "—"} />
-                <Field label="Assigned to" value={conversation.assignedTo?.name ?? "—"} />
-              </CardContent>
-            </Card>
-
-            {conversation.referral != null && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Came from</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ReferralDetails referral={conversation.referral as Record<string, string | undefined>} />
-                </CardContent>
-              </Card>
-            )}
-
-            {conversation.facts.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Remembered facts</CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-3">
-                  {conversation.facts.map((fact) => {
-                    const payload = fact.payload as { key?: string; value?: string };
-                    return (
-                      <div key={fact.id} className="flex items-start gap-2 text-sm">
-                        <Badge variant="secondary" className="mt-0.5 shrink-0">
-                          {fact.kind}
-                        </Badge>
-                        <span className="min-w-0 text-muted-foreground">
-                          <span className="font-medium text-foreground">{payload.key}</span>
-                          {payload.value ? `: ${payload.value}` : ""}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </CardContent>
-              </Card>
-            )}
-
-            {conversation.orders.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Orders</CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-3">
-                  {conversation.orders.map((order) => (
-                    <div key={order.id} className="flex flex-col gap-1 text-sm">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">{order.product.name}</span>
-                        <Badge
-                          variant={
-                            order.status === "VERIFIED"
-                              ? "default"
-                              : order.status === "ESCALATED"
-                                ? "destructive"
-                                : order.status === "REJECTED"
-                                  ? "outline"
-                                  : "secondary"
-                          }
-                        >
-                          {order.status}
-                        </Badge>
-                      </div>
-                      <div className="text-muted-foreground">
-                        Expected {formatNaira(Number(order.expectedAmount))}, extracted{" "}
-                        {order.extractedAmount ? formatNaira(Number(order.extractedAmount)) : "—"} via{" "}
-                        {order.extractedBank ?? "—"}
-                      </div>
-                      <div className="text-muted-foreground">
-                        Confidence {order.verificationConfidence?.toFixed(2) ?? "—"}
-                        {order.receiptImageUrl && (
-                          <>
-                            {" "}
-                            ·{" "}
-                            <a
-                              href={order.receiptImageUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1 font-medium underline"
-                            >
-                              receipt <ExternalLink className="size-3" />
-                            </a>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-
-            {visibleFollowups.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Follow-ups</CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-3 text-sm">
-                  {visibleFollowups.map((followup) => (
-                    <div key={followup.id} className="flex items-center justify-between gap-2">
-                      <span className="text-muted-foreground">
-                        Step {followup.step} of {maxFollowups} · {followup.scheduledFor.toLocaleString()}
-                      </span>
-                      <Badge variant={followup.cancelled ? "secondary" : followup.sent ? "default" : "outline"}>
-                        {followup.cancelled ? "cancelled" : followup.sent ? "sent" : "pending"}
-                      </Badge>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
+          {/* Desktop-only persistent column — below `lg` this content only
+              exists inside the Sheet triggered from the header (see
+              `actions` above), not stacked in the page flow, matching how
+              real chat apps tuck conversation info behind a tap on mobile
+              instead of making you scroll past it. Card's border is a
+              `ring` (box-shadow), which renders outside its box and gets
+              clipped by a flush-fitting scroll parent — worst at the top
+              and where the scrollbar sits. `-m-1 p-1` gives every card's
+              ring room to render before the scroll boundary/scrollbar
+              starts, without shifting the column's visible position
+              against its grid neighbor. */}
+          <div className="-m-1 hidden flex-col gap-5 p-1 lg:flex lg:min-h-0 lg:overflow-y-auto">
+            {detailsPanel}
           </div>
         </div>
       </div>
@@ -400,7 +475,7 @@ function StatusBanner({
   const Icon = tone === "muted" ? UserX2 : AlertTriangle;
 
   return (
-    <div className={`flex items-start gap-3 rounded-xl border px-5 py-4 ${styles}`}>
+    <div className={`flex items-start gap-3 rounded-xl border px-5 py-3 ${styles}`}>
       <Icon className="mt-0.5 size-4 shrink-0" />
       <div>
         <div className="text-sm font-semibold">{title}</div>
@@ -412,18 +487,42 @@ function StatusBanner({
 
 function PipelineTracker({ currentStage }: { currentStage: ConversationStage }) {
   const activeIndex = milestoneIndexForStage(currentStage);
+  const total = PIPELINE_MILESTONES.length;
+  const progressPercent = total > 1 ? (activeIndex / (total - 1)) * 100 : 100;
 
   return (
-    <div className="flex items-center rounded-xl border bg-card px-6 py-5">
-      {PIPELINE_MILESTONES.map((milestone, index) => {
+    <>
+      {/* Below `sm`, five spelled-out steps don't fit a phone width without
+          either clipping past the edge or scrolling sideways — neither is
+          how top platforms show mobile progress. Checkout flows (Stripe,
+          Shopify) collapse this to a slim bar plus the current step's name
+          instead; the full node-by-node stepper is still exactly what
+          renders from `sm` up. */}
+      <div className="flex flex-col gap-2 rounded-xl border bg-card px-4 py-3 sm:hidden">
+        <div className="flex items-center justify-between gap-2 text-xs">
+          <span className="font-semibold text-foreground">{PIPELINE_MILESTONES[activeIndex].label}</span>
+          <span className="shrink-0 text-muted-foreground">
+            Step {activeIndex + 1} of {total}
+          </span>
+        </div>
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full rounded-full bg-primary transition-[width]"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+      </div>
+
+      <div className="hidden items-center rounded-xl border bg-card px-6 py-3 sm:flex">
+        {PIPELINE_MILESTONES.map((milestone, index) => {
         const done = index < activeIndex;
         const active = index === activeIndex;
         const isLast = index === PIPELINE_MILESTONES.length - 1;
         return (
           <div key={milestone.key} className={`flex items-center ${isLast ? "" : "flex-1"}`}>
-            <div className="flex flex-col items-center gap-1.5">
+            <div className="flex flex-col items-center gap-1">
               <div
-                className={`flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+                className={`flex size-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
                   done
                     ? "bg-emerald-600 text-white"
                     : active
@@ -431,7 +530,7 @@ function PipelineTracker({ currentStage }: { currentStage: ConversationStage }) 
                       : "bg-muted text-muted-foreground"
                 }`}
               >
-                {done ? <Check className="size-3.5" /> : index + 1}
+                {done ? <Check className="size-3" /> : index + 1}
               </div>
               <span
                 className={`text-xs whitespace-nowrap ${active ? "font-semibold text-foreground" : "text-muted-foreground"}`}
@@ -445,6 +544,7 @@ function PipelineTracker({ currentStage }: { currentStage: ConversationStage }) 
           </div>
         );
       })}
-    </div>
+      </div>
+    </>
   );
 }

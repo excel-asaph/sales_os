@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/submit-button";
 import {
@@ -30,7 +31,10 @@ export function DeleteConversationButton({ conversationId }: { conversationId: s
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button variant="destructive" size="sm" />}>Delete</DialogTrigger>
+      <DialogTrigger render={<Button variant="destructive" size="sm" />}>
+        <Trash2 />
+        <span className="hidden sm:inline">Delete</span>
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete this conversation?</DialogTitle>

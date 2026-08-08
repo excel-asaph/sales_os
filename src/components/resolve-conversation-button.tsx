@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/submit-button";
 import {
@@ -51,7 +51,14 @@ export function ResolveConversationButton({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button variant="outline" size="sm" />}>Mark resolved</DialogTrigger>
+      {/* Icon always shown, label hidden below `sm` — a phone-width header
+          can't fit three full-text action buttons plus the sidebar trigger
+          and notification bell, same collapse-to-icon idea the sidebar
+          itself already uses at its own icon-only breakpoint. */}
+      <DialogTrigger render={<Button variant="outline" size="sm" />}>
+        <CheckCircle2 />
+        <span className="hidden sm:inline">Mark resolved</span>
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
