@@ -554,9 +554,13 @@ async function finalizeVerifiedOrder(
     currency: "NGN",
   });
   await prisma.$transaction([
-    ...(conversionResult.reported
-      ? [prisma.order.update({ where: { id: order.id }, data: { metaConversionReportedAt: new Date() } })]
-      : []),
+    prisma.order.update({
+      where: { id: order.id },
+      data: {
+        metaConversionReportReason: conversionResult.reported ? "reported" : conversionResult.reason,
+        ...(conversionResult.reported ? { metaConversionReportedAt: new Date() } : {}),
+      },
+    }),
     prisma.event.create({
       data: {
         conversationId: ctx.conversationId,

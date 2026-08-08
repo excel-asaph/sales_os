@@ -319,11 +319,17 @@ model Order {
   verifiedAt              DateTime?       @map("verified_at")
   createdAt               DateTime        @default(now()) @map("created_at")
   /// When this order's sale was successfully reported to Meta's Conversions
-  /// API as a Purchase event (meta-conversions.ts) — null if never attempted,
-  /// the conversation wasn't ad-attributed (no ctwa_clid), or the report
-  /// failed. Lets the dashboard show whether a given sale actually reached
-  /// Meta, not just whether it was verified internally.
+  /// API as a Purchase event (meta-conversions.ts) — null if it never
+  /// succeeded (not yet attempted, not ad-attributed, or failed; see
+  /// metaConversionReportReason for which).
   metaConversionReportedAt DateTime?      @map("meta_conversion_reported_at")
+  /// The outcome of the most recent report attempt — "reported",
+  /// "not_ad_attributed", "send_failed", or "not_configured" (see
+  /// ConversionReportResult in meta-conversions.ts). Null means no attempt
+  /// has ever run for this order (e.g. it predates this feature). Set on
+  /// every attempt regardless of outcome, so the dashboard can show *why*
+  /// a sale wasn't reported, not just whether it was.
+  metaConversionReportReason String?      @map("meta_conversion_report_reason")
 
   conversation   Conversation    @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   product        Product         @relation(fields: [productId], references: [id])

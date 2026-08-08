@@ -7,6 +7,7 @@ import { formatNaira } from "@/lib/currency";
 import { relativeTime } from "@/lib/relative-time";
 import { AppShell } from "@/components/app-shell";
 import { getNumberFilterCookie } from "@/lib/number-filter";
+import { conversionBadge } from "@/lib/meta-conversions";
 import { StatTile } from "@/components/stat-tile";
 import { Field, ReferralDetails } from "@/components/referral-details";
 import { Badge } from "@/components/ui/badge";
@@ -213,7 +214,9 @@ export default async function CustomerProfilePage({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {allOrders.map((order) => (
+                    {allOrders.map((order) => {
+                      const metaBadge = conversionBadge(order.metaConversionReportReason);
+                      return (
                       <TableRow key={order.id} className="cursor-pointer">
                         <TableCell className="font-medium">
                           <Link href={`/dashboard/${order.conversationId}`} className="hover:underline">
@@ -236,16 +239,17 @@ export default async function CustomerProfilePage({
                             >
                               {order.status}
                             </Badge>
-                            {order.metaConversionReportedAt && (
-                              <Badge variant="outline" className="font-medium text-muted-foreground">
-                                Reported to Meta
+                            {metaBadge && (
+                              <Badge className={`${metaBadge.className} border-transparent font-medium`}>
+                                {metaBadge.label}
                               </Badge>
                             )}
                           </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground">{order.createdAt.toLocaleDateString()}</TableCell>
                       </TableRow>
-                    ))}
+                      );
+                    })}
                   </TableBody>
                 </Table>
               )}

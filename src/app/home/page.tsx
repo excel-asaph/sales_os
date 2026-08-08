@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth";
 import { formatNaira } from "@/lib/currency";
 import { AppShell } from "@/components/app-shell";
 import { getNumberFilterCookie } from "@/lib/number-filter";
+import { conversionBadge } from "@/lib/meta-conversions";
 import { StatTile } from "@/components/stat-tile";
 import { RevenueChart } from "@/components/revenue-chart";
 import { Badge } from "@/components/ui/badge";
@@ -127,50 +128,53 @@ export default async function HomePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {recentOrders.map((order) => (
-                    <TableRow key={order.id} className="cursor-pointer">
-                      <TableCell className="font-medium">
-                        <Link
-                          href={`/customers/${order.conversation.customer.id}`}
-                          className="flex flex-col hover:underline"
-                        >
-                          <span>{order.conversation.customer.name ?? order.conversation.customer.phoneNumber}</span>
-                          {order.conversation.customer.name && (
-                            <span className="text-xs font-normal text-muted-foreground">
-                              {order.conversation.customer.phoneNumber}
-                            </span>
-                          )}
-                        </Link>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">{order.product.name}</TableCell>
-                      <TableCell className="tabular-nums">{formatNaira(Number(order.expectedAmount))}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <Badge
-                            variant={
-                              order.status === "VERIFIED"
-                                ? "default"
-                                : order.status === "ESCALATED"
-                                  ? "destructive"
-                                  : order.status === "REJECTED"
-                                    ? "outline"
-                                    : "secondary"
-                            }
+                  {recentOrders.map((order) => {
+                    const metaBadge = conversionBadge(order.metaConversionReportReason);
+                    return (
+                      <TableRow key={order.id} className="cursor-pointer">
+                        <TableCell className="font-medium">
+                          <Link
+                            href={`/customers/${order.conversation.customer.id}`}
+                            className="flex flex-col hover:underline"
                           >
-                            {order.status}
-                          </Badge>
-                          {order.metaConversionReportedAt && (
-                            <Badge variant="outline" className="font-medium text-muted-foreground">
-                              Reported to Meta
+                            <span>{order.conversation.customer.name ?? order.conversation.customer.phoneNumber}</span>
+                            {order.conversation.customer.name && (
+                              <span className="text-xs font-normal text-muted-foreground">
+                                {order.conversation.customer.phoneNumber}
+                              </span>
+                            )}
+                          </Link>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{order.product.name}</TableCell>
+                        <TableCell className="tabular-nums">{formatNaira(Number(order.expectedAmount))}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <Badge
+                              variant={
+                                order.status === "VERIFIED"
+                                  ? "default"
+                                  : order.status === "ESCALATED"
+                                    ? "destructive"
+                                    : order.status === "REJECTED"
+                                      ? "outline"
+                                      : "secondary"
+                              }
+                            >
+                              {order.status}
                             </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {order.createdAt.toLocaleDateString()}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                            {metaBadge && (
+                              <Badge className={`${metaBadge.className} border-transparent font-medium`}>
+                                {metaBadge.label}
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {order.createdAt.toLocaleDateString()}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             )}

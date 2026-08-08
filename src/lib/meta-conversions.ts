@@ -10,6 +10,35 @@ export type ConversionReportResult =
   | { reported: true }
   | { reported: false; reason: "not_configured" | "not_ad_attributed" | "send_failed" };
 
+// Order.metaConversionReportReason stores exactly this string: "reported"
+// on success, or the failure `reason` verbatim — see finalizeVerifiedOrder
+// (src/lib/actions.ts), the only writer.
+const CONVERSION_BADGES: Record<string, { label: string; className: string }> = {
+  reported: {
+    label: "Reported to Meta",
+    className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400",
+  },
+  not_ad_attributed: {
+    label: "Not ad-attributed",
+    className: "bg-muted text-muted-foreground",
+  },
+  send_failed: {
+    label: "Meta report failed",
+    className: "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400",
+  },
+  not_configured: {
+    label: "Meta not configured",
+    className: "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400",
+  },
+};
+
+// Null (no badge) means no report was ever attempted for this order — e.g.
+// it predates this feature — rather than implying an outcome that never
+// actually happened.
+export function conversionBadge(reason: string | null): { label: string; className: string } | null {
+  return reason ? (CONVERSION_BADGES[reason] ?? null) : null;
+}
+
 /**
  * Reports a completed sale to Meta's Conversions API for Business Messaging
  * (docs.developers.facebook.com/docs/marketing-api/conversions-api/business-messaging)
