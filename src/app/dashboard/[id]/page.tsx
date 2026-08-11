@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { notFound, redirect } from "next/navigation";
 import { getNumberFilterCookie } from "@/lib/number-filter";
 import { Check, ExternalLink, FileText, AlertTriangle, UserX2, UserRound, Info } from "lucide-react";
@@ -17,13 +18,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Field, ReferralDetails } from "@/components/referral-details";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  MobileDetailsSheetProvider,
+  MobileDetailsSheetTrigger,
+  MobileDetailsSheetPanel,
+} from "@/components/mobile-details-sheet";
 import {
   HUMAN_STAGES,
   TERMINAL_STAGES,
@@ -245,6 +243,7 @@ export default async function ConversationReviewPage({
   );
 
   return (
+    <MobileDetailsSheetProvider>
     <AppShell
       active="conversations"
       title={name ?? phoneNumber}
@@ -256,20 +255,18 @@ export default async function ConversationReviewPage({
               — this is the only way to reach it there, the same "tap to
               reveal info" pattern real chat apps use on mobile instead of
               stacking it under the thread. Hidden at `lg` and up since the
-              panel is already visible as its own column then. */}
-          <Sheet>
-            <SheetTrigger render={<Button variant="outline" size="sm" className="lg:hidden" />}>
-              <Info />
-              <span className="hidden sm:inline">Details</span>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-full sm:max-w-md">
-              <SheetHeader className="border-b">
-                <SheetTitle>Conversation details</SheetTitle>
-                <SheetDescription>Record, remembered facts, and orders for this conversation</SheetDescription>
-              </SheetHeader>
-              <div className="flex flex-col gap-5 overflow-y-auto px-4 pb-4">{detailsPanel}</div>
-            </SheetContent>
-          </Sheet>
+              panel is already visible as its own column then. Shares its
+              open state with the StatusBanner's "View full details" link
+              below (MobileDetailsSheetProvider, wrapping the whole page) —
+              same Sheet, two doors into it. */}
+          <MobileDetailsSheetTrigger
+            render={
+              <Button variant="outline" size="sm" className="lg:hidden">
+                <Info />
+                <span className="hidden sm:inline">Details</span>
+              </Button>
+            }
+          />
           <Button
             variant="outline"
             size="sm"
@@ -314,6 +311,20 @@ export default async function ConversationReviewPage({
                   : "Needs a human — the AI has paused on this conversation"
             }
             description={conversation.summary ?? undefined}
+            detailsTrigger={
+              conversation.summary ? (
+                <MobileDetailsSheetTrigger
+                  render={
+                    <button
+                      type="button"
+                      className="text-xs font-medium underline underline-offset-2 lg:hidden"
+                    >
+                      View full details
+                    </button>
+                  }
+                />
+              ) : undefined
+            }
           />
         ) : (
           <PipelineTracker currentStage={conversation.currentStage} />
@@ -402,6 +413,8 @@ export default async function ConversationReviewPage({
         </div>
       </div>
     </AppShell>
+    <MobileDetailsSheetPanel>{detailsPanel}</MobileDetailsSheetPanel>
+    </MobileDetailsSheetProvider>
   );
 }
 
@@ -457,10 +470,12 @@ function StatusBanner({
   tone,
   title,
   description,
+  detailsTrigger,
 }: {
   tone: "urgent" | "assigned" | "muted";
   title: string;
   description?: string;
+  detailsTrigger?: ReactNode;
 }) {
   const styles = {
     urgent: "border-red-200 bg-red-50 text-red-900 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300",
@@ -473,9 +488,25 @@ function StatusBanner({
   return (
     <div className={`flex items-start gap-3 rounded-xl border px-5 py-3 ${styles}`}>
       <Icon className="mt-0.5 size-4 shrink-0" />
-      <div>
+      <div className="min-w-0">
         <div className="text-sm font-semibold">{title}</div>
-        {description && <div className="mt-0.5 text-sm opacity-90">{description}</div>}
+        {/* AI-written summaries vary a lot in length — an unclamped long
+            one (a real complaint case, lots of detail) grows this banner
+            tall enough to squeeze the chat pane below it down to nothing,
+            since this div has no min-h-0 and flexbox won't shrink it below
+            its content's natural height otherwise. Clamped to 3 lines: a
+            quick-glance pointer, not the full detail — that's one scroll
+            away in the actual transcript right below it. */}
+        {description && (
+          <div className="mt-0.5 line-clamp-3 text-sm opacity-90">{description}</div>
+        )}
+        {/* Full text lives in the Record card's "Summary" field — same
+            value, already always visible on desktop, one tap away via the
+            mobile Details Sheet. This just makes that connection obvious
+            from the clamped text itself instead of relying on someone to
+            separately notice the header's Info icon. Desktop doesn't need
+            it: the Summary field is already on-screen there. */}
+        {description && detailsTrigger && <div className="mt-1">{detailsTrigger}</div>}
       </div>
     </div>
   );
