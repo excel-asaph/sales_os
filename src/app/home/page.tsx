@@ -150,11 +150,16 @@ export default async function HomePage() {
               // same principle as the conversation Review page's chat pane
               // — otherwise the page itself keeps growing as more orders
               // come in and "Recent orders" pushes everything below it
-              // further down with no end. The header stays pinned
-              // (`sticky top-0`) as the rows scroll underneath it, needing
-              // its own bg-card so scrolled-under rows don't show through.
-              <div className="max-h-[22rem] overflow-y-auto">
-                <Table>
+              // further down with no end. containerClassName (not
+              // className, which only reaches <table> itself) puts the
+              // vertical bound on Table's own wrapper div — the SAME
+              // element that already handles horizontal scroll — since
+              // `sticky` binds to its nearest ancestor with non-visible
+              // overflow on *either* axis; putting the vertical scroll on
+              // a separate outer div left the header sticking to a
+              // container that itself never scrolled vertically, so it
+              // just scrolled away with everything else.
+                <Table containerClassName="max-h-[22rem] overflow-y-auto">
                   <TableHeader className="sticky top-0 z-10 bg-card">
                     <TableRow>
                       <TableHead>Customer</TableHead>
@@ -214,7 +219,6 @@ export default async function HomePage() {
                   })}
                   </TableBody>
                 </Table>
-              </div>
             )}
           </Card>
 
