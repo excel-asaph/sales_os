@@ -5,8 +5,10 @@ import { getSession } from "@/lib/auth";
 import { formatNaira } from "@/lib/currency";
 import { AppShell } from "@/components/app-shell";
 import { getNumberFilterCookie } from "@/lib/number-filter";
+import { getDateRangeFilterCookie, resolveDateRange } from "@/lib/date-range-filter";
 import { conversionBadge } from "@/lib/meta-conversions";
 import { StatTile } from "@/components/stat-tile";
+import { DateRangePicker } from "@/components/date-range-picker";
 import { RevenueChart } from "@/components/revenue-chart";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,7 +33,12 @@ export default async function HomePage() {
   if (!session) return null;
 
   const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  // Deliberately its own fixed trailing window, independent of the date-
+  // range picker below — the chart draws one bar per day, and a picker
+  // range wide enough to matter (a custom multi-month span, "All time")
+  // would need the bars to switch to weekly/monthly buckets to stay
+  // readable, which is a real design problem of its own, not a rename.
+  // Left as a fixed 14-day trend rather than half-solving that.
   const chartStart = new Date(now);
   chartStart.setDate(chartStart.getDate() - (CHART_DAYS - 1));
   chartStart.setHours(0, 0, 0, 0);
@@ -39,27 +46,37 @@ export default async function HomePage() {
   // Same cookie-driven filter as Dashboard/Customers (number-filter.ts) —
   // every aggregate view on this page needs to agree with what the sidebar
   // switcher shows, or "Recent orders" etc. would keep showing the other
-  // number's activity regardless of what's selected.
-  const [business, numberFilter] = await Promise.all([
+  // number's activity regardless of what's selected. The date range is its
+  // OWN cookie though, separate from Dashboard's — Home's picker is the
+  // primary lens for the whole page, not a secondary one, so it shouldn't
+  // silently follow whatever Dashboard happens to be set to (see
+  // date-range-filter.ts). Defaults to "This month" — this page's behavior
+  // before this picker existed at all, so adding the picker doesn't change
+  // what anyone not touching it sees.
+  const [business, numberFilter, dateRangeCookie] = await Promise.all([
     prisma.business.findUniqueOrThrow({
       where: { id: session.businessId },
       select: { whatsappPhoneNumberId: true },
     }),
     getNumberFilterCookie(),
+    getDateRangeFilterCookie("home"),
   ]);
   const effectiveNumber =
     numberFilter === "all" ? undefined : (numberFilter ?? business.whatsappPhoneNumberId ?? undefined);
+  const { start: rangeStart, end: rangeEnd, label: rangeLabel } = resolveDateRange(dateRangeCookie, "thismonth");
 
   const conversationScope = {
     customer: { businessId: session.businessId },
     ...(effectiveNumber ? { whatsappPhoneNumberId: effectiveNumber } : {}),
   };
   const orderBusinessScope = { conversation: conversationScope };
+  const verifiedInRangeWhere = rangeStart && rangeEnd ? { verifiedAt: { gte: rangeStart, lt: rangeEnd } } : {};
+  const createdInRangeWhere = rangeStart && rangeEnd ? { createdAt: { gte: rangeStart, lt: rangeEnd } } : {};
 
-  const [verifiedThisMonth, verifiedForChart, leadsThisMonth, recentOrders, conversationsWithReferral] =
+  const [verifiedInRange, verifiedForChart, leadsInRange, recentOrders, conversationsWithReferral] =
     await Promise.all([
       prisma.order.findMany({
-        where: { ...orderBusinessScope, status: "VERIFIED", verifiedAt: { gte: startOfMonth } },
+        where: { ...orderBusinessScope, status: "VERIFIED", ...verifiedInRangeWhere },
         select: { expectedAmount: true },
       }),
       prisma.order.findMany({
@@ -67,8 +84,12 @@ export default async function HomePage() {
         select: { expectedAmount: true, verifiedAt: true },
       }),
       prisma.conversation.count({
-        where: { ...conversationScope, createdAt: { gte: startOfMonth } },
+        where: { ...conversationScope, ...createdInRangeWhere },
       }),
+      // Deliberately NOT scoped to the date range — same "lists/feeds stay
+      // live" principle as Dashboard's conversation list: a quick activity
+      // glance, not a report. Always the 10 most recent regardless of what
+      // range is selected above.
       prisma.order.findMany({
         where: orderBusinessScope,
         include: { product: true, conversation: { include: { customer: true } } },
@@ -76,14 +97,14 @@ export default async function HomePage() {
         take: 10,
       }),
       prisma.conversation.findMany({
-        where: conversationScope,
+        where: { ...conversationScope, ...createdInRangeWhere },
         select: { id: true, referral: true, orders: { where: { status: "VERIFIED" }, select: { id: true } } },
       }),
     ]);
 
-  const revenueThisMonth = verifiedThisMonth.reduce((sum, o) => sum + Number(o.expectedAmount), 0);
-  const ordersThisMonth = verifiedThisMonth.length;
-  const conversionRate = leadsThisMonth > 0 ? (ordersThisMonth / leadsThisMonth) * 100 : 0;
+  const revenueInRange = verifiedInRange.reduce((sum, o) => sum + Number(o.expectedAmount), 0);
+  const ordersInRange = verifiedInRange.length;
+  const conversionRate = leadsInRange > 0 ? (ordersInRange / leadsInRange) * 100 : 0;
 
   const chartData = buildDailyChartData(verifiedForChart, chartStart, CHART_DAYS);
   const adBreakdown = buildAdBreakdown(conversationsWithReferral);
@@ -91,10 +112,18 @@ export default async function HomePage() {
   return (
     <AppShell active="home" title="Home" description="How the business is doing, at a glance">
       <div className="mx-auto flex max-w-5xl flex-col gap-8">
+        {/* Scopes Revenue/Orders/New leads/Conversion rate and "Where
+            leads come from" below — NOT the trend chart (its own fixed
+            window, see chartStart above) or Recent orders (a live feed,
+            not a report). */}
+        <div className="flex justify-end">
+          <DateRangePicker currentLabel={rangeLabel} redirectTo="/home" scope="home" />
+        </div>
+
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <StatTile label="Revenue this month" value={formatNaira(revenueThisMonth)} icon={Wallet} tone="good" />
-          <StatTile label="Orders this month" value={ordersThisMonth} icon={ShoppingBag} tone="default" />
-          <StatTile label="New leads this month" value={leadsThisMonth} icon={UserPlus} tone="default" />
+          <StatTile label="Revenue" value={formatNaira(revenueInRange)} icon={Wallet} tone="good" />
+          <StatTile label="Orders" value={ordersInRange} icon={ShoppingBag} tone="default" />
+          <StatTile label="New leads" value={leadsInRange} icon={UserPlus} tone="default" />
           <StatTile label="Conversion rate" value={`${conversionRate.toFixed(0)}%`} icon={Percent} tone="default" />
         </div>
 
