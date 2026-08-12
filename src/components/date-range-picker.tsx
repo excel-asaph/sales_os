@@ -58,9 +58,14 @@ export function DateRangePicker({
         {currentLabel}
         <ChevronDown className="text-muted-foreground" />
       </PopoverTrigger>
+      {/* A preset list next to a 256px calendar is close to 400px wide —
+          wider than most phone screens outright, and no amount of
+          repositioning fixes content that's simply too wide for the
+          viewport. Stacked below `sm` (presets on top, calendar below);
+          side by side from `sm` up, where there's room for both. */}
       <PopoverContent align="end" className="w-auto p-0">
-        <div className="flex">
-          <div className="flex flex-col gap-0.5 border-r p-2">
+        <div className="flex flex-col sm:flex-row">
+          <div className="flex flex-row flex-wrap gap-0.5 border-b p-2 sm:flex-col sm:border-r sm:border-b-0">
             {PRESETS.map((preset) => (
               <a
                 key={preset.value}
@@ -76,7 +81,7 @@ export function DateRangePicker({
             <Separator />
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs text-muted-foreground">
-                {from && to ? "Pick Apply to use this range" : "Pick a start and end date"}
+                {from && to ? "Tap Apply to use this range" : "Pick a start and end date"}
               </span>
               {applyHref ? (
                 <Button size="sm" nativeButton={false} render={<a href={applyHref} />}>
