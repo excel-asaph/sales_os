@@ -146,7 +146,7 @@ export default async function HomePage() {
                 No orders yet.
               </CardContent>
             ) : (
-              // Bounded to roughly 5-6 rows before scrolling internally,
+              // Bounded to roughly 6 rows before scrolling internally,
               // same principle as the conversation Review page's chat pane
               // — otherwise the page itself keeps growing as more orders
               // come in and "Recent orders" pushes everything below it
@@ -159,7 +159,7 @@ export default async function HomePage() {
               // a separate outer div left the header sticking to a
               // container that itself never scrolled vertically, so it
               // just scrolled away with everything else.
-                <Table containerClassName="max-h-[22rem] overflow-y-auto">
+                <Table containerClassName="max-h-[37rem] overflow-y-auto">
                   <TableHeader className="sticky top-0 z-10 bg-card">
                     <TableRow>
                       <TableHead>Customer</TableHead>
