@@ -281,6 +281,35 @@ async function processInboundMessage(
         await runAIEmployeeTurn(conversation!.id);
       } catch (error) {
         console.error(`AI Employee Runtime failed for conversation ${conversation!.id}`, error);
+        // Every retry the Anthropic client is configured for (claude.ts) is
+        // already exhausted by the time an error reaches here — this is the
+        // last line of defense. Escalating turns a silently dropped reply
+        // into something that shows up immediately in the dashboard's
+        // Awaiting a Human queue, instead of the customer being left in
+        // silence with zero trace anywhere (confirmed in production,
+        // 2026-08-12 — several real customers hit exactly this). No
+        // fallback message is sent to the customer here on purpose — a
+        // human picking this up should be able to reply naturally, not
+        // follow a canned "having trouble" message the AI already sent.
+        // runAIEmployeeTurn itself already no-ops for a conversation
+        // already on a human stage, so this can't clobber an existing
+        // human assignment.
+        await prisma.$transaction([
+          prisma.conversation.update({
+            where: { id: conversation!.id },
+            data: {
+              currentStage: "HUMAN_REVIEW_REQUIRED",
+              summary: "The AI ran into a technical error and couldn't reply — needs a human to pick this up.",
+            },
+          }),
+          prisma.event.create({
+            data: {
+              conversationId: conversation!.id,
+              type: "HUMAN_ASSIGNED",
+              payload: { reason: "ai_runtime_error", error: (error as Error).message },
+            },
+          }),
+        ]);
       }
     })
   );

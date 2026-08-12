@@ -14,6 +14,26 @@ import { prisma } from "@/lib/prisma";
 // step early.
 const MAX_TOOL_ITERATIONS = 12;
 
+// Tool calls that actually put a message in front of the customer — used
+// below to catch a turn that ends without ever having sent anything (the
+// model called only non-messaging tools, or decided there was nothing to
+// add). Kept as a set of names rather than inspecting `actionContractTools`
+// directly since "does this tool message the customer" isn't otherwise
+// derivable from the tool contract itself.
+const CUSTOMER_FACING_SEND_TOOLS = new Set([
+  "send_message",
+  "send_template_message",
+  "send_product",
+  "send_payment_details",
+]);
+
+function wasCustomerMessaged(toolName: string, result: unknown): boolean {
+  if (!CUSTOMER_FACING_SEND_TOOLS.has(toolName)) return false;
+  if (typeof result !== "object" || result === null) return false;
+  const r = result as Record<string, unknown>;
+  return r.sent === true || r.delivered === true;
+}
+
 /**
  * The AI Employee Runtime (ARCHITECTURE.md §7): one reasoning loop per
  * customer turn. The model reads the Conversation Brain (not the message
@@ -64,6 +84,7 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
     : renderConversationBrain(brain);
 
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: brainContent }];
+  let hasMessagedCustomer = false;
 
   for (let iteration = 0; iteration < MAX_TOOL_ITERATIONS; iteration++) {
     const response = await claude.messages.create({
@@ -109,12 +130,27 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
     if (response.stop_reason !== "tool_use") {
       // end_turn without ever calling send_message means nothing was
       // communicated to the customer — treat as a low-confidence outcome
-      // rather than silently doing nothing.
+      // rather than silently doing nothing. Previously this only actually
+      // escalated for max_tokens specifically; the far more common ordinary
+      // end_turn case (the model just stops — plain prose instead of a
+      // tool call, or a turn that only called non-messaging tools) fell
+      // through with no trace at all, confirmed in production as one real
+      // way a customer got left in silence (2026-08-12).
       if (response.stop_reason === "max_tokens") {
         console.warn(`AI Employee Runtime: hit max_tokens on conversation ${conversationId}`);
         await executeAction(
           "escalate_to_human",
           { reason: "max_tokens", summary: "The AI's response was cut off before completing; needs human review." },
+          ctx
+        );
+      } else if (!hasMessagedCustomer) {
+        console.warn(`AI Employee Runtime: ended turn without messaging the customer on conversation ${conversationId}`);
+        await executeAction(
+          "escalate_to_human",
+          {
+            reason: "no_reply_sent",
+            summary: "The AI finished its turn without sending the customer a reply; needs human review.",
+          },
           ctx
         );
       }
@@ -129,6 +165,7 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
     for (const block of toolUseBlocks) {
       try {
         const result = await executeAction(block.name, block.input as Record<string, unknown>, ctx);
+        if (wasCustomerMessaged(block.name, result)) hasMessagedCustomer = true;
         toolResults.push({
           type: "tool_result",
           tool_use_id: block.id,

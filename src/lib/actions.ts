@@ -37,7 +37,7 @@ export async function executeAction(
     case "send_product":
       return sendProduct(ctx, input.product_id as string);
     case "send_payment_details":
-      return getPaymentAccounts(ctx.businessId);
+      return sendPaymentDetails(ctx);
     case "request_payment_verification":
       return requestPaymentVerification(ctx, input.product_id as string, input.expected_amount as number);
     case "update_stage":
@@ -143,6 +143,25 @@ async function sendProduct(ctx: ActionContext, productId: string) {
     }),
   ]);
   return { delivered: true };
+}
+
+// The tool's own name and description ("Retrieve and send...") always said
+// this sends the account details to the customer — the implementation just
+// didn't, returning the account rows straight to the model instead of
+// actually messaging anyone. A model that calls this and gets data back has
+// no way to know it wasn't relayed, and ends its turn believing it answered
+// — a real, confirmed way a customer was left without a reply (2026-08-12).
+// Every other send_* tool in the contract genuinely sends; this brings it
+// in line with them rather than the model.
+async function sendPaymentDetails(ctx: ActionContext) {
+  const accounts = await getPaymentAccounts(ctx.businessId);
+  if (accounts.length === 0) {
+    return { sent: false, reason: "No active payment account is configured for this business." };
+  }
+  const text = accounts
+    .map((account) => `Bank: ${account.bankName}\nAccount number: ${account.accountNumber}\nAccount name: ${account.accountName}`)
+    .join("\n\n");
+  return sendMessage(ctx, text);
 }
 
 /**
