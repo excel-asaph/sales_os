@@ -146,17 +146,25 @@ export default async function HomePage() {
                 No orders yet.
               </CardContent>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              // Bounded to roughly 5-6 rows before scrolling internally,
+              // same principle as the conversation Review page's chat pane
+              // — otherwise the page itself keeps growing as more orders
+              // come in and "Recent orders" pushes everything below it
+              // further down with no end. The header stays pinned
+              // (`sticky top-0`) as the rows scroll underneath it, needing
+              // its own bg-card so scrolled-under rows don't show through.
+              <div className="max-h-[22rem] overflow-y-auto">
+                <Table>
+                  <TableHeader className="sticky top-0 z-10 bg-card">
+                    <TableRow>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Product</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                   {recentOrders.map((order) => {
                     const metaBadge = conversionBadge(order.metaConversionReportReason);
                     return (
@@ -204,8 +212,9 @@ export default async function HomePage() {
                       </TableRow>
                     );
                   })}
-                </TableBody>
-              </Table>
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </Card>
 
