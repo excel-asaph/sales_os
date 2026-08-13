@@ -49,7 +49,7 @@ export function RevenueChart({ data }: { data: RevenueChartPoint[] }) {
               <div key={step} className="h-px" style={{ background: "var(--grid-line)" }} />
             ))}
           </div>
-          <div className="relative flex h-48 items-end gap-1">
+          <div className="relative flex h-48 gap-1">
             {data.map((point, i) => {
               const heightPct = niceMax > 0 ? (point.value / niceMax) * 100 : 0;
               return (
