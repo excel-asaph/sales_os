@@ -12,6 +12,7 @@ import { getBusinessConfig } from "@/lib/knowledge";
 import { getBusinessNumbers } from "@/lib/whatsapp-numbers";
 import { getNumberFilterCookie } from "@/lib/number-filter";
 import { AppShell } from "@/components/app-shell";
+import { FilterDropdown } from "@/components/filter-dropdown";
 import { FollowupCountdownBar } from "@/components/followup-countdown-bar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -254,44 +255,36 @@ export default async function CustomersPage({
           </div>
         </form>
 
-        {stageChips.length > 0 && (
+        {(stageChips.length > 0 || tagChips.length > 0) && (
           <div className="flex flex-wrap gap-2">
-            <Link href={customersHref({ stage: null })}>
-              <Badge variant={activeStage ? "outline" : "default"} className="cursor-pointer font-medium">
-                All stages
-              </Badge>
-            </Link>
-            {stageChips.map(({ stage, count }) => (
-              <Link key={stage} href={customersHref({ stage })}>
-                <Badge
-                  className={`cursor-pointer border-transparent font-medium ${
-                    activeStage === stage ? stageStyle(stage) : "bg-secondary text-secondary-foreground"
-                  }`}
-                >
-                  {stage.replaceAll("_", " ")} · {count}
-                </Badge>
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {tagChips.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            <Link href={customersHref({ tag: null })}>
-              <Badge variant={activeTag ? "outline" : "default"} className="cursor-pointer font-medium">
-                All tags
-              </Badge>
-            </Link>
-            {tagChips.map(({ tag, count }) => (
-              <Link key={tag} href={customersHref({ tag })}>
-                <Badge
-                  variant={activeTag === tag ? undefined : "secondary"}
-                  className="cursor-pointer font-medium"
-                >
-                  {tag} · {count}
-                </Badge>
-              </Link>
-            ))}
+            {stageChips.length > 0 && (
+              <FilterDropdown
+                label="Stage"
+                placeholder="All stages"
+                activeValue={activeStage}
+                clearHref={customersHref({ stage: null })}
+                options={stageChips.map(({ stage, count }) => ({
+                  value: stage,
+                  label: stage.replaceAll("_", " "),
+                  count,
+                  href: customersHref({ stage }),
+                }))}
+              />
+            )}
+            {tagChips.length > 0 && (
+              <FilterDropdown
+                label="Tags"
+                placeholder="All tags"
+                activeValue={activeTag}
+                clearHref={customersHref({ tag: null })}
+                options={tagChips.map(({ tag, count }) => ({
+                  value: tag,
+                  label: tag,
+                  count,
+                  href: customersHref({ tag }),
+                }))}
+              />
+            )}
           </div>
         )}
 

@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { StatTile } from "@/components/stat-tile";
 import { DateRangePicker } from "@/components/date-range-picker";
+import { FilterDropdown } from "@/components/filter-dropdown";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { HUMAN_STAGES, TERMINAL_STAGES, stageStyle } from "@/lib/stage-display";
@@ -173,27 +174,18 @@ export default async function DashboardPage({
         </div>
 
         {stageChips.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            <Link href="/dashboard">
-              <Badge
-                variant={activeStage ? "outline" : "default"}
-                className="cursor-pointer font-medium"
-              >
-                All
-              </Badge>
-            </Link>
-            {stageChips.map(({ stage, count }) => (
-              <Link key={stage} href={`/dashboard?stage=${stage}`}>
-                <Badge
-                  className={`cursor-pointer border-transparent font-medium ${
-                    activeStage === stage ? stageStyle(stage) : "bg-secondary text-secondary-foreground"
-                  }`}
-                >
-                  {stage.replaceAll("_", " ")} · {count}
-                </Badge>
-              </Link>
-            ))}
-          </div>
+          <FilterDropdown
+            label="Stage"
+            placeholder="All stages"
+            activeValue={activeStage}
+            clearHref="/dashboard"
+            options={stageChips.map(({ stage, count }) => ({
+              value: stage,
+              label: stage.replaceAll("_", " "),
+              count,
+              href: `/dashboard?stage=${stage}`,
+            }))}
+          />
         )}
 
         {sorted.length === 0 ? (
