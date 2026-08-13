@@ -2,12 +2,13 @@
 
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { sendWhatsAppText, sendWhatsAppTemplate } from "@/lib/whatsapp-send";
+import { sendWhatsAppText, sendWhatsAppTemplate, sendWhatsAppDocument } from "@/lib/whatsapp-send";
 import { isWithinCustomerServiceWindow } from "@/lib/whatsapp-window";
 import { revalidatePath } from "next/cache";
 import { requireSession, requireAdminSession } from "@/lib/auth";
 import { applyOrderVerifiedEffects, type ActionContext } from "@/lib/actions";
 import { addCustomerTag } from "@/lib/customer-tags";
+import { cancelPendingFollowups } from "@/lib/followups";
 import { runAIEmployeeTurn } from "@/lib/ai-runtime";
 import type { ConversationStage } from "@/generated/prisma/client";
 
@@ -96,6 +97,70 @@ export async function sendHumanReply(formData: FormData) {
       "This customer hasn't messaged in over 24 hours, so WhatsApp only allowed a pre-approved re-engagement template through — not your typed message. That template was sent instead; you'll be able to send your actual reply once they respond."
     );
   }
+}
+
+// The AI's own send_product tool (src/lib/actions.ts) is unreachable while
+// a conversation is on a human stage (ai-runtime.ts's guard) — but a human
+// handling an escalation may still need to get the product to the customer
+// themselves (e.g. the original delivery failed, or the customer's asking
+// for it again mid-conversation). Deliberately doesn't check
+// deliverBeforePayment/order-verified the way the AI's own sendProduct
+// does — a human looking at the actual conversation is trusted to judge
+// that themselves, the same way they're trusted with the free-text reply
+// box right above this. Mirrors sendProduct's own message/event shape so
+// this shows up identically in the transcript and Orders history either
+// way, and moves the stage to PRODUCT_DELIVERED for the same reason
+// sendProduct does — it's just factually true now, regardless of who sent
+// it — but deliberately doesn't touch assignedHumanId or trigger an AI
+// turn the way returnToAI/verifyOrderManually do: sending a file is a
+// supplementary action a human might take while still actively handling
+// the rest of the conversation themselves.
+export async function sendProductAsHuman(formData: FormData) {
+  const session = await requireSession();
+  const conversationId = String(formData.get("conversationId"));
+  const productId = String(formData.get("productId"));
+
+  const conversation = await loadOwnedConversation(conversationId, session.businessId);
+  const product = await prisma.product.findUniqueOrThrow({ where: { id: productId } });
+  if (product.businessId !== session.businessId) {
+    throw new Error("Product does not belong to this business");
+  }
+  if (!product.fileUrl) {
+    throw new Error("This product has no file configured yet — add one under Settings → Products first.");
+  }
+
+  const agent = await prisma.humanAgent.findUniqueOrThrow({ where: { id: session.agentId } });
+  const phoneNumberId = conversation.whatsappPhoneNumberId ?? conversation.customer.business.whatsappPhoneNumberId ?? "";
+  const filename = `${product.name}.pdf`;
+
+  await sendWhatsAppDocument(conversation.customer.phoneNumber, product.fileUrl, filename, phoneNumberId);
+
+  await prisma.$transaction([
+    prisma.message.create({
+      data: {
+        conversationId,
+        direction: "OUTBOUND",
+        sender: "HUMAN",
+        type: "DOCUMENT",
+        content: filename,
+        mediaUrl: product.fileUrl,
+      },
+    }),
+    prisma.conversation.update({
+      where: { id: conversationId },
+      data: { currentStage: "PRODUCT_DELIVERED" },
+    }),
+    prisma.event.create({
+      data: {
+        conversationId,
+        type: "PRODUCT_DELIVERED",
+        payload: { productId, sentBy: "human", humanAgentId: agent.id, humanAgentName: agent.name },
+      },
+    }),
+  ]);
+
+  revalidatePath(`/dashboard/${conversationId}`);
+  revalidatePath("/dashboard");
 }
 
 // Shared by every human-driven action below that wants the AI to take the
@@ -336,6 +401,12 @@ export async function resolveConversation(formData: FormData) {
       data: { conversationId, type: "HUMAN_RESOLVED", payload: { humanAgentId: session.agentId } },
     }),
   ]);
+  // The follow-up worker itself would refuse to act once a conversation is
+  // RESOLVED (BLOCKS_FOLLOWUP, src/worker/followup-worker.ts) — this just
+  // stops any already-scheduled one from sitting around looking "active"
+  // (a live countdown on the Customers/Dashboard UI) until its job fires
+  // and discovers that.
+  await cancelPendingFollowups(conversationId, "resolved");
 
   revalidatePath(`/dashboard/${conversationId}`);
   revalidatePath("/dashboard");

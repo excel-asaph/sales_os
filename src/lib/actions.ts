@@ -5,6 +5,7 @@ import { downloadWhatsAppMedia, persistMediaFile, readPersistedMedia } from "@/l
 import { verifyReceiptContent, type ReceiptExtraction, type PaymentAccountRef } from "@/lib/receipt-verification";
 import { getBoss, FOLLOWUP_QUEUE } from "@/lib/queue";
 import { addCustomerTag } from "@/lib/customer-tags";
+import { cancelPendingFollowups } from "@/lib/followups";
 import { reportPurchaseConversion } from "@/lib/meta-conversions";
 import type { ConversationStage, FactKind, FollowupReason, Prisma } from "@/generated/prisma/client";
 
@@ -557,6 +558,12 @@ export async function applyOrderVerifiedEffects(
       data: { conversationId: ctx.conversationId, type: params.event.type, payload: params.event.payload },
     }),
   ]);
+  // PAYMENT_VERIFIED is one of the follow-up worker's own BLOCKS_FOLLOWUP
+  // stages — this just stops any already-scheduled follow-up (e.g. one
+  // created with reason AWAITING_PAYMENT_EVIDENCE) from sitting around
+  // looking "active" until its job fires and discovers the payment's
+  // already in.
+  await cancelPendingFollowups(ctx.conversationId, "order_verified");
 
   // Customer.lifetimePurchases/returningCustomer (read into the AI's brain —
   // conversation-brain.ts — and shown on the Customer Profile page) were
@@ -806,6 +813,11 @@ async function escalateToHuman(ctx: ActionContext, reason: string, summary: stri
       data: { conversationId: ctx.conversationId, type: "HUMAN_ASSIGNED", payload: { reason, summary } },
     }),
   ]);
+  // The follow-up worker itself would refuse to act once a conversation is
+  // on a human stage (BLOCKS_FOLLOWUP) — this just stops any already-
+  // scheduled one from sitting around looking "active" until it fires and
+  // discovers that.
+  await cancelPendingFollowups(ctx.conversationId, "escalated_to_human");
   return { escalated: true };
 }
 
