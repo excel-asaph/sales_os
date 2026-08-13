@@ -98,6 +98,37 @@ export async function sendHumanReply(formData: FormData) {
   }
 }
 
+// Shared by every human-driven action below that wants the AI to take the
+// next step immediately afterward — returnToAI, and the two order-
+// verification actions — rather than leaving the conversation to sit
+// unlocked-but-untouched until the customer's next message. Same last-line-
+// of-defense pattern as ingest-message.ts: if the AI turn itself throws,
+// hand it straight back to a human rather than leaving it in an ambiguous
+// state with no trace of why.
+async function runAIAfterHumanAction(conversationId: string, note: string) {
+  try {
+    await runAIEmployeeTurn(conversationId, note);
+  } catch (error) {
+    console.error(`AI Employee Runtime failed for conversation ${conversationId} after a human action`, error);
+    await prisma.$transaction([
+      prisma.conversation.update({
+        where: { id: conversationId },
+        data: {
+          currentStage: "HUMAN_REVIEW_REQUIRED",
+          summary: "The AI ran into a technical error right after a human action — needs a human to pick this up.",
+        },
+      }),
+      prisma.event.create({
+        data: {
+          conversationId,
+          type: "HUMAN_ASSIGNED",
+          payload: { reason: "ai_runtime_error", error: (error as Error).message },
+        },
+      }),
+    ]);
+  }
+}
+
 // HUMAN_REVIEW_REQUIRED/HUMAN_ASSIGNED is otherwise a one-way door:
 // ai-runtime.ts's guard no-ops the AI on both stages forever, and nothing
 // in this file ever clears assignedHumanId — once a human touches a
@@ -145,33 +176,10 @@ export async function returnToAI(formData: FormData) {
     }),
   ]);
 
-  try {
-    await runAIEmployeeTurn(
-      conversationId,
-      "[A human just finished handling this conversation and is handing it back to you. Review the recent messages and current state, then take whatever action is actually appropriate — record any facts you learn, update the stage, schedule a follow-up if something's genuinely still pending, or do nothing further if there's nothing to do. Don't assume anything is wrong just because a human was involved.]"
-    );
-  } catch (error) {
-    // Same last-line-of-defense pattern as ingest-message.ts: if the AI
-    // turn itself throws, hand it straight back to a human rather than
-    // leaving it in an unlocked-but-unhandled state with no trace of why.
-    console.error(`AI Employee Runtime failed for conversation ${conversationId} right after being handed back`, error);
-    await prisma.$transaction([
-      prisma.conversation.update({
-        where: { id: conversationId },
-        data: {
-          currentStage: "HUMAN_REVIEW_REQUIRED",
-          summary: "The AI ran into a technical error right after being handed back — needs a human to pick this up.",
-        },
-      }),
-      prisma.event.create({
-        data: {
-          conversationId,
-          type: "HUMAN_ASSIGNED",
-          payload: { reason: "ai_runtime_error", error: (error as Error).message },
-        },
-      }),
-    ]);
-  }
+  await runAIAfterHumanAction(
+    conversationId,
+    "[A human just finished handling this conversation and is handing it back to you. Review the recent messages and current state, then take whatever action is actually appropriate — record any facts you learn, update the stage, schedule a follow-up if something's genuinely still pending, or do nothing further if there's nothing to do. Don't assume anything is wrong just because a human was involved.]"
+  );
 
   revalidatePath(`/dashboard/${conversationId}`);
   revalidatePath("/dashboard");
@@ -232,6 +240,7 @@ export async function createAndVerifyOrder(formData: FormData) {
     orderId: order.id,
     expectedAmount,
     confidence: null,
+    clearHumanAssignment: true,
     event: {
       type: "ORDER_MANUALLY_VERIFIED",
       payload: { orderId: order.id, humanAgentId: agent.id, humanAgentName: agent.name, createdManually: true },
@@ -239,6 +248,11 @@ export async function createAndVerifyOrder(formData: FormData) {
   });
 
   await addCustomerTag(conversationId, "Paid");
+
+  await runAIAfterHumanAction(
+    conversationId,
+    `[A human just manually recorded and verified a payment of ${expectedAmount} for ${product.name} on this conversation — the AI never got to check the receipt itself. Review the current state and take whatever's actually appropriate next: send a payment confirmation if one hasn't gone out, deliver the product if it hasn't been sent yet, update the stage (including marking the sale complete if nothing else is pending), or schedule a follow-up if something's still outstanding.]`
+  );
 
   revalidatePath(`/dashboard/${conversationId}`);
   revalidatePath("/dashboard");
@@ -288,6 +302,7 @@ export async function verifyOrderManually(formData: FormData) {
     orderId: order.id,
     expectedAmount: Number(order.expectedAmount),
     confidence: null,
+    clearHumanAssignment: true,
     event: {
       type: "ORDER_MANUALLY_VERIFIED",
       payload: { orderId: order.id, humanAgentId: agent.id, humanAgentName: agent.name, previousStatus },
@@ -295,6 +310,11 @@ export async function verifyOrderManually(formData: FormData) {
   });
 
   await addCustomerTag(conversationId, "Paid");
+
+  await runAIAfterHumanAction(
+    conversationId,
+    `[A human just manually verified this conversation's payment (previously ${previousStatus.toLowerCase()}) — the AI's own attempt had flagged it, but a human has now personally confirmed it's genuine. Review the current state and take whatever's actually appropriate next: send a payment confirmation if one hasn't gone out, deliver the product if it hasn't been sent yet, update the stage (including marking the sale complete if nothing else is pending), or schedule a follow-up if something's still outstanding.]`
+  );
 
   revalidatePath(`/dashboard/${conversationId}`);
   revalidatePath("/dashboard");

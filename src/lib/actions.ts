@@ -535,12 +535,23 @@ export async function applyOrderVerifiedEffects(
     expectedAmount: number;
     confidence: number | null;
     event: { type: string; payload: Prisma.InputJsonValue };
+    // Only ever true for a human-triggered verification that's about to
+    // hand the conversation back to the AI right after (dashboard/[id]'s
+    // verifyOrderManually/createAndVerifyOrder) — the AI's own
+    // finalizeVerifiedOrder never sets this, since it only ever runs from a
+    // turn that was already unassigned to begin with (ai-runtime.ts's guard
+    // wouldn't have let it run otherwise).
+    clearHumanAssignment?: boolean;
   }
 ) {
   await prisma.$transaction([
     prisma.conversation.update({
       where: { id: ctx.conversationId },
-      data: { currentStage: "PAYMENT_VERIFIED", ...(params.confidence !== null ? { confidence: params.confidence } : {}) },
+      data: {
+        currentStage: "PAYMENT_VERIFIED",
+        ...(params.confidence !== null ? { confidence: params.confidence } : {}),
+        ...(params.clearHumanAssignment ? { assignedHumanId: null } : {}),
+      },
     }),
     prisma.event.create({
       data: { conversationId: ctx.conversationId, type: params.event.type, payload: params.event.payload },
