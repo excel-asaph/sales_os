@@ -10,6 +10,7 @@ import { applyOrderVerifiedEffects, type ActionContext } from "@/lib/actions";
 import { addCustomerTag } from "@/lib/customer-tags";
 import { cancelPendingFollowups } from "@/lib/followups";
 import { runAIEmployeeTurn } from "@/lib/ai-runtime";
+import { HUMAN_STAGES } from "@/lib/stage-display";
 import type { ConversationStage } from "@/generated/prisma/client";
 
 async function loadOwnedConversation(conversationId: string, businessId: string) {
@@ -115,6 +116,16 @@ export async function sendHumanReply(formData: FormData) {
 // turn the way returnToAI/verifyOrderManually do: sending a file is a
 // supplementary action a human might take while still actively handling
 // the rest of the conversation themselves.
+//
+// Confirmed in production (2026-08-13): unconditionally overwriting
+// currentStage did exactly that even when the conversation was sitting in
+// HUMAN_REVIEW_REQUIRED/HUMAN_ASSIGNED — PRODUCT_DELIVERED isn't a human
+// stage, so it silently kicked the conversation out of human-review mode
+// as a side effect of just resending a file, hiding ReturnToAIButton and
+// CreateOrderButton (both gated on being in that state) without the human
+// ever choosing to hand anything back. Preserving the human stage when
+// it's already there — rather than clobbering it — is what actually keeps
+// this action "supplementary" instead of an accidental hand-back.
 export async function sendProductAsHuman(formData: FormData) {
   const session = await requireSession();
   const conversationId = String(formData.get("conversationId"));
@@ -148,7 +159,7 @@ export async function sendProductAsHuman(formData: FormData) {
     }),
     prisma.conversation.update({
       where: { id: conversationId },
-      data: { currentStage: "PRODUCT_DELIVERED" },
+      data: HUMAN_STAGES.includes(conversation.currentStage) ? {} : { currentStage: "PRODUCT_DELIVERED" },
     }),
     prisma.event.create({
       data: {
