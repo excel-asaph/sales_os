@@ -52,7 +52,16 @@ export function FilterDropdown({
           {(value: string) => (value === ALL ? placeholder : (options.find((o) => o.value === value)?.label ?? placeholder))}
         </SelectValue>
       </SelectTrigger>
-      <SelectContent>
+      {/* Overridden here, not in the shared ui/select.tsx primitive: that
+          default (w-(--anchor-width), alignItemWithTrigger) is the
+          "native <select>" interaction — popup aligned to the selected
+          item, sized to the trigger — which a future genuine native-style
+          select elsewhere might actually want. This is a plain filter
+          dropdown instead: always opens directly below the trigger, sized
+          to fit its own longest label rather than the (much narrower)
+          trigger button, since w-(--anchor-width) was clipping stage
+          labels like "INTRODUCTION COMPLETED" with no ellipsis or scroll. */}
+      <SelectContent align="start" alignItemWithTrigger={false} className="w-max min-w-48">
         <SelectItem value={ALL}>{placeholder}</SelectItem>
         {options.map((option) => (
           <SelectItem key={option.value} value={option.value}>
