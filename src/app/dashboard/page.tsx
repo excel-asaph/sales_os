@@ -8,11 +8,13 @@ import { DateRangePicker } from "@/components/date-range-picker";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { HUMAN_STAGES, TERMINAL_STAGES, stageStyle } from "@/lib/stage-display";
+import { STAGE_VALUES } from "@/lib/tools";
 import { clampMaxFollowups, FOLLOWUP_SEQUENCE } from "@/lib/followup-sequence";
 import { relativeTime } from "@/lib/relative-time";
 import { getBusinessNumbers } from "@/lib/whatsapp-numbers";
 import { getNumberFilterCookie } from "@/lib/number-filter";
 import { getDateRangeFilterCookie, resolveDateRange } from "@/lib/date-range-filter";
+import type { ConversationStage } from "@/generated/prisma/client";
 
 // Dashboard "Monitor" view (ARCHITECTURE.md §10, PRD 13.3): active
 // conversations, today's counts, conversations awaiting a human. This is
@@ -20,9 +22,23 @@ import { getDateRangeFilterCookie, resolveDateRange } from "@/lib/date-range-fil
 // now a conversation can reach HUMAN_REVIEW_REQUIRED with nothing pointing
 // a human at it. This page is that pointer.
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ stage?: string }>;
+}) {
   const session = await getSession();
   if (!session) return null;
+
+  // A page-local, shareable/bookmarkable filter — unlike the number and
+  // date-range filters below, this doesn't need to "agree" with anything
+  // elsewhere in the app, so it's a URL param (matching Customers' `q`
+  // search) rather than a cookie. An invalid/stale value (hand-edited URL,
+  // a stage that's since become terminal) just falls back to unfiltered
+  // rather than erroring.
+  const { stage: stageParam } = await searchParams;
+  const activeStage =
+    stageParam && (STAGE_VALUES as readonly string[]).includes(stageParam) ? (stageParam as ConversationStage) : undefined;
 
   // The number filter is a cookie (app-shell.tsx's switcher, via
   // /api/number-filter), not a URL param — it has to agree with what the
@@ -58,16 +74,28 @@ export default async function DashboardPage() {
   const createdInRangeWhere = rangeStart && rangeEnd ? { createdAt: { gte: rangeStart, lt: rangeEnd } } : {};
   const updatedInRangeWhere = rangeStart && rangeEnd ? { updatedAt: { gte: rangeStart, lt: rangeEnd } } : {};
 
-  const [conversations, awaitingHumanCount, pendingPaymentCount, totalConversationsCount, salesCompletedCount, businessConfig] =
+  // Baseline for the whole page: active (non-terminal) conversations in
+  // scope. The stage filter chips are counted against this same baseline
+  // (not narrowed by activeStage) so every chip — including the one
+  // currently selected — keeps showing its real count instead of
+  // disappearing or freezing once clicked.
+  const activeConversationsWhere = { ...businessScope, NOT: { currentStage: { in: TERMINAL_STAGES } } };
+
+  const [conversations, stageCounts, awaitingHumanCount, pendingPaymentCount, totalConversationsCount, salesCompletedCount, businessConfig] =
     await Promise.all([
       prisma.conversation.findMany({
-        where: { ...businessScope, NOT: { currentStage: { in: TERMINAL_STAGES } } },
+        where: { ...activeConversationsWhere, ...(activeStage ? { currentStage: activeStage } : {}) },
         include: {
           customer: true,
           messages: { orderBy: { createdAt: "desc" }, take: 1 },
           followups: { orderBy: { step: "desc" }, take: 1 },
         },
         orderBy: { updatedAt: "desc" },
+      }),
+      prisma.conversation.groupBy({
+        by: ["currentStage"],
+        where: activeConversationsWhere,
+        _count: true,
       }),
       prisma.conversation.count({ where: { ...businessScope, currentStage: { in: HUMAN_STAGES } } }),
       prisma.conversation.count({
@@ -79,6 +107,13 @@ export default async function DashboardPage() {
       }),
       prisma.businessConfig.findUnique({ where: { businessId: session.businessId } }),
     ]);
+
+  // Funnel order (STAGE_VALUES), not by count — reads like a mini pipeline
+  // rather than shuffling every time volume shifts between stages.
+  const stageChips = STAGE_VALUES.map((stage) => ({
+    stage,
+    count: stageCounts.find((s) => s.currentStage === stage)?._count ?? 0,
+  })).filter((c) => c.count > 0);
 
   const maxFollowups = clampMaxFollowups(businessConfig?.maxFollowups ?? FOLLOWUP_SEQUENCE.length);
   const numberLabels = new Map(getBusinessNumbers(business).map((n) => [n.id, n.label]));
@@ -137,10 +172,34 @@ export default async function DashboardPage() {
           />
         </div>
 
+        {stageChips.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            <Link href="/dashboard">
+              <Badge
+                variant={activeStage ? "outline" : "default"}
+                className="cursor-pointer font-medium"
+              >
+                All
+              </Badge>
+            </Link>
+            {stageChips.map(({ stage, count }) => (
+              <Link key={stage} href={`/dashboard?stage=${stage}`}>
+                <Badge
+                  className={`cursor-pointer border-transparent font-medium ${
+                    activeStage === stage ? stageStyle(stage) : "bg-secondary text-secondary-foreground"
+                  }`}
+                >
+                  {stage.replaceAll("_", " ")} · {count}
+                </Badge>
+              </Link>
+            ))}
+          </div>
+        )}
+
         {sorted.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center text-sm text-muted-foreground">
-              No active conversations.
+              {activeStage ? "No conversations in this stage." : "No active conversations."}
             </CardContent>
           </Card>
         ) : (

@@ -5,6 +5,8 @@ import { getSession } from "@/lib/auth";
 import { formatNaira } from "@/lib/currency";
 import { relativeTime } from "@/lib/relative-time";
 import { stageStyle } from "@/lib/stage-display";
+import { STAGE_VALUES } from "@/lib/tools";
+import type { ConversationStage } from "@/generated/prisma/client";
 import { clampMaxFollowups } from "@/lib/followup-sequence";
 import { getBusinessConfig } from "@/lib/knowledge";
 import { getBusinessNumbers } from "@/lib/whatsapp-numbers";
@@ -63,13 +65,22 @@ function describeFollowupEnd(type: string, payload: unknown): string {
 export default async function CustomersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; stage?: string; tag?: string }>;
 }) {
   const session = await getSession();
   if (!session) return null;
 
-  const { q } = await searchParams;
+  const { q, stage: stageParam, tag: tagParam } = await searchParams;
   const query = q?.trim();
+  // Same page-local URL-param pattern as `q` — stage/tag here describe a
+  // customer's *latest conversation* and free-text Customer.tags, neither
+  // of which Prisma can filter as part of the query below (tags is a Json
+  // array, and "stage" means the first of an already-ordered relation), so
+  // both are applied in JS after `rows` is built, same as the existing
+  // lastActivity sort just below it.
+  const activeStage =
+    stageParam && (STAGE_VALUES as readonly string[]).includes(stageParam) ? (stageParam as ConversationStage) : undefined;
+  const activeTag = tagParam?.trim() || undefined;
 
   // The number filter is a cookie (app-shell.tsx's switcher, via
   // /api/number-filter), not a URL param — it has to agree with what the
@@ -151,7 +162,7 @@ export default async function CustomersPage({
     : [];
   const lastEventByConversation = new Map(lastEvents.map((e) => [e.conversationId, e]));
 
-  const rows = customers
+  const allRows = customers
     .map((customer) => {
       const orders = customer.conversations.flatMap((c) => c.orders);
       const totalSpent = orders
@@ -192,6 +203,41 @@ export default async function CustomersPage({
     })
     .sort((a, b) => (b.lastActivity?.getTime() ?? 0) - (a.lastActivity?.getTime() ?? 0));
 
+  // Counted against allRows (not narrowed by activeStage/activeTag) so
+  // every chip — including whichever one is currently selected — keeps
+  // showing its real count instead of disappearing once clicked.
+  const stageCounts = new Map<ConversationStage, number>();
+  const tagCounts = new Map<string, number>();
+  for (const row of allRows) {
+    if (row.stage) stageCounts.set(row.stage, (stageCounts.get(row.stage) ?? 0) + 1);
+    for (const tag of row.tags) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+  }
+  // Funnel order for stages (STAGE_VALUES), same as the Conversations page;
+  // tags have no inherent order, so most-used first.
+  const stageChips = STAGE_VALUES.map((stage) => ({ stage, count: stageCounts.get(stage) ?? 0 })).filter(
+    (c) => c.count > 0
+  );
+  const tagChips = [...tagCounts.entries()]
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
+
+  const rows = allRows.filter(
+    (row) => (!activeStage || row.stage === activeStage) && (!activeTag || row.tags.includes(activeTag))
+  );
+
+  // Preserves the other two filters (and the search query) when toggling
+  // one — passing null for a key clears it instead of carrying it forward.
+  function customersHref(overrides: { stage?: string | null; tag?: string | null }) {
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    const stage = overrides.stage === null ? undefined : (overrides.stage ?? activeStage);
+    const tag = overrides.tag === null ? undefined : (overrides.tag ?? activeTag);
+    if (stage) params.set("stage", stage);
+    if (tag) params.set("tag", tag);
+    const qs = params.toString();
+    return `/customers${qs ? `?${qs}` : ""}`;
+  }
+
   return (
     <AppShell
       active="customers"
@@ -200,16 +246,59 @@ export default async function CustomersPage({
     >
       <div className="mx-auto flex max-w-5xl flex-col gap-5">
         <form action="/customers" className="max-w-sm">
+          {activeStage && <input type="hidden" name="stage" value={activeStage} />}
+          {activeTag && <input type="hidden" name="tag" value={activeTag} />}
           <div className="relative">
             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input name="q" defaultValue={query ?? ""} placeholder="Search by name or phone number" className="pl-9" />
           </div>
         </form>
 
+        {stageChips.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            <Link href={customersHref({ stage: null })}>
+              <Badge variant={activeStage ? "outline" : "default"} className="cursor-pointer font-medium">
+                All stages
+              </Badge>
+            </Link>
+            {stageChips.map(({ stage, count }) => (
+              <Link key={stage} href={customersHref({ stage })}>
+                <Badge
+                  className={`cursor-pointer border-transparent font-medium ${
+                    activeStage === stage ? stageStyle(stage) : "bg-secondary text-secondary-foreground"
+                  }`}
+                >
+                  {stage.replaceAll("_", " ")} · {count}
+                </Badge>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {tagChips.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            <Link href={customersHref({ tag: null })}>
+              <Badge variant={activeTag ? "outline" : "default"} className="cursor-pointer font-medium">
+                All tags
+              </Badge>
+            </Link>
+            {tagChips.map(({ tag, count }) => (
+              <Link key={tag} href={customersHref({ tag })}>
+                <Badge
+                  variant={activeTag === tag ? undefined : "secondary"}
+                  className="cursor-pointer font-medium"
+                >
+                  {tag} · {count}
+                </Badge>
+              </Link>
+            ))}
+          </div>
+        )}
+
         <Card className="py-0">
           {rows.length === 0 ? (
             <CardContent className="py-12 text-center text-sm text-muted-foreground">
-              {query ? `No customers match "${query}".` : "No customers yet."}
+              {query ? `No customers match "${query}".` : activeStage || activeTag ? "No customers match this filter." : "No customers yet."}
             </CardContent>
           ) : (
             <Table>
