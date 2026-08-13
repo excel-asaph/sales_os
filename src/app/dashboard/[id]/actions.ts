@@ -177,6 +177,74 @@ export async function returnToAI(formData: FormData) {
   revalidatePath("/dashboard");
 }
 
+// A payment the AI never got to check at all has no Order row yet — the
+// only code that ever creates one lives inside requestPaymentVerification
+// (src/lib/actions.ts). verifyOrderManually below only covers the case
+// where the AI already tried and an Order already exists (ESCALATED or
+// REJECTED); this covers the more common case behind today's escalations —
+// the AI never got that far — by creating the record from scratch. A human
+// who has personally confirmed the payment picks which product and amount
+// it was for (there's no existing Order to read that from), and the
+// platform links whatever receipt the customer most recently sent, same
+// "latest attachment" convention requestPaymentVerification itself uses.
+export async function createAndVerifyOrder(formData: FormData) {
+  const session = await requireSession();
+  const conversationId = String(formData.get("conversationId"));
+  const productId = String(formData.get("productId"));
+  const expectedAmount = Number(formData.get("expectedAmount"));
+
+  if (!productId || !Number.isFinite(expectedAmount) || expectedAmount <= 0) {
+    throw new Error("Choose a product and enter a valid amount.");
+  }
+
+  const conversation = await loadOwnedConversation(conversationId, session.businessId);
+  const product = await prisma.product.findUniqueOrThrow({ where: { id: productId } });
+  if (product.businessId !== session.businessId) {
+    throw new Error("Product does not belong to this business");
+  }
+
+  const agent = await prisma.humanAgent.findUniqueOrThrow({ where: { id: session.agentId } });
+
+  const receiptMessage = await prisma.message.findFirst({
+    where: { conversationId, direction: "INBOUND", type: { in: ["IMAGE", "DOCUMENT"] } },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const order = await prisma.order.create({
+    data: {
+      conversationId,
+      productId,
+      expectedAmount,
+      receiptImageUrl: receiptMessage?.mediaUrl ?? null,
+      status: "VERIFIED",
+      verifiedAt: new Date(),
+    },
+  });
+
+  const ctx: ActionContext = {
+    conversationId,
+    businessId: session.businessId,
+    customerPhoneNumber: conversation.customer.phoneNumber,
+    whatsappPhoneNumberId: conversation.whatsappPhoneNumberId ?? conversation.customer.business.whatsappPhoneNumberId ?? "",
+  };
+
+  await applyOrderVerifiedEffects(ctx, {
+    orderId: order.id,
+    expectedAmount,
+    confidence: null,
+    event: {
+      type: "ORDER_MANUALLY_VERIFIED",
+      payload: { orderId: order.id, humanAgentId: agent.id, humanAgentName: agent.name, createdManually: true },
+    },
+  });
+
+  await addCustomerTag(conversationId, "Paid");
+
+  revalidatePath(`/dashboard/${conversationId}`);
+  revalidatePath("/dashboard");
+  revalidatePath("/home");
+}
+
 // A human who has personally confirmed a payment outside the normal AI
 // flow — most often because the conversation escalated to a human before
 // the AI ever got to check the receipt itself (e.g. ai-runtime.ts's

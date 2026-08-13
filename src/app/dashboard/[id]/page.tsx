@@ -12,6 +12,7 @@ import { SubmitButton } from "@/components/submit-button";
 import { ResolveConversationButton } from "@/components/resolve-conversation-button";
 import { ReturnToAIButton } from "@/components/return-to-ai-button";
 import { VerifyOrderButton } from "@/components/verify-order-button";
+import { CreateOrderButton } from "@/components/create-order-button";
 import { DeleteConversationButton } from "@/components/delete-conversation-button";
 import { ScrollToBottomAnchor } from "@/components/scroll-to-bottom-anchor";
 import { Badge } from "@/components/ui/badge";
@@ -94,6 +95,16 @@ export default async function ConversationReviewPage({
   const customerTags = Array.isArray(tags) ? (tags as string[]) : [];
   const isLost = conversation.currentStage === "LOST_LEAD";
   const isHumanStage = HUMAN_STAGES.includes(conversation.currentStage);
+  // Only fetched when the "Record payment" button (for a payment the AI
+  // never got to check at all — no Order exists yet) can actually show, to
+  // avoid the extra query on every ordinary conversation page load.
+  const orderableProducts = isHumanStage
+    ? await prisma.product.findMany({
+        where: { businessId: session.businessId, available: true },
+        orderBy: { name: "asc" },
+        select: { id: true, name: true, price: true },
+      })
+    : [];
   // Safe to resolve without a strong warning: a human already owns it, or
   // the outcome is already final. Anything else means the AI is still
   // actively mid-sale, expecting the customer's next move.
@@ -287,6 +298,12 @@ export default async function ConversationReviewPage({
             <UserRound />
             <span className="hidden sm:inline">Customer profile</span>
           </Button>
+          {isHumanStage && (
+            <CreateOrderButton
+              conversationId={conversation.id}
+              products={orderableProducts.map((p) => ({ ...p, price: Number(p.price) }))}
+            />
+          )}
           {isHumanStage && <ReturnToAIButton conversationId={conversation.id} />}
           <ResolveConversationButton conversationId={conversation.id} requiresWarning={requiresResolveWarning} />
           {session.isAdmin && conversation.orders.length === 0 && (
