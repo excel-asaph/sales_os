@@ -6,7 +6,7 @@ import { verifyReceiptContent, type ReceiptExtraction, type PaymentAccountRef } 
 import { getBoss, FOLLOWUP_QUEUE } from "@/lib/queue";
 import { addCustomerTag } from "@/lib/customer-tags";
 import { reportPurchaseConversion } from "@/lib/meta-conversions";
-import type { ConversationStage, FactKind, FollowupReason } from "@/generated/prisma/client";
+import type { ConversationStage, FactKind, FollowupReason, Prisma } from "@/generated/prisma/client";
 
 export interface ActionContext {
   conversationId: string;
@@ -51,6 +51,8 @@ export async function executeAction(
         input.message as string,
         (input.reason as FollowupReason | undefined) ?? "GENERAL"
       );
+    case "no_reply_needed":
+      return noReplyNeeded(ctx);
     case "escalate_to_human":
       return escalateToHuman(ctx, input.reason as string, input.summary as string);
     case "tag_customer":
@@ -513,37 +515,35 @@ function describeReceiptMismatch(params: {
   return "I wasn't able to verify this receipt — could you resend it, or send a clearer copy?";
 }
 
-async function finalizeVerifiedOrder(
+/**
+ * Everything that follows from an Order actually becoming VERIFIED, shared
+ * between the AI's own verification (finalizeVerifiedOrder, below — creates
+ * the Order itself first) and a human manually verifying one the AI never
+ * got to (src/app/dashboard/[id]/actions.ts's verifyOrderManually, which
+ * updates an existing ESCALATED/REJECTED Order rather than creating a new
+ * one). Both need the identical downstream effects — conversation stage,
+ * the customer's purchase count, and Meta conversion reporting — so this is
+ * the one place that logic lives rather than drifting apart across two
+ * call sites. Takes the caller's own event (type/payload) rather than
+ * hard-coding one, since a human-driven verification is worth distinguishing
+ * in the audit trail from the AI's own.
+ */
+export async function applyOrderVerifiedEffects(
   ctx: ActionContext,
-  productId: string,
-  expectedAmount: number,
-  info: { receiptImageUrl: string | null; extractedAmount: number | null; extractedBank: string | null; confidence: number }
+  params: {
+    orderId: string;
+    expectedAmount: number;
+    confidence: number | null;
+    event: { type: string; payload: Prisma.InputJsonValue };
+  }
 ) {
-  const order = await prisma.order.create({
-    data: {
-      conversationId: ctx.conversationId,
-      productId,
-      expectedAmount,
-      receiptImageUrl: info.receiptImageUrl,
-      extractedAmount: info.extractedAmount,
-      extractedBank: info.extractedBank,
-      verificationConfidence: info.confidence,
-      status: "VERIFIED",
-      verifiedAt: new Date(),
-    },
-  });
-
   await prisma.$transaction([
     prisma.conversation.update({
       where: { id: ctx.conversationId },
-      data: { currentStage: "PAYMENT_VERIFIED", confidence: info.confidence },
+      data: { currentStage: "PAYMENT_VERIFIED", ...(params.confidence !== null ? { confidence: params.confidence } : {}) },
     }),
     prisma.event.create({
-      data: {
-        conversationId: ctx.conversationId,
-        type: "PAYMENT_VERIFIED",
-        payload: { orderId: order.id, confidence: info.confidence },
-      },
+      data: { conversationId: ctx.conversationId, type: params.event.type, payload: params.event.payload },
     }),
   ]);
 
@@ -569,12 +569,12 @@ async function finalizeVerifiedOrder(
   // verified.
   const conversionResult = await reportPurchaseConversion({
     conversationId: ctx.conversationId,
-    value: expectedAmount,
+    value: params.expectedAmount,
     currency: "NGN",
   });
   await prisma.$transaction([
     prisma.order.update({
-      where: { id: order.id },
+      where: { id: params.orderId },
       data: {
         metaConversionReportReason: conversionResult.reported ? "reported" : conversionResult.reason,
         ...(conversionResult.reported ? { metaConversionReportedAt: new Date() } : {}),
@@ -584,10 +584,38 @@ async function finalizeVerifiedOrder(
       data: {
         conversationId: ctx.conversationId,
         type: "META_CONVERSION_REPORTED",
-        payload: { orderId: order.id, ...conversionResult },
+        payload: { orderId: params.orderId, ...conversionResult },
       },
     }),
   ]);
+}
+
+async function finalizeVerifiedOrder(
+  ctx: ActionContext,
+  productId: string,
+  expectedAmount: number,
+  info: { receiptImageUrl: string | null; extractedAmount: number | null; extractedBank: string | null; confidence: number }
+) {
+  const order = await prisma.order.create({
+    data: {
+      conversationId: ctx.conversationId,
+      productId,
+      expectedAmount,
+      receiptImageUrl: info.receiptImageUrl,
+      extractedAmount: info.extractedAmount,
+      extractedBank: info.extractedBank,
+      verificationConfidence: info.confidence,
+      status: "VERIFIED",
+      verifiedAt: new Date(),
+    },
+  });
+
+  await applyOrderVerifiedEffects(ctx, {
+    orderId: order.id,
+    expectedAmount,
+    confidence: info.confidence,
+    event: { type: "PAYMENT_VERIFIED", payload: { orderId: order.id, confidence: info.confidence } },
+  });
 
   return {
     verified: true,
@@ -748,6 +776,13 @@ async function createFollowup(
     },
   });
   return { scheduled: true, scheduledFor };
+}
+
+async function noReplyNeeded(ctx: ActionContext) {
+  await prisma.event.create({
+    data: { conversationId: ctx.conversationId, type: "NO_REPLY_NEEDED", payload: {} },
+  });
+  return { acknowledged: true };
 }
 
 async function escalateToHuman(ctx: ActionContext, reason: string, summary: string) {

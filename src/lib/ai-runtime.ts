@@ -34,6 +34,19 @@ function wasCustomerMessaged(toolName: string, result: unknown): boolean {
   return r.sent === true || r.delivered === true;
 }
 
+// Distinct from wasCustomerMessaged: the model explicitly decided the
+// customer's message needs no reply (a bare "ok", a thumbs-up) rather than
+// getting stuck. Ending a turn silently used to be indistinguishable from
+// this and always escalated — which meant a harmless "ok" one message
+// before a real, unrelated payment receipt could flip the conversation to
+// HUMAN_REVIEW_REQUIRED and lock the AI out of ever seeing that receipt
+// (confirmed in production, 2026-08-13). This tool call is the model's way
+// of saying "I looked, nothing to do" without that being treated the same
+// as silence.
+function wasNoReplyDeclared(toolName: string): boolean {
+  return toolName === "no_reply_needed";
+}
+
 /**
  * The AI Employee Runtime (ARCHITECTURE.md §7): one reasoning loop per
  * customer turn. The model reads the Conversation Brain (not the message
@@ -85,6 +98,7 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
 
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: brainContent }];
   let hasMessagedCustomer = false;
+  let noReplyDeclared = false;
 
   for (let iteration = 0; iteration < MAX_TOOL_ITERATIONS; iteration++) {
     const response = await claude.messages.create({
@@ -128,14 +142,17 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
     messages.push({ role: "assistant", content: response.content });
 
     if (response.stop_reason !== "tool_use") {
-      // end_turn without ever calling send_message means nothing was
-      // communicated to the customer — treat as a low-confidence outcome
-      // rather than silently doing nothing. Previously this only actually
-      // escalated for max_tokens specifically; the far more common ordinary
-      // end_turn case (the model just stops — plain prose instead of a
-      // tool call, or a turn that only called non-messaging tools) fell
-      // through with no trace at all, confirmed in production as one real
-      // way a customer got left in silence (2026-08-12).
+      // end_turn without ever calling send_message (and without an explicit
+      // no_reply_needed) means nothing was communicated to the customer and
+      // the model never said why — treat as a low-confidence outcome rather
+      // than silently doing nothing. Previously this only actually escalated
+      // for max_tokens specifically; the far more common ordinary end_turn
+      // case (the model just stops — plain prose instead of a tool call, or
+      // a turn that only called non-messaging tools) fell through with no
+      // trace at all, confirmed in production as one real way a customer got
+      // left in silence (2026-08-12). no_reply_needed (added 2026-08-13)
+      // gives the model a way to end a turn on a message that plainly needs
+      // no reply without tripping this — see its tool description.
       if (response.stop_reason === "max_tokens") {
         console.warn(`AI Employee Runtime: hit max_tokens on conversation ${conversationId}`);
         await executeAction(
@@ -143,7 +160,7 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
           { reason: "max_tokens", summary: "The AI's response was cut off before completing; needs human review." },
           ctx
         );
-      } else if (!hasMessagedCustomer) {
+      } else if (!hasMessagedCustomer && !noReplyDeclared) {
         console.warn(`AI Employee Runtime: ended turn without messaging the customer on conversation ${conversationId}`);
         await executeAction(
           "escalate_to_human",
@@ -166,6 +183,7 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
       try {
         const result = await executeAction(block.name, block.input as Record<string, unknown>, ctx);
         if (wasCustomerMessaged(block.name, result)) hasMessagedCustomer = true;
+        if (wasNoReplyDeclared(block.name)) noReplyDeclared = true;
         toolResults.push({
           type: "tool_result",
           tool_use_id: block.id,

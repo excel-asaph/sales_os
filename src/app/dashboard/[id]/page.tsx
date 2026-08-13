@@ -10,6 +10,8 @@ import type { ConversationStage, MessageType } from "@/generated/prisma/client";
 import { AppShell } from "@/components/app-shell";
 import { SubmitButton } from "@/components/submit-button";
 import { ResolveConversationButton } from "@/components/resolve-conversation-button";
+import { ReturnToAIButton } from "@/components/return-to-ai-button";
+import { VerifyOrderButton } from "@/components/verify-order-button";
 import { DeleteConversationButton } from "@/components/delete-conversation-button";
 import { ScrollToBottomAnchor } from "@/components/scroll-to-bottom-anchor";
 import { Badge } from "@/components/ui/badge";
@@ -214,6 +216,15 @@ export default async function ConversationReviewPage({
                     </>
                   )}
                 </div>
+                {order.status !== "VERIFIED" && (
+                  <div className="pt-1">
+                    <VerifyOrderButton
+                      conversationId={conversation.id}
+                      orderId={order.id}
+                      productName={order.product.name}
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </CardContent>
@@ -276,6 +287,7 @@ export default async function ConversationReviewPage({
             <UserRound />
             <span className="hidden sm:inline">Customer profile</span>
           </Button>
+          {isHumanStage && <ReturnToAIButton conversationId={conversation.id} />}
           <ResolveConversationButton conversationId={conversation.id} requiresWarning={requiresResolveWarning} />
           {session.isAdmin && conversation.orders.length === 0 && (
             <DeleteConversationButton conversationId={conversation.id} />

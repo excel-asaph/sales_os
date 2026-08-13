@@ -159,6 +159,12 @@ export const actionContractTools: Anthropic.Tool[] = [
     },
   },
   {
+    name: "no_reply_needed",
+    description:
+      "Declare that the customer's message needs no reply at all — a bare acknowledgment ('ok', 'thanks', a thumbs-up), and nothing is otherwise pending on your side. Call this instead of just ending your turn with no tool call: the platform can't otherwise tell 'nothing needed doing' apart from you getting stuck, and treats a turn with no reply and no explanation as a failure requiring human review. Never call this if there's outstanding work you haven't done yet — unverified payment evidence, an unanswered question, information you still owe the customer — do that instead.",
+    input_schema: { type: "object", properties: {} },
+  },
+  {
     name: "escalate_to_human",
     description:
       "Hand the conversation off to a human agent. Use this whenever confidence is low, the situation is outside routine sales (refunds, complaints, anger, medical claims), or the customer asks for a human.",
