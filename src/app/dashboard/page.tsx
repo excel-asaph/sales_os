@@ -6,6 +6,7 @@ import { AppShell } from "@/components/app-shell";
 import { StatTile } from "@/components/stat-tile";
 import { DateRangePicker } from "@/components/date-range-picker";
 import { FilterDropdown } from "@/components/filter-dropdown";
+import { isSystemNote, stripSystemNotePrefix } from "@/lib/system-notes";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { HUMAN_STAGES, TERMINAL_STAGES, stageStyle } from "@/lib/stage-display";
@@ -232,7 +233,9 @@ export default async function DashboardPage({
                       </div>
                       <div className="truncate text-sm text-muted-foreground">
                         {latest
-                          ? `${latest.direction === "INBOUND" ? "Customer" : latest.sender === "AI" ? "AI" : "You"}: ${latest.content ?? "(no text)"}`
+                          ? isSystemNote(latest.content)
+                            ? `System note: ${stripSystemNotePrefix(latest.content!)}`
+                            : `${latest.direction === "INBOUND" ? "Customer" : latest.sender === "AI" ? "AI" : "You"}: ${latest.content ?? "(no text)"}`
                           : "No messages yet"}
                       </div>
                     </div>

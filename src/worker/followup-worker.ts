@@ -6,6 +6,7 @@ import { sendWhatsAppText, sendWhatsAppTemplate } from "@/lib/whatsapp-send";
 import { isWithinCustomerServiceWindow } from "@/lib/whatsapp-window";
 import { FOLLOWUP_SEQUENCE, stepDefinition, clampMaxFollowups } from "@/lib/followup-sequence";
 import { addCustomerTag } from "@/lib/customer-tags";
+import { formatSystemNote, describeTemplateFallback } from "@/lib/system-notes";
 import type { ConversationStage } from "@/generated/prisma/client";
 
 // The one Meta-approved re-engagement template — used when a follow-up
@@ -178,8 +179,7 @@ async function deliverFollowup(followup: LoadedFollowup): Promise<DeliveryResult
         direction: "OUTBOUND",
         sender: "AI",
         type: "TEXT",
-        content:
-          "[Re-engagement template sent — outside the 24h messaging window, so a fixed pre-approved message went out instead of a composed follow-up.]",
+        content: formatSystemNote(describeTemplateFallback()),
       },
     });
     return "template";

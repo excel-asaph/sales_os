@@ -33,6 +33,7 @@ import {
   milestoneIndexForStage,
 } from "@/lib/stage-display";
 import { clampMaxFollowups, FOLLOWUP_SEQUENCE } from "@/lib/followup-sequence";
+import { isSystemNote, stripSystemNotePrefix } from "@/lib/system-notes";
 import { sendHumanReply } from "./actions";
 
 // Dashboard "Review" view (ARCHITECTURE.md §10): per-conversation
@@ -363,6 +364,23 @@ export default async function ConversationReviewPage({
             <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
               <CardContent className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
                 {conversation.messages.map((message) => {
+                  // An internal record of what happened (e.g. "sent the
+                  // approved template instead of a composed reply"), not
+                  // something the customer actually received — rendering
+                  // it as an ordinary chat bubble made it read as if the
+                  // customer got this literal bracketed sentence, when
+                  // they'd actually gotten Meta's real template text
+                  // (confirmed in production, 2026-08-13).
+                  if (isSystemNote(message.content)) {
+                    return (
+                      <div key={message.id} className="flex justify-center">
+                        <div className="max-w-[90%] rounded-md bg-muted/50 px-3 py-1.5 text-center text-xs text-muted-foreground italic">
+                          {stripSystemNotePrefix(message.content!)}
+                          <span className="ml-1.5 not-italic">· {message.createdAt.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    );
+                  }
                   const fromCustomer = message.direction === "INBOUND";
                   const fromHuman = message.sender === "HUMAN";
                   return (

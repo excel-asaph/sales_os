@@ -11,6 +11,7 @@ import { addCustomerTag } from "@/lib/customer-tags";
 import { cancelPendingFollowups } from "@/lib/followups";
 import { runAIEmployeeTurn } from "@/lib/ai-runtime";
 import { HUMAN_STAGES } from "@/lib/stage-display";
+import { formatSystemNote, describeTemplateFallback } from "@/lib/system-notes";
 import type { ConversationStage } from "@/generated/prisma/client";
 
 async function loadOwnedConversation(conversationId: string, businessId: string) {
@@ -69,7 +70,7 @@ export async function sendHumanReply(formData: FormData) {
         type: "TEXT",
         content: withinWindow
           ? text
-          : `[Re-engagement template sent — this customer hasn't messaged in over 24 hours, so WhatsApp only allowed the approved template through, not this text. Intended reply: "${text}"]`,
+          : formatSystemNote(`${describeTemplateFallback()} Your intended reply wasn't sent: "${text}"`),
       },
     }),
     // Picking up a HUMAN_REVIEW_REQUIRED conversation by replying to it is
