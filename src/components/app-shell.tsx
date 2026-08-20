@@ -104,6 +104,7 @@ export async function AppShell({
   const awaitingHumanWhere = {
     customer: { businessId: session.businessId },
     currentStage: { in: Array.from(HUMAN_STAGES) },
+    ...(effectiveNumberId ? { whatsappPhoneNumberId: effectiveNumberId } : {}),
   };
   const [awaitingHuman, awaitingHumanCount] = await Promise.all([
     prisma.conversation.findMany({
