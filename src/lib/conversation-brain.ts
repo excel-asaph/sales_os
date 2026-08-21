@@ -35,6 +35,13 @@ export async function loadConversationBrain(conversationId: string) {
       returningCustomer: conversation.customer.returningCustomer,
       lifetimePurchases: conversation.customer.lifetimePurchases,
       preferredLanguage: conversation.customer.preferredLanguage,
+      // Customer-level, not conversation-level — survives a fork onto a
+      // brand-new Conversation row (a prior LOST_LEAD, a fresh cold
+      // message weeks later). Without this, a customer who explicitly
+      // declined ("no", "stop messaging me") starts every future
+      // conversation looking like a first-time lead, with no memory that
+      // this was already asked and already answered.
+      tags: Array.isArray(conversation.customer.tags) ? (conversation.customer.tags as string[]) : [],
     },
     currentStage: conversation.currentStage,
     currentObjective: conversation.currentObjective,
@@ -58,6 +65,9 @@ export function renderConversationBrain(
   );
   if (brain.customer.preferredLanguage) {
     lines.push(`Preferred language: ${brain.customer.preferredLanguage}`);
+  }
+  if (brain.customer.tags.length > 0) {
+    lines.push(`Customer tags (from any past conversation): ${brain.customer.tags.join(", ")}`);
   }
   lines.push(`Current stage: ${brain.currentStage}`);
   if (brain.currentObjective) lines.push(`Current objective: ${brain.currentObjective}`);
