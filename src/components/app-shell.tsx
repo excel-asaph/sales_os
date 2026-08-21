@@ -12,6 +12,7 @@ import {
   Check,
   ChevronsUpDown,
   Phone,
+  TrendingUp,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getViewerContext } from "@/lib/viewer";
@@ -54,7 +55,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type NavKey = "home" | "conversations" | "customers" | "products" | "payment-accounts" | "team" | "settings" | "manage";
+type NavKey = "home" | "conversations" | "customers" | "trends" | "products" | "payment-accounts" | "team" | "settings" | "manage";
 
 const HUMAN_STAGES = ["HUMAN_REVIEW_REQUIRED", "HUMAN_ASSIGNED"] as const;
 
@@ -144,6 +145,13 @@ export async function AppShell({
       href: "/customers",
       label: "Customers",
       icon: BookUser,
+      adminOnly: false,
+    },
+    {
+      key: "trends",
+      href: "/trends",
+      label: "Trends",
+      icon: TrendingUp,
       adminOnly: false,
     },
     {
