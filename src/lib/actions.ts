@@ -565,6 +565,23 @@ export async function applyOrderVerifiedEffects(
   // already in.
   await cancelPendingFollowups(ctx.conversationId, "order_verified");
 
+  // Nothing else ever resolves a TASK fact (conversation-brain.ts renders
+  // every unresolved one as "Outstanding tasks" on every future turn,
+  // forever) — a "Product delivered before payment... Awaiting payment of
+  // NGN X" TASK fact from the deliver-before-payment flow would otherwise
+  // sit there permanently, and a later, unrelated customer message (a
+  // product question, anything) would have the AI reading real payment as
+  // still outstanding and reflexively re-opening a "still waiting for your
+  // payment" follow-up on an already-paid sale (confirmed in production,
+  // 2026-08-14/19 — see conversation cmsstrjaa01m71mryqvo5vupv). A verified
+  // payment is strong evidence any task tracking "get this paid" is done,
+  // so clear all of them here rather than trying to match the one that
+  // caused it.
+  await prisma.conversationFact.updateMany({
+    where: { conversationId: ctx.conversationId, kind: "TASK", resolved: false },
+    data: { resolved: true },
+  });
+
   // Customer.lifetimePurchases/returningCustomer (read into the AI's brain —
   // conversation-brain.ts — and shown on the Customer Profile page) were
   // never actually written anywhere, so every customer looked first-time
