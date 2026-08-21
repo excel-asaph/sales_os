@@ -69,6 +69,10 @@ async function handleFollowup(followupId: string) {
   if (!followup || followup.sent || followup.cancelled) return;
 
   const { conversation } = followup;
+  const config = await prisma.businessConfig.findUnique({
+    where: { businessId: conversation.customer.businessId },
+  });
+
   // Verified SINCE this follow-up was scheduled, not "ever" — conversations
   // now persist across multiple purchases, so an all-time check would let
   // a stale verified order from an earlier, completed purchase wrongly
@@ -77,8 +81,12 @@ async function handleFollowup(followupId: string) {
     (order) => order.status === "VERIFIED" && order.verifiedAt !== null && order.verifiedAt > followup.createdAt
   );
   const stageBlocksFollowup = BLOCKS_FOLLOWUP.has(conversation.currentStage);
+  // Business-wide kill switch (Settings) — checked here too, not just in
+  // createFollowup, so anything already scheduled before the pause also
+  // stops rather than firing anyway.
+  const businessPaused = config?.followupsEnabled === false;
 
-  if (orderVerified || stageBlocksFollowup) {
+  if (orderVerified || stageBlocksFollowup || businessPaused) {
     await prisma.$transaction([
       prisma.followup.update({ where: { id: followup.id }, data: { cancelled: true } }),
       prisma.event.create({
@@ -87,7 +95,11 @@ async function handleFollowup(followupId: string) {
           type: "FOLLOWUP_CANCELLED",
           payload: {
             followupId: followup.id,
-            reason: orderVerified ? "order_already_verified" : `conversation_stage_${conversation.currentStage}`,
+            reason: orderVerified
+              ? "order_already_verified"
+              : businessPaused
+                ? "business_paused"
+                : `conversation_stage_${conversation.currentStage}`,
           },
         },
       }),
@@ -95,9 +107,6 @@ async function handleFollowup(followupId: string) {
     return;
   }
 
-  const config = await prisma.businessConfig.findUnique({
-    where: { businessId: conversation.customer.businessId },
-  });
   const maxSteps = clampMaxFollowups(config?.maxFollowups ?? FOLLOWUP_SEQUENCE.length);
 
   // A step beyond the business's configured cap is a silent "did they

@@ -23,3 +23,33 @@ export async function cancelPendingFollowups(conversationId: string, reason: str
     });
   }
 }
+
+/**
+ * The business-wide equivalent of cancelPendingFollowups above — used when
+ * BusinessConfig.followupsEnabled flips to false (Settings), rather than
+ * one conversation reaching a stage that blocks follow-ups on its own.
+ * Cancels outright rather than deferring: a follow-up that would otherwise
+ * fire mid-pause and get "caught up" later reads as a stale, oddly-timed
+ * message once it finally sends, the same failure mode already fixed
+ * elsewhere this session — better to just not send it.
+ */
+export async function cancelAllPendingFollowupsForBusiness(businessId: string, reason: string) {
+  const pending = await prisma.followup.findMany({
+    where: { sent: false, cancelled: false, conversation: { customer: { businessId } } },
+    select: { conversationId: true },
+    distinct: ["conversationId"],
+  });
+  if (pending.length === 0) return;
+
+  await prisma.followup.updateMany({
+    where: { sent: false, cancelled: false, conversation: { customer: { businessId } } },
+    data: { cancelled: true },
+  });
+  await prisma.event.createMany({
+    data: pending.map(({ conversationId }) => ({
+      conversationId,
+      type: "FOLLOWUP_CANCELLED",
+      payload: { reason },
+    })),
+  });
+}

@@ -49,6 +49,7 @@ export async function getBusinessConfig(businessId: string) {
       maxFollowups: 3,
       escalationConfidenceThreshold: 0.7,
       aiHandlesReceiptIssues: true,
+      followupsEnabled: true,
       greetingTemplate: null,
       playbook: null,
     }

@@ -788,6 +788,14 @@ async function createFollowup(
   message: string,
   reason: FollowupReason = "GENERAL"
 ) {
+  // Business-wide kill switch (Settings) — refuse to start a new sequence
+  // at all while paused, so nothing accumulates that the worker would just
+  // have to cancel again on its own once it fires.
+  const config = await getBusinessConfig(ctx.businessId);
+  if (!config.followupsEnabled) {
+    return { scheduled: false, paused: true };
+  }
+
   const existing = await prisma.followup.findFirst({
     where: { conversationId: ctx.conversationId, sent: false, cancelled: false },
   });

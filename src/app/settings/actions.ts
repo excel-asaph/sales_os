@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/lib/auth";
 import { PLAYBOOK_SCHEMA } from "@/lib/playbook-schema";
 import { clampMaxFollowups } from "@/lib/followup-sequence";
+import { cancelAllPendingFollowupsForBusiness } from "@/lib/followups";
 
 export async function updateDeliveryPolicy(formData: FormData) {
   const session = await requireAdminSession();
@@ -48,6 +49,26 @@ export async function updateMaxFollowups(formData: FormData) {
 // read-modify-write rather than a single-column update. Fine at this
 // business's scale (one admin editing at a time); a real concurrent-write
 // story would need a different storage shape, not a bigger transaction.
+export async function updateFollowupsEnabled(formData: FormData) {
+  const session = await requireAdminSession();
+  const followupsEnabled = formData.get("followupsEnabled") === "true";
+
+  await prisma.businessConfig.update({
+    where: { businessId: session.businessId },
+    data: { followupsEnabled },
+  });
+
+  // Cancel outright rather than deferring — see the schema comment on
+  // BusinessConfig.followupsEnabled. Idempotent: a no-op if nothing was
+  // actually pending (e.g. saving "Paused" again with everything already
+  // cancelled from the first save).
+  if (!followupsEnabled) {
+    await cancelAllPendingFollowupsForBusiness(session.businessId, "business_paused");
+  }
+
+  revalidatePath("/settings");
+}
+
 export async function updatePlaybookTemplate(formData: FormData) {
   const session = await requireAdminSession();
   const key = String(formData.get("key") ?? "");

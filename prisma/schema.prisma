@@ -139,6 +139,14 @@ model BusinessConfig {
   /// non-payment escalation (refunds, complaints, anger) — those always
   /// reach a human.
   aiHandlesReceiptIssues       Boolean  @default(true) @map("ai_handles_receipt_issues")
+  /// Business-wide kill switch for the Follow-Up Engine. When false, the
+  /// worker (BLOCKS_FOLLOWUP check) cancels anything already scheduled and
+  /// createFollowup (src/lib/actions.ts) refuses to start new sequences —
+  /// so nothing accumulates that would need cancelling again on resume.
+  /// Settings → General. No "catch up on resume": pausing cancels pending
+  /// follow-ups outright rather than deferring them, deliberately, to
+  /// avoid a stale nudge arriving days late.
+  followupsEnabled             Boolean  @default(true) @map("followups_enabled")
   businessHours               Json?    @map("business_hours")
   greetingTemplate            String?  @map("greeting_template")
   /// Sales Playbook (PRD 11.3, Knowledge Engine) — this business's own

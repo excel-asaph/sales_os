@@ -14,6 +14,7 @@ import {
   updateDeliveryPolicy,
   updatePlaybookTemplate,
   updateMaxFollowups,
+  updateFollowupsEnabled,
   updateAiHandlesReceiptIssues,
   addFaqEntry,
   updateFaqEntry,
@@ -54,6 +55,7 @@ export default async function SettingsPage() {
   const deliverBeforePayment = business.config?.deliverBeforePayment ?? false;
   const aiHandlesReceiptIssues = business.config?.aiHandlesReceiptIssues ?? true;
   const maxFollowups = business.config?.maxFollowups ?? FOLLOWUP_SEQUENCE.length;
+  const followupsEnabled = business.config?.followupsEnabled ?? true;
   const playbook = (business.config?.playbook as Record<string, string> | null) ?? {};
 
   const followupTimeline = FOLLOWUP_SEQUENCE.reduce<Array<(typeof FOLLOWUP_SEQUENCE)[number] & { cumulativeHours: number }>>(
@@ -181,6 +183,43 @@ export default async function SettingsPage() {
                     ))}
                   </RadioGroup>
                   <SubmitButton className="self-start" pendingLabel="Saving…" successMessage="Follow-up limit saved">
+                    Save
+                  </SubmitButton>
+                </form>
+              </CardContent>
+            </Card>
+
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>Pause follow-ups</CardTitle>
+                <CardDescription>
+                  Stop automated check-ins across every number on this business — useful while deprioritizing a
+                  number or pausing outreach for a while. Pausing cancels every currently pending follow-up
+                  outright rather than delaying it; nothing gets sent late once you turn this back on, and nothing
+                  new gets scheduled while it&apos;s off.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form action={updateFollowupsEnabled} className="flex flex-col gap-5">
+                  <RadioGroup name="followupsEnabled" defaultValue={followupsEnabled ? "true" : "false"}>
+                    <Label className="flex items-start gap-3 rounded-lg border p-4 has-data-checked:border-primary has-data-checked:bg-primary/5">
+                      <RadioGroupItem value="true" className="mt-0.5" />
+                      <span className="flex flex-col gap-0.5 text-sm font-normal">
+                        <span className="font-medium">Enabled</span>
+                        <span className="text-muted-foreground">Normal — the AI checks in on quiet customers</span>
+                      </span>
+                    </Label>
+                    <Label className="flex items-start gap-3 rounded-lg border p-4 has-data-checked:border-primary has-data-checked:bg-primary/5">
+                      <RadioGroupItem value="false" className="mt-0.5" />
+                      <span className="flex flex-col gap-0.5 text-sm font-normal">
+                        <span className="font-medium">Paused</span>
+                        <span className="text-muted-foreground">
+                          No automated check-ins anywhere on this business until turned back on
+                        </span>
+                      </span>
+                    </Label>
+                  </RadioGroup>
+                  <SubmitButton className="self-start" pendingLabel="Saving…" successMessage="Follow-up pause setting saved">
                     Save
                   </SubmitButton>
                 </form>
