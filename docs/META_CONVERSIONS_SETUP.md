@@ -87,6 +87,27 @@ likelihood:
   as an asset in Business Settings, or lacks `business_management` scope
   (messaging-only permissions aren't enough for the Dataset API).
 
+## Setting up the actual ad campaign (once the dataset/env vars are correct)
+
+Two things that look unrelated to this doc's main topic but caused real
+confusion the first time (2026-08-22) and will again if not written down:
+
+- **"Conversion location" in Ads Manager must be `Messaging Apps → WhatsApp`,
+  never `Website`.** These are two entirely separate tracks — Website uses a
+  Pixel/CAPI dataset for on-site purchases (irrelevant here, this business
+  has no website checkout); only Messaging Apps surfaces the WhatsApp number
+  picker and the correct Conversions API dataset (`Truefix Wellness Event
+  Data`) as selectable options at all. If the campaign is set to Website, the
+  datasets offered will be unrelated website-tracking ones from whatever
+  other campaigns exist on that ad account — that's a strong sign the
+  conversion location is wrong, not that the dataset setup is broken.
+- **The number picker in the ad set pulls from the Facebook Page's own
+  WhatsApp connection, not the Business Manager/WABA registration.** Even
+  after everything above is correct, a number can still be missing from that
+  dropdown until it's separately linked via "Connect another number" (OTP
+  verification) or Page → Settings → WhatsApp. Two different connections,
+  easy to conflate.
+
 ## Scope — single number, deliberately
 
 This whole setup assumes **one number is running ads at a time**. If this
