@@ -47,6 +47,20 @@ function wasNoReplyDeclared(toolName: string): boolean {
   return toolName === "no_reply_needed";
 }
 
+// A third, equally valid way for a turn to legitimately end without
+// messaging the customer: the model already handed the conversation to a
+// human (e.g. a send genuinely failed and it correctly diagnosed that as a
+// technical issue). Without tracking this separately, the post-loop
+// fallback below couldn't tell that apart from true silence and escalated
+// a second time with a generic reason — clobbering the model's real
+// diagnosis with "the AI finished its turn without sending a reply"
+// (confirmed in production, 2026-08-24: a genuinely useful escalation
+// summary describing a WhatsApp Graph API failure got overwritten within
+// two seconds by this exact fallback).
+function wasEscalated(toolName: string): boolean {
+  return toolName === "escalate_to_human";
+}
+
 /**
  * The AI Employee Runtime (ARCHITECTURE.md §7): one reasoning loop per
  * customer turn. The model reads the Conversation Brain (not the message
@@ -55,7 +69,7 @@ function wasNoReplyDeclared(toolName: string): boolean {
  * (src/lib/actions.ts) — the model never touches the database or
  * WhatsApp directly (PRD Philosophy 3).
  */
-export async function runAIEmployeeTurn(conversationId: string, followupNote?: string) {
+export async function runAIEmployeeTurn(conversationId: string, followupNote?: string): Promise<boolean> {
   const conversation = await prisma.conversation.findUniqueOrThrow({
     where: { id: conversationId },
     include: { customer: { include: { business: true } } },
@@ -65,7 +79,7 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
   // the AI (PRD 5.11: exactly one active workflow, and a human taking
   // over means the AI pauses on that conversation).
   if (conversation.currentStage === "HUMAN_REVIEW_REQUIRED" || conversation.currentStage === "HUMAN_ASSIGNED") {
-    return;
+    return false;
   }
 
   const businessId = conversation.customer.businessId;
@@ -99,6 +113,7 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: brainContent }];
   let hasMessagedCustomer = false;
   let noReplyDeclared = false;
+  let escalatedToHuman = false;
 
   for (let iteration = 0; iteration < MAX_TOOL_ITERATIONS; iteration++) {
     const response = await claude.messages.create({
@@ -136,7 +151,7 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
         { reason: "model_refusal", summary: "The AI declined to respond to this conversation; needs human review." },
         ctx
       );
-      return;
+      return false;
     }
 
     messages.push({ role: "assistant", content: response.content });
@@ -160,7 +175,7 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
           { reason: "max_tokens", summary: "The AI's response was cut off before completing; needs human review." },
           ctx
         );
-      } else if (!hasMessagedCustomer && !noReplyDeclared) {
+      } else if (!hasMessagedCustomer && !noReplyDeclared && !escalatedToHuman) {
         console.warn(`AI Employee Runtime: ended turn without messaging the customer on conversation ${conversationId}`);
         await executeAction(
           "escalate_to_human",
@@ -171,7 +186,7 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
           ctx
         );
       }
-      return;
+      return hasMessagedCustomer;
     }
 
     const toolUseBlocks = response.content.filter(
@@ -184,6 +199,7 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
         const result = await executeAction(block.name, block.input as Record<string, unknown>, ctx);
         if (wasCustomerMessaged(block.name, result)) hasMessagedCustomer = true;
         if (wasNoReplyDeclared(block.name)) noReplyDeclared = true;
+        if (wasEscalated(block.name)) escalatedToHuman = true;
         toolResults.push({
           type: "tool_result",
           tool_use_id: block.id,
@@ -202,11 +218,14 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
   }
 
   console.warn(`AI Employee Runtime: exceeded ${MAX_TOOL_ITERATIONS} tool iterations on conversation ${conversationId}`);
-  await executeAction(
-    "escalate_to_human",
-    { reason: "tool_loop_limit", summary: "The AI took too many actions in one turn without finishing; needs human review." },
-    ctx
-  );
+  if (!escalatedToHuman) {
+    await executeAction(
+      "escalate_to_human",
+      { reason: "tool_loop_limit", summary: "The AI took too many actions in one turn without finishing; needs human review." },
+      ctx
+    );
+  }
+  return hasMessagedCustomer;
 }
 
 // Visibility into whether prompt caching is actually working — until this

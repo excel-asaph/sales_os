@@ -145,7 +145,13 @@ async function handleFollowup(followupId: string) {
   }
 
   const delivery = await deliverFollowup(followup);
-  if (delivery === "skipped") return; // stays unsent — retried whenever this job is next redelivered
+  // Two different reasons land here: outside the 24h window with no
+  // template configured (stays unsent, retried whenever this job is next
+  // redelivered), or the AI turn ended in an escalation rather than a real
+  // send (already cancelled as a side effect of that escalation — nothing
+  // further to do, and no redelivery will occur since handleFollowup's own
+  // top guard skips anything already cancelled).
+  if (delivery === "skipped") return;
 
   await prisma.$transaction([
     prisma.followup.update({ where: { id: followup.id }, data: { sent: true } }),
@@ -198,7 +204,18 @@ async function deliverFollowup(followup: LoadedFollowup): Promise<DeliveryResult
   const note = `[Scheduled follow-up firing now (step ${followup.step} of this sequence). The customer has not replied since this was scheduled. This step's intent: ${angle} Compose it fresh via send_message — you don't have to reuse any previously planned wording. If the situation has genuinely changed (they already replied, paid, or a follow-up no longer fits), do nothing instead.]`;
 
   try {
-    await runAIEmployeeTurn(conversation.id, note);
+    const messaged = await runAIEmployeeTurn(conversation.id, note);
+    if (!messaged) {
+      // The turn ended without actually sending anything — most often
+      // because it escalated to a human (e.g. a real WhatsApp send
+      // failure), not because there was genuinely nothing to say.
+      // Reporting this as delivered would falsely mark this follow-up
+      // sent and schedule a next step on a conversation that's now
+      // sitting in human review — instead, leave it exactly as whatever
+      // it already is (escalating cancels pending follow-ups on its own)
+      // and let handleFollowup's "skipped" branch do nothing further.
+      return "skipped";
+    }
   } catch (error) {
     // Template fallback if generation fails — the customer still gets a
     // reminder even if the Claude call errors.
