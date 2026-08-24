@@ -796,6 +796,27 @@ async function createFollowup(
     return { scheduled: false, paused: true };
   }
 
+  // A customer already tagged "Uninterested" (an explicit past decline, or
+  // a fully exhausted sequence — both apply the same tag) gets no automatic
+  // follow-up on a fresh conversation unless *this* conversation has
+  // already shown real renewed interest — evidenced by the stage having
+  // moved off NEW_LEAD, which only happens when the AI reasoned its way
+  // there off something the customer actually said, not just "they
+  // messaged in again." Nudging someone who already declined, on nothing
+  // but an ambiguous message, is exactly the pattern that risks WhatsApp
+  // spam/opt-out complaints and damages the number's quality rating
+  // (Trends → Number health) — enforced here rather than only in the
+  // system prompt, since a compliance-sensitive rule shouldn't depend on
+  // the model remembering it every turn.
+  const conversation = await prisma.conversation.findUniqueOrThrow({
+    where: { id: ctx.conversationId },
+    include: { customer: { select: { tags: true } } },
+  });
+  const customerTags = Array.isArray(conversation.customer.tags) ? (conversation.customer.tags as string[]) : [];
+  if (customerTags.includes("Uninterested") && conversation.currentStage === "NEW_LEAD") {
+    return { scheduled: false, returningDeclinedCustomer: true };
+  }
+
   const existing = await prisma.followup.findFirst({
     where: { conversationId: ctx.conversationId, sent: false, cancelled: false },
   });
