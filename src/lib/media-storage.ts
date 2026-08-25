@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getMetaCredentials } from "@/lib/meta-credentials";
 
 const GRAPH_API_VERSION = "v21.0";
 const RECEIPT_STORAGE_DIR = path.join(process.cwd(), "storage", "receipts");
@@ -31,12 +32,13 @@ export interface DownloadedMedia {
  * that URL, both authenticated with the same access token.
  * https://developers.facebook.com/docs/whatsapp/cloud-api/reference/media
  */
-export async function downloadWhatsAppMedia(mediaId: string): Promise<DownloadedMedia | null> {
-  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
-  if (!accessToken) {
-    console.warn(`[media-storage:dry-run] WHATSAPP_ACCESS_TOKEN not set — cannot download media ${mediaId}`);
+export async function downloadWhatsAppMedia(businessId: string, mediaId: string): Promise<DownloadedMedia | null> {
+  const credentials = await getMetaCredentials(businessId);
+  if (!credentials) {
+    console.warn(`[media-storage:dry-run] no Meta credentials for business ${businessId} — cannot download media ${mediaId}`);
     return null;
   }
+  const accessToken = credentials.accessToken;
 
   const metaResponse = await fetch(`https://graph.facebook.com/${GRAPH_API_VERSION}/${mediaId}`, {
     headers: { Authorization: `Bearer ${accessToken}` },

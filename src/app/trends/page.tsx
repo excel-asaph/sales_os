@@ -35,7 +35,7 @@ export default async function TrendsPage() {
     getFunnelBreakdown(session.businessId, effectiveNumber),
     getFollowupStepPerformance(session.businessId, effectiveNumber),
     getConversionAttribution(session.businessId, effectiveNumber),
-    Promise.all(numbers.map((n) => fetchNumberHealth(n.id))),
+    Promise.all(numbers.map((n) => fetchNumberHealth(session.businessId, n.id))),
   ]);
 
   const totalReplySent = followupSteps.reduce((sum, s) => sum + s.sent, 0);

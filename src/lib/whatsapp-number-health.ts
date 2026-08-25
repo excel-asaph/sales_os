@@ -1,3 +1,5 @@
+import { getMetaCredentials } from "@/lib/meta-credentials";
+
 const GRAPH_API_VERSION = "v21.0";
 
 export type NumberHealth =
@@ -37,9 +39,9 @@ export function qualityBadge(qualityRating: string | null): { label: string; cla
  * style, since a Meta hiccup here shouldn't take down the whole Trends
  * page, only this one panel.
  */
-export async function fetchNumberHealth(phoneNumberId: string): Promise<NumberHealth> {
-  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
-  if (!accessToken) {
+export async function fetchNumberHealth(businessId: string, phoneNumberId: string): Promise<NumberHealth> {
+  const credentials = await getMetaCredentials(businessId);
+  if (!credentials) {
     console.log(`[whatsapp-number-health:dry-run] phoneNumberId=${phoneNumberId}`);
     return { phoneNumberId, ok: false, reason: "not_configured" };
   }
@@ -47,7 +49,7 @@ export async function fetchNumberHealth(phoneNumberId: string): Promise<NumberHe
   try {
     const response = await fetch(
       `https://graph.facebook.com/${GRAPH_API_VERSION}/${phoneNumberId}?fields=quality_rating,whatsapp_business_manager_messaging_limit`,
-      { headers: { Authorization: `Bearer ${accessToken}` } }
+      { headers: { Authorization: `Bearer ${credentials.accessToken}` } }
     );
 
     if (!response.ok) {

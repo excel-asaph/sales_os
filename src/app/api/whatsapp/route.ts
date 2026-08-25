@@ -59,6 +59,20 @@ export async function POST(request: NextRequest) {
   try {
     for (const entry of payload.entry ?? []) {
       for (const change of entry.changes ?? []) {
+        if (change.field === "account_update") {
+          // Meta requires a subscription to this event for Embedded Signup
+          // (Connect WhatsApp wizard, src/app/settings/whatsapp) to work at
+          // all — but it's not the load-bearing path for completing a
+          // connection here. That happens synchronously, client-side: the
+          // wizard's onComplete callback calls completeEmbeddedSignup
+          // directly with the WABA ID/phone number ID Meta's own postMessage
+          // already handed it. This event arrives asynchronously and isn't
+          // guaranteed to include the same fields for every account-level
+          // change, so it's logged for visibility/debugging rather than
+          // driving a second write path that could race the first one.
+          console.log("[whatsapp-webhook] account_update event", JSON.stringify(change.value));
+          continue;
+        }
         if (change.field !== "messages") continue;
         for (const message of change.value.messages ?? []) {
           await ingestInboundMessage(change.value, message);

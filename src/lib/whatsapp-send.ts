@@ -1,3 +1,5 @@
+import { getMetaCredentials } from "@/lib/meta-credentials";
+
 const GRAPH_API_VERSION = "v21.0";
 
 /**
@@ -6,10 +8,10 @@ const GRAPH_API_VERSION = "v21.0";
  * AI Employee Runtime is testable locally before WhatsApp is provisioned
  * (ARCHITECTURE.md §12 prerequisites).
  */
-export async function sendWhatsAppText(to: string, text: string, phoneNumberId: string): Promise<void> {
-  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+export async function sendWhatsAppText(businessId: string, to: string, text: string, phoneNumberId: string): Promise<void> {
+  const credentials = await getMetaCredentials(businessId);
 
-  if (!accessToken || !phoneNumberId) {
+  if (!credentials || !phoneNumberId) {
     console.log(`[whatsapp-send:dry-run] to=${to} text=${JSON.stringify(text)}`);
     return;
   }
@@ -19,7 +21,7 @@ export async function sendWhatsAppText(to: string, text: string, phoneNumberId: 
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${credentials.accessToken}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -46,14 +48,15 @@ export async function sendWhatsAppText(to: string, text: string, phoneNumberId: 
  * https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-message-templates
  */
 export async function sendWhatsAppTemplate(
+  businessId: string,
   to: string,
   templateName: string,
   languageCode: string,
   phoneNumberId: string
 ): Promise<void> {
-  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+  const credentials = await getMetaCredentials(businessId);
 
-  if (!accessToken || !phoneNumberId) {
+  if (!credentials || !phoneNumberId) {
     console.log(`[whatsapp-send:dry-run] to=${to} template=${templateName} lang=${languageCode}`);
     return;
   }
@@ -63,7 +66,7 @@ export async function sendWhatsAppTemplate(
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${credentials.accessToken}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -92,14 +95,15 @@ export async function sendWhatsAppTemplate(
  * https://developers.facebook.com/docs/whatsapp/cloud-api/reference/messages#document-object
  */
 export async function sendWhatsAppDocument(
+  businessId: string,
   to: string,
   link: string,
   filename: string,
   phoneNumberId: string
 ): Promise<void> {
-  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+  const credentials = await getMetaCredentials(businessId);
 
-  if (!accessToken || !phoneNumberId) {
+  if (!credentials || !phoneNumberId) {
     console.log(`[whatsapp-send:dry-run] to=${to} document=${filename} link=${link}`);
     return;
   }
@@ -109,7 +113,7 @@ export async function sendWhatsAppDocument(
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${credentials.accessToken}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -137,10 +141,10 @@ export async function sendWhatsAppDocument(
  * ingest-message.ts skips it for reactions, which never get a reply.
  * https://developers.facebook.com/docs/whatsapp/cloud-api/typing-indicators
  */
-export async function sendTypingIndicator(messageId: string, phoneNumberId: string): Promise<void> {
-  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+export async function sendTypingIndicator(businessId: string, messageId: string, phoneNumberId: string): Promise<void> {
+  const credentials = await getMetaCredentials(businessId);
 
-  if (!accessToken || !phoneNumberId) {
+  if (!credentials || !phoneNumberId) {
     console.log(`[whatsapp-send:dry-run] typing-indicator for message=${messageId}`);
     return;
   }
@@ -150,7 +154,7 @@ export async function sendTypingIndicator(messageId: string, phoneNumberId: stri
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${credentials.accessToken}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({

@@ -7,6 +7,29 @@ reported, because the env vars pointed at a stale WABA/dataset pair from
 before this business's numbers were reorganized. This doc exists so that
 diagnosis never has to happen twice.
 
+## Most of this is now automated — the Connect WhatsApp wizard
+
+As of the Connect WhatsApp wizard (`src/app/settings/whatsapp`), steps 1–2
+below happen inside the app itself via Meta's Embedded Signup, instead of
+by hand through Meta Business Suite and Graph API Explorer. This doc still
+matters for: understanding *why* the wizard does what it does, the one
+step that genuinely can't be automated (cross-Business-Manager sharing,
+step 4), and the one-time setup below that has to exist before the wizard
+can work at all.
+
+**One-time prerequisite, outside this codebase**: the platform needs its
+own Meta App with Embedded Signup configured — Meta for Developers → create
+an app → add the WhatsApp product → Embedded Signup → create a
+configuration (this is what produces the `config_id`). Set the resulting
+values as `NEXT_PUBLIC_META_APP_ID` and
+`NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID` (`.env.example` documents
+both). `WHATSAPP_APP_SECRET` (already required for webhook signature
+verification) is the same App's secret, reused for the wizard's server-side
+OAuth code exchange — no separate secret needed. The app also needs a
+subscription to the `account_update` webhook field for Embedded Signup to
+report completion (handled in `src/app/api/whatsapp/route.ts`, alongside
+the existing `messages` field).
+
 ## What this actually does
 
 When a sale gets verified, `reportPurchaseConversion` sends a `Purchase`

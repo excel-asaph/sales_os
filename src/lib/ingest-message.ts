@@ -76,11 +76,12 @@ export async function ingestInboundMessage(
   });
 
   await withCustomerLock(customer.id, () =>
-    processInboundMessage(customer.id, message, value.metadata.phone_number_id)
+    processInboundMessage(business.id, customer.id, message, value.metadata.phone_number_id)
   );
 }
 
 async function processInboundMessage(
+  businessId: string,
   customerId: string,
   message: NonNullable<WhatsAppChangeValue["messages"]>[number],
   phoneNumberId: string
@@ -207,7 +208,7 @@ async function processInboundMessage(
   // below means the customer would otherwise sit in silence for several
   // seconds before seeing any sign of life. Fire-and-forget: this is a
   // courtesy indicator, not something worth failing the whole turn over.
-  sendTypingIndicator(message.id, phoneNumberId).catch((error) =>
+  sendTypingIndicator(businessId, message.id, phoneNumberId).catch((error) =>
     console.error(`Failed to send typing indicator for message ${message.id}`, error)
   );
 
@@ -220,7 +221,7 @@ async function processInboundMessage(
   if (inboundMessageId && mediaRef?.startsWith("whatsapp-media:") && PERSISTABLE_MEDIA_TYPES.includes(messageType)) {
     try {
       const mediaId = mediaRef.slice("whatsapp-media:".length);
-      const downloaded = await downloadWhatsAppMedia(mediaId);
+      const downloaded = await downloadWhatsAppMedia(businessId, mediaId);
       if (downloaded) {
         const storedUrl = await persistMediaFile(downloaded.buffer, downloaded.mimeType, mediaId);
         await prisma.message.update({ where: { id: inboundMessageId }, data: { mediaUrl: storedUrl } });

@@ -1,9 +1,34 @@
 import { prisma } from "@/lib/prisma";
+import { getMetaCredentials } from "@/lib/meta-credentials";
 
 const GRAPH_API_VERSION = "v21.0";
 
 interface ReferralShape {
   ctwa_clid?: string;
+}
+
+/**
+ * Creates (or, since this call is idempotent, retrieves the existing)
+ * Conversions API dataset for a WABA — the exact call documented by hand in
+ * docs/META_CONVERSIONS_SETUP.md, now run automatically as step 2 of the
+ * Connect WhatsApp wizard (src/app/settings/whatsapp) right after Embedded
+ * Signup completes, using the token it just returned.
+ */
+export async function createOrGetConversionsDataset(wabaId: string, accessToken: string): Promise<string> {
+  const response = await fetch(
+    `https://graph.facebook.com/${GRAPH_API_VERSION}/${wabaId}/dataset`,
+    { method: "POST", headers: { Authorization: `Bearer ${accessToken}` } }
+  );
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Failed to create/retrieve Conversions dataset for WABA ${wabaId} (${response.status}): ${body}`);
+  }
+  const data = (await response.json()) as { id?: string; dataset_id?: string };
+  const datasetId = data.id ?? data.dataset_id;
+  if (!datasetId) {
+    throw new Error(`Dataset creation for WABA ${wabaId} succeeded but returned no dataset id: ${JSON.stringify(data)}`);
+  }
+  return datasetId;
 }
 
 export type ConversionReportResult =
@@ -60,13 +85,15 @@ export function conversionBadge(reason: string | null): { label: string; classNa
  * something the customer-facing flow depends on.
  */
 export async function reportPurchaseConversion(params: {
+  businessId: string;
   conversationId: string;
   value: number;
   currency: string;
 }): Promise<ConversionReportResult> {
-  const datasetId = process.env.META_CONVERSIONS_DATASET_ID;
-  const wabaId = process.env.META_WHATSAPP_BUSINESS_ACCOUNT_ID;
-  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+  const credentials = await getMetaCredentials(params.businessId);
+  const datasetId = credentials?.conversionsDatasetId;
+  const wabaId = credentials?.wabaId;
+  const accessToken = credentials?.accessToken;
 
   if (!datasetId || !wabaId || !accessToken) {
     console.log(

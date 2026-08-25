@@ -109,6 +109,7 @@ model Business {
   createdAt             DateTime @default(now()) @map("created_at")
 
   config          BusinessConfig?
+  metaConnection  BusinessMetaConnection?
   paymentAccounts PaymentAccount[]
   products        Product[]
   customers       Customer[]
@@ -116,6 +117,44 @@ model Business {
   faqEntries      FaqEntry[]
 
   @@map("businesses")
+}
+
+/// Per-business Meta/WhatsApp connection, written by the Embedded Signup
+/// onboarding wizard (src/app/settings/whatsapp). Before this existed, every
+/// credential here (WHATSAPP_ACCESS_TOKEN, META_CONVERSIONS_DATASET_ID,
+/// META_WHATSAPP_BUSINESS_ACCOUNT_ID) was a single deployment-wide env var —
+/// fine for one business, not for a real multi-tenant platform. A business
+/// with no row here still works: src/lib/meta-credentials.ts falls back to
+/// those same env vars, which is what keeps local dev and any
+/// not-yet-migrated business working without a schema-breaking cutover.
+///
+/// WHATSAPP_APP_SECRET and WHATSAPP_WEBHOOK_VERIFY_TOKEN deliberately do NOT
+/// move here — those belong to the platform's own Meta App (the one webhook
+/// endpoint every connected business's messages arrive on, disambiguated by
+/// phone_number_id in ingest-message.ts), not to an individual business.
+model BusinessMetaConnection {
+  id          String @id @default(cuid())
+  businessId  String @unique @map("business_id")
+  wabaId      String @map("waba_id")
+  /// AES-256-GCM, base64(iv + authTag + ciphertext) — see
+  /// src/lib/credential-crypto.ts. The only encrypted-at-rest field in this
+  /// schema; everything else here is an identifier, not a secret.
+  encryptedAccessToken String @map("encrypted_access_token")
+  conversionsDatasetId String? @map("conversions_dataset_id")
+  followupTemplateName String? @map("followup_template_name")
+  followupTemplateLang String? @map("followup_template_lang")
+  /// NOT_STARTED | PENDING | VERIFIED | REJECTED — Meta's own verification
+  /// review status, mirrored here so the wizard/settings page can show it
+  /// without a live API call on every page load.
+  businessVerificationStatus String @default("NOT_STARTED") @map("business_verification_status")
+  connectedAt    DateTime  @default(now()) @map("connected_at")
+  /// Last time a real Graph API call using this token succeeded — distinct
+  /// from connectedAt, which never changes after the initial signup.
+  lastVerifiedAt DateTime? @map("last_verified_at")
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("business_meta_connections")
 }
 
 /// Business Rules Engine (PRD 5.10, Module 6) — every business-specific

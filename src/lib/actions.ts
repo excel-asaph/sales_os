@@ -64,7 +64,7 @@ export async function executeAction(
 }
 
 async function sendMessage(ctx: ActionContext, text: string) {
-  await sendWhatsAppText(ctx.customerPhoneNumber, text, ctx.whatsappPhoneNumberId);
+  await sendWhatsAppText(ctx.businessId, ctx.customerPhoneNumber, text, ctx.whatsappPhoneNumberId);
   await prisma.$transaction([
     prisma.message.create({
       data: {
@@ -125,7 +125,7 @@ async function sendProduct(ctx: ActionContext, productId: string) {
   }
 
   const filename = `${product.name}.pdf`;
-  await sendWhatsAppDocument(ctx.customerPhoneNumber, product.fileUrl, filename, ctx.whatsappPhoneNumberId);
+  await sendWhatsAppDocument(ctx.businessId, ctx.customerPhoneNumber, product.fileUrl, filename, ctx.whatsappPhoneNumberId);
   await prisma.$transaction([
     prisma.message.create({
       data: {
@@ -272,7 +272,7 @@ async function requestPaymentVerification(ctx: ActionContext, productId: string,
     } else if (!receiptMessage.mediaUrl) {
       reason = "Could not read the payment evidence automatically — routed to a human for manual verification.";
     } else {
-      const media = await resolveMediaBytes(receiptMessage.mediaUrl, receiptMessage.id);
+      const media = await resolveMediaBytes(ctx.businessId, receiptMessage.mediaUrl, receiptMessage.id);
 
       if (media) {
         storedImageUrl = media.storedUrl;
@@ -405,6 +405,7 @@ async function requestPaymentVerification(ctx: ActionContext, productId: string,
 // hasn't happened yet for some reason (e.g. it failed, or this is an older
 // message from before that existed).
 async function resolveMediaBytes(
+  businessId: string,
   mediaUrl: string,
   messageId: string
 ): Promise<{ buffer: Buffer; mimeType: string; storedUrl: string } | null> {
@@ -414,7 +415,7 @@ async function resolveMediaBytes(
   }
 
   const mediaId = mediaUrl.slice("whatsapp-media:".length);
-  const downloaded = await downloadWhatsAppMedia(mediaId);
+  const downloaded = await downloadWhatsAppMedia(businessId, mediaId);
   if (!downloaded) return null;
 
   const storedUrl = await persistMediaFile(downloaded.buffer, downloaded.mimeType, mediaId);
@@ -603,6 +604,7 @@ export async function applyOrderVerifiedEffects(
   // sale did or didn't reach Meta, not just whether it was internally
   // verified.
   const conversionResult = await reportPurchaseConversion({
+    businessId: ctx.businessId,
     conversationId: ctx.conversationId,
     value: params.expectedAmount,
     currency: "NGN",

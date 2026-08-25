@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getBoss, FOLLOWUP_QUEUE, type FollowupJobData } from "@/lib/queue";
 import { runAIEmployeeTurn } from "@/lib/ai-runtime";
 import { sendWhatsAppText, sendWhatsAppTemplate } from "@/lib/whatsapp-send";
+import { getMetaCredentials } from "@/lib/meta-credentials";
 import { isWithinCustomerServiceWindow } from "@/lib/whatsapp-window";
 import { FOLLOWUP_SEQUENCE, stepDefinition, clampMaxFollowups } from "@/lib/followup-sequence";
 import { addCustomerTag } from "@/lib/customer-tags";
@@ -178,16 +179,23 @@ type DeliveryResult = "composed" | "template" | "skipped";
  */
 async function deliverFollowup(followup: LoadedFollowup): Promise<DeliveryResult> {
   const { conversation } = followup;
+  const businessId = conversation.customer.businessId;
   const phoneNumberId = conversation.whatsappPhoneNumberId ?? conversation.customer.business.whatsappPhoneNumberId ?? "";
 
   if (!(await isWithinCustomerServiceWindow(conversation.id))) {
-    if (!FOLLOWUP_TEMPLATE_NAME) {
+    // getMetaCredentials falls back to the global env vars on its own, so
+    // this covers both a business connected via the wizard (its own
+    // approved template) and one still on the old single-deployment setup.
+    const credentials = await getMetaCredentials(businessId);
+    const templateName = credentials?.followupTemplateName ?? FOLLOWUP_TEMPLATE_NAME;
+    const templateLang = credentials?.followupTemplateLang ?? FOLLOWUP_TEMPLATE_LANG;
+    if (!templateName) {
       console.error(
-        `Follow-up ${followup.id}: outside the 24h customer service window and WHATSAPP_FOLLOWUP_TEMPLATE_NAME isn't configured — cannot send anything yet.`
+        `Follow-up ${followup.id}: outside the 24h customer service window and no follow-up template is configured — cannot send anything yet.`
       );
       return "skipped";
     }
-    await sendWhatsAppTemplate(conversation.customer.phoneNumber, FOLLOWUP_TEMPLATE_NAME, FOLLOWUP_TEMPLATE_LANG, phoneNumberId);
+    await sendWhatsAppTemplate(businessId, conversation.customer.phoneNumber, templateName, templateLang, phoneNumberId);
     await prisma.message.create({
       data: {
         conversationId: conversation.id,
@@ -220,7 +228,7 @@ async function deliverFollowup(followup: LoadedFollowup): Promise<DeliveryResult
     // Template fallback if generation fails — the customer still gets a
     // reminder even if the Claude call errors.
     console.error(`Follow-up ${followup.id}: AI runtime failed, sending fallback message`, error);
-    await sendWhatsAppText(conversation.customer.phoneNumber, followup.message, phoneNumberId);
+    await sendWhatsAppText(businessId, conversation.customer.phoneNumber, followup.message, phoneNumberId);
     await prisma.message.create({
       data: {
         conversationId: conversation.id,

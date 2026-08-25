@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { sendWhatsAppText, sendWhatsAppTemplate, sendWhatsAppDocument } from "@/lib/whatsapp-send";
+import { getMetaCredentials } from "@/lib/meta-credentials";
 import { isWithinCustomerServiceWindow } from "@/lib/whatsapp-window";
 import { revalidatePath } from "next/cache";
 import { requireSession, requireAdminSession } from "@/lib/auth";
@@ -38,7 +39,7 @@ export async function sendHumanReply(formData: FormData) {
   const phoneNumberId = conversation.whatsappPhoneNumberId ?? conversation.customer.business.whatsappPhoneNumberId ?? "";
 
   if (withinWindow) {
-    await sendWhatsAppText(conversation.customer.phoneNumber, text, phoneNumberId);
+    await sendWhatsAppText(session.businessId, conversation.customer.phoneNumber, text, phoneNumberId);
   } else {
     // Free-form text — including a human's own typed reply — is rejected
     // by WhatsApp outside the 24-hour customer service window. The exact
@@ -47,16 +48,18 @@ export async function sendHumanReply(formData: FormData) {
     // losing contact entirely; the human is told clearly afterward
     // (thrown error below) rather than this silently pretending their
     // typed reply went out.
-    const templateName = process.env.WHATSAPP_FOLLOWUP_TEMPLATE_NAME;
+    const credentials = await getMetaCredentials(session.businessId);
+    const templateName = credentials?.followupTemplateName;
     if (!templateName) {
       throw new Error(
-        "This customer hasn't messaged in over 24 hours — WhatsApp only allows a pre-approved template to reach them now, and none is configured (WHATSAPP_FOLLOWUP_TEMPLATE_NAME). Nothing was sent."
+        "This customer hasn't messaged in over 24 hours — WhatsApp only allows a pre-approved template to reach them now, and none is configured. Nothing was sent."
       );
     }
     await sendWhatsAppTemplate(
+      session.businessId,
       conversation.customer.phoneNumber,
       templateName,
-      process.env.WHATSAPP_FOLLOWUP_TEMPLATE_LANG || "en_US",
+      credentials.followupTemplateLang || "en_US",
       phoneNumberId
     );
   }
@@ -145,7 +148,7 @@ export async function sendProductAsHuman(formData: FormData) {
   const phoneNumberId = conversation.whatsappPhoneNumberId ?? conversation.customer.business.whatsappPhoneNumberId ?? "";
   const filename = `${product.name}.pdf`;
 
-  await sendWhatsAppDocument(conversation.customer.phoneNumber, product.fileUrl, filename, phoneNumberId);
+  await sendWhatsAppDocument(session.businessId, conversation.customer.phoneNumber, product.fileUrl, filename, phoneNumberId);
 
   await prisma.$transaction([
     prisma.message.create({

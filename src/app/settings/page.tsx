@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { SubmitButton } from "@/components/submit-button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,12 +38,13 @@ export default async function SettingsPage() {
   const session = await getSession();
   if (!session?.isAdmin) return null;
 
-  const [business, faqEntries] = await Promise.all([
+  const [business, faqEntries, metaConnection] = await Promise.all([
     prisma.business.findUnique({
       where: { id: session.businessId },
       include: { config: true },
     }),
     prisma.faqEntry.findMany({ where: { businessId: session.businessId }, orderBy: { order: "asc" } }),
+    prisma.businessMetaConnection.findUnique({ where: { businessId: session.businessId } }),
   ]);
 
   if (!business) {
@@ -70,6 +73,22 @@ export default async function SettingsPage() {
   return (
     <AppShell active="settings" title="Settings" description={business.name}>
       <div className="mx-auto max-w-2xl">
+        <Card className="mb-6">
+          <CardHeader className="flex-row items-center justify-between gap-3 space-y-0">
+            <div>
+              <CardTitle>WhatsApp connection</CardTitle>
+              <CardDescription>
+                {metaConnection
+                  ? `Connected — WhatsApp Business Account ${metaConnection.wabaId}`
+                  : "Not connected — set up a new WhatsApp Business Account, guided end to end."}
+              </CardDescription>
+            </div>
+            <Button variant="outline" render={<Link href="/settings/whatsapp" />}>
+              {metaConnection ? "Manage" : "Connect WhatsApp"}
+            </Button>
+          </CardHeader>
+        </Card>
+
         <Tabs defaultValue="general">
           <TabsList>
             <TabsTrigger value="general">General</TabsTrigger>
