@@ -2,10 +2,10 @@ export default function PrivacyPolicyPage() {
   return (
     <main style={{ padding: 32, fontFamily: "sans-serif", maxWidth: 720, margin: "0 auto", lineHeight: 1.6 }}>
       <h1>Privacy Policy</h1>
-      <p style={{ color: "#666" }}>Last updated: 2026</p>
+      <p style={{ color: "#666" }}>Last updated: 2026-08-28</p>
 
       <p>
-        This policy describes how TRUEFIX WELLNESS GLOBAL (&quot;we&quot;, &quot;us&quot;) handles information when you
+        This policy describes how VITALFIX (&quot;we&quot;, &quot;us&quot;) handles information when you
         contact us on WhatsApp.
       </p>
 
