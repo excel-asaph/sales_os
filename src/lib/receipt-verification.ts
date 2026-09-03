@@ -153,9 +153,15 @@ export async function verifyReceiptContent(params: {
   // on — see shared/prompt-caching.md's "prompts that change from the
   // beginning every time" guidance. Usage is still logged for cost
   // visibility, since vision calls are a real, recurring cost center.
+  // 4096, not 1024: thinking counts against max_tokens and Sonnet 5 thinks
+  // by default, so a budget sized for "one tool call, no thinking" can be
+  // exhausted before the tool call is ever emitted. That failure lands on
+  // the no-toolUse path below as "unclear" with confidence 0, i.e. a real
+  // customer's real receipt silently failing verification — same root cause
+  // as the trends-insights bug found 2026-09-03, but on a money path.
   const response = await claude.messages.create({
     model: CLAUDE_MODEL,
-    max_tokens: 1024,
+    max_tokens: 4096,
     tools: [REPORT_TOOL],
     tool_choice: { type: "tool", name: "report_receipt_details" },
     messages: [
@@ -178,6 +184,10 @@ export async function verifyReceiptContent(params: {
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
   );
   if (!toolUse) {
+    console.error(
+      `[receipt-verification] no tool_use block. stop_reason=${response.stop_reason} ` +
+        `blocks=[${response.content.map((b) => b.type).join(",")}]`
+    );
     return {
       extractedAmount: null,
       extractedBank: null,

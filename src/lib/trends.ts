@@ -184,12 +184,34 @@ Conversion attribution:
 ${snapshot.attribution.buckets.map((b) => `${b.label}: ${b.count}`).join("\n")}
 Total converted: ${snapshot.attribution.total}`;
 
+  // max_tokens is a hard cap on *total* output, thinking included, and
+  // Sonnet 5 runs adaptive thinking by default at `high` effort — a change
+  // from Sonnet 4.6, where an identical request ran without thinking. The
+  // original 1024 was sized for "4-6 sentences with no thinking", so in
+  // production the model spent the whole budget reasoning and got cut off
+  // before emitting a single text block: stop_reason max_tokens, content
+  // with no text in it, and the panel showing the fallback string on every
+  // click (reported 2026-09-03). Two documented remedies; both applied,
+  // since the budget was genuinely too small *and* a fifteen-number funnel
+  // summary doesn't warrant `high`-effort reasoning.
   const response = await claude.messages.create({
     model: CLAUDE_MODEL,
-    max_tokens: 1024,
+    max_tokens: 4096,
+    output_config: { effort: "medium" },
     messages: [{ role: "user", content: prompt }],
   });
 
   const textBlock = response.content.find((block) => block.type === "text");
-  return textBlock?.type === "text" ? textBlock.text : "Could not generate insights right now.";
+  if (!textBlock || textBlock.type !== "text") {
+    // Don't swallow this again. A no-text response is a budget/config
+    // problem, not a transient one, and it is invisible without the
+    // stop_reason and the block types that actually came back.
+    console.error(
+      `[trends-insights] no text block. stop_reason=${response.stop_reason} ` +
+        `blocks=[${response.content.map((b) => b.type).join(",")}] ` +
+        `output=${response.usage.output_tokens} thinking=${response.usage.output_tokens_details?.thinking_tokens ?? "n/a"}`
+    );
+    return "Could not generate insights right now.";
+  }
+  return textBlock.text;
 }
