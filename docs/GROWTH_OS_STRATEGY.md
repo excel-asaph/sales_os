@@ -152,6 +152,30 @@ The original idea was generated B-roll to add a human, realistic feel. If any co
 
 But the stronger argument doesn't need the policy question resolved at all: **actual phone footage of the real product is cheaper than generated video, more convincing than generated video, and carries no disclosure question whatever the answer turns out to be.** Generate the polish, not the person.
 
+## 8. Build a CapCut-style editor, or embed one? — build/buy call
+
+The question that followed: if users want to make their own edits, should we build the assembly engine ourselves?
+
+**No. An embeddable one already exists, under a license that permits this use.**
+
+**Verified** (fetched: [shotstack-studio-sdk](https://github.com/shotstack/shotstack-studio-sdk) and its `LICENSE`): the **Shotstack Studio SDK** is a browser video editor — timeline with drag/resize/selection, canvas preview, undo/redo command model, text/image/video/audio clips, and browser-side export via `VideoExporter`. TypeScript, framework-agnostic, works with React and Next.js.
+
+**License, checked against the actual text rather than a summary**: PolyForm Shield 1.0.0. *"Any purpose is a permitted purpose, except for providing any product that competes with the software or any product the licensor or any of its affiliates provides using the software."* Commercial use is permitted outright. The only exclusion is building a competing video-editing platform. Antflow is a WhatsApp growth system, not a video API, so this is clear.
+
+> Worth flagging because it will mislead someone re-reading this later: both a search summary and an automated page summary described PolyForm Shield as "a proprietary license restricting commercial use without explicit permission." The license text says the opposite. Read the text.
+
+**But the cheaper answer probably covers most real demand.** Be precise about what "make some edits" means for a Nigerian merchant on a phone: change the hook line, swap the opening shot, change the CTA, pick a different variant. That is a **form with four fields plus a preview**, not a timeline — and it is nearly free, because the edit is already JSON (§4). Expose a few values as inputs, re-render, show the result.
+
+Pair it with a one-button escape hatch: let them download the rendered file and the source clips. **Users already have CapCut on their phones and already know it.** Handing off to the tool they know beats anything embedded.
+
+**The device constraint points the same way.** Browser editing means WebAssembly, heavy CPU, and downloading every asset to the handset before anything can be scrubbed. On a mid-range Android over Lagos mobile data, a full timeline is a poor experience regardless of who builds it. Form-plus-preview is the right shape for that constraint, not a compromise against it.
+
+**Sequencing**: form and preview first → escape-hatch download → embed Studio SDK only when a real user asks for something the form cannot express.
+
+**Remotion licensing, if the self-hosted path is ever taken** (**verified**: [remotion.dev license FAQ](https://www.remotion.dev/docs/license/faq)) — free for individuals and organisations of up to 3 people; a Company License is required at 4+. Remotion for Creators is $25 per seat per month; **Remotion for Automators is $0.01 per render with a $100/month minimum**, and *using the `<Player>` counts as automation*. Headcount aggregates across contractors and agencies on the same project. Not free at company scale — know this before choosing Remotion as the "own it" option.
+
+**The strategic weighting.** An editor is the most enjoyable and least defensible item available. Nobody will choose Antflow because its editor is good; they might choose it because it stops their ad account being disabled — and that piece (§ the compliance gate, below) is still unbuilt.
+
 ## Where this leaves the strategy
 
 Wall 3's conclusion stands and is now better supported. Three separate things say don't build the intelligence half:
