@@ -65,7 +65,17 @@ export const PIPELINE_MILESTONES = [
   },
 ] as const satisfies ReadonlyArray<{ key: string; label: string; stages: readonly string[] }>;
 
-export function milestoneIndexForStage(stage: ConversationStage): number {
+// null for stages that aren't on the pipeline at all (LOST_LEAD,
+// HUMAN_REVIEW_REQUIRED, HUMAN_ASSIGNED). milestoneIndexForStage below
+// collapses those to 0, which is the right default for a tracker that has
+// to render *something*, but reads as "reached Lead" to anything doing
+// arithmetic — see getCohortProgression in trends.ts, which needs to tell
+// "never got past Lead" apart from "was escalated out of the pipeline".
+export function milestoneIndexOrNull(stage: ConversationStage): number | null {
   const idx = PIPELINE_MILESTONES.findIndex((m) => (m.stages as readonly string[]).includes(stage));
-  return idx === -1 ? 0 : idx;
+  return idx === -1 ? null : idx;
+}
+
+export function milestoneIndexForStage(stage: ConversationStage): number {
+  return milestoneIndexOrNull(stage) ?? 0;
 }

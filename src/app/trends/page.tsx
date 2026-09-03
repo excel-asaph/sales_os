@@ -4,13 +4,14 @@ import { getSession } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { getNumberFilterCookie, resolveEffectiveNumber } from "@/lib/number-filter";
 import { getBusinessNumbers } from "@/lib/whatsapp-numbers";
-import { getFunnelBreakdown, getFollowupStepPerformance, getConversionAttribution } from "@/lib/trends";
+import { getFunnelBreakdown, getFollowupStepPerformance, getConversionAttribution, getPeriodComparison } from "@/lib/trends";
 import { fetchNumberHealth, qualityBadge } from "@/lib/whatsapp-number-health";
 import { StatTile } from "@/components/stat-tile";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { CategoryBarChart } from "@/components/category-bar-chart";
 import { FollowupStepChart } from "@/components/followup-step-chart";
 import { TrendsInsightsPanel } from "@/components/trends-insights-panel";
+import { PeriodComparisonTable } from "@/components/period-comparison";
 
 // Everything on this page pulls together, by hand, what earlier this
 // session got pulled via ad-hoc SQL: where the funnel leaks, whether
@@ -30,10 +31,11 @@ export default async function TrendsPage() {
   const numbers = getBusinessNumbers(business);
   const effectiveNumber = resolveEffectiveNumber(numberFilter, business);
 
-  const [funnel, followupSteps, attribution, numberHealth] = await Promise.all([
+  const [funnel, followupSteps, attribution, comparison, numberHealth] = await Promise.all([
     getFunnelBreakdown(session.businessId, effectiveNumber),
     getFollowupStepPerformance(session.businessId, effectiveNumber),
     getConversionAttribution(session.businessId, effectiveNumber),
+    getPeriodComparison(session.businessId, effectiveNumber),
     Promise.all(numbers.map((n) => fetchNumberHealth(session.businessId, n.id))),
   ]);
 
@@ -80,8 +82,25 @@ export default async function TrendsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Funnel</CardTitle>
-            <CardDescription>Where conversations are right now, by pipeline stage.</CardDescription>
+            <CardTitle>Last 30 days vs. the 30 before</CardTitle>
+            <CardDescription>
+              Conversations that <em>started</em> in each window, and how far they got. Unlike the funnel below, these
+              counts follow the same people over time, so the steps are comparable to each other and to the previous
+              period.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PeriodComparisonTable comparison={comparison} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Open pipeline right now</CardTitle>
+            <CardDescription>
+              A snapshot of where conversations sit today, one bucket each. Each conversation is counted once, at its
+              current stage only, so these bars show what is in flight — not drop-off between stages.
+            </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <CategoryBarChart data={funnelChartData} />
