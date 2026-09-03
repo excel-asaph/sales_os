@@ -19,7 +19,7 @@ import { ScrollToBottomAnchor } from "@/components/scroll-to-bottom-anchor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import { ReplyTextarea } from "@/components/reply-textarea";
 import { Field, ReferralDetails } from "@/components/referral-details";
 import {
   MobileDetailsSheetProvider,
@@ -427,8 +427,9 @@ export default async function ConversationReviewPage({
                       (field-sizing-content, textarea.tsx) — rows={2} just
                       sets a shorter starting height so the composer doesn't
                       eat more of the pane's vertical budget than an empty
-                      box needs. */}
-                  <Textarea name="text" placeholder="Reply as a human agent…" rows={2} />
+                      box needs. Enter sends, Shift+Enter for a newline
+                      (reply-textarea.tsx). */}
+                  <ReplyTextarea name="text" placeholder="Reply as a human agent… (Enter to send, Shift+Enter for a new line)" rows={2} />
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <SendProductButton
