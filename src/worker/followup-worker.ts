@@ -196,7 +196,33 @@ async function deliverFollowup(followup: LoadedFollowup): Promise<DeliveryResult
       );
       return "skipped";
     }
-    await sendWhatsAppTemplate(businessId, conversation.customer.phoneNumber, templateName, templateLang, phoneNumberId);
+    // The in-window path below has a fallback when generation fails; this
+    // one had none, so any rejection here (an unapproved or renamed
+    // template, a rate limit, a transient API error) threw straight out of
+    // the pg-boss handler. That failed the job, left the follow-up unsent
+    // with scheduleNext never running, and told the customer nothing —
+    // visible only as a worker stack trace. Caught and recorded instead,
+    // returning "skipped" so the row stays pending for redelivery, the same
+    // semantics as the no-template-configured branch above.
+    try {
+      await sendWhatsAppTemplate(businessId, conversation.customer.phoneNumber, templateName, templateLang, phoneNumberId);
+    } catch (error) {
+      console.error(`Follow-up ${followup.id}: template send failed (${templateName}/${templateLang})`, error);
+      await prisma.event.create({
+        data: {
+          conversationId: conversation.id,
+          type: "FOLLOWUP_TEMPLATE_SEND_FAILED",
+          payload: {
+            followupId: followup.id,
+            templateName,
+            templateLang,
+            error: (error as Error).message,
+          },
+        },
+      });
+      return "skipped";
+    }
+
     await prisma.message.create({
       data: {
         conversationId: conversation.id,
