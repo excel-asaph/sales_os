@@ -26,6 +26,25 @@ import { getBusinessConfig } from "@/lib/knowledge";
 const GREETING_STAGE = "GREETING_SENT" as const;
 const FIRST_FOLLOWUP_HOURS = 1;
 
+// Composing this reply used to take however long an AI turn took; now it's
+// a template lookup and one send. The message-debounce window
+// (message-debounce.ts) still runs either way — this path sits inside it,
+// so a burst of opening messages is coalesced exactly as before — but with
+// the model's own latency gone, a multi-paragraph pitch would otherwise
+// land a fraction of a second after the typing indicator appears, which no
+// business types that fast.
+//
+// The range is a judgment call, not a measurement of what the model used to
+// take: long enough that "typing…" is actually seen, short enough that the
+// whole exchange is still faster than it was. Randomised rather than fixed
+// so replies aren't mechanically identical to the millisecond.
+const TYPING_PAUSE_MIN_MS = 2_000;
+const TYPING_PAUSE_MAX_MS = 4_000;
+
+function typingPauseMs(): number {
+  return TYPING_PAUSE_MIN_MS + Math.random() * (TYPING_PAUSE_MAX_MS - TYPING_PAUSE_MIN_MS);
+}
+
 /**
  * True only for a message type carrying nothing the pitch can answer. An
  * image or PDF opener is exactly where the standard pitch is wrong (one
@@ -101,6 +120,13 @@ export async function tryGreetingShortcut(conversationId: string): Promise<boole
     customerPhoneNumber: conversation.customer.phoneNumber,
     whatsappPhoneNumberId: conversation.whatsappPhoneNumberId ?? "",
   };
+
+  // Every gate has passed, so this conversation is definitely being handled
+  // here — pause before sending, not before deciding, so nothing that falls
+  // through to the model is delayed on the way there. Safe to hold: this
+  // runs in a background callback long after the webhook responded, and the
+  // customer lock it extends is meant to serialise this customer anyway.
+  await new Promise((resolve) => setTimeout(resolve, typingPauseMs()));
 
   // Reply first, bookkeeping after — same order the model's own turns show,
   // and it keeps the customer's wait as short as possible.

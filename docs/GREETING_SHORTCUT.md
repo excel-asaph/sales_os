@@ -74,6 +74,28 @@ All must hold, or it falls through to the normal AI turn
 | The playbook pitch key is non-empty | Nothing to send otherwise |
 | The send actually succeeded | If it didn't, fall through so the model gets its normal attempt |
 
+## Timing — what the customer experiences
+
+Unchanged from before, deliberately:
+
+- **The typing indicator still fires**, immediately on the inbound message,
+  before any of this runs (`ingest-message.ts`).
+- **The message-debounce window still applies.** This path sits *inside* the
+  debounced callback, so a customer sending "hi" then "how much?" seconds
+  apart is still coalesced into one reply, exactly as before. The shortcut
+  is only consulted once the burst has settled.
+
+What did change is that composing the reply no longer takes an AI turn. To
+stop a multi-paragraph pitch from landing a fraction of a second after
+"typing…" appears — faster than any business types — the shortcut pauses
+2–4 seconds (randomised) before sending. Tunable via `TYPING_PAUSE_MIN_MS` /
+`TYPING_PAUSE_MAX_MS` in `src/lib/greeting-shortcut.ts`; setting both to 0
+removes the pause entirely.
+
+That range is a judgment call about plausibility, not a measurement of what
+the model used to take. The pause happens after every gate has passed, so
+nothing that falls through to the model is delayed on its way there.
+
 ## Measured effect (dry run over all historical conversations)
 
 | | |
