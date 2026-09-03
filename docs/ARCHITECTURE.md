@@ -178,7 +178,7 @@ One Claude call per customer turn, using tool use:
 | `send_payment_details()` | Return the active configured payment account(s) | Platform, reads `payment_accounts` |
 | `request_payment_verification(image_url, expected_amount)` | Ask the platform to verify a receipt | Platform runs Claude vision extraction + rule comparison — **the AI never declares payment confirmed itself** (PRD 14.2) |
 | `update_stage(new_stage)` | Move the conversation's workflow state | Platform, validates the transition is legal |
-| `create_followup(days, template)` | Schedule a follow-up | Platform, writes to `followups` via pg-boss |
+| `create_followup(hours, message, reason)` | Schedule step 1 of a follow-up sequence (§9) | Platform, writes to `followups` via pg-boss |
 | `escalate_to_human(reason, summary)` | Hand off to a human agent | Platform, notifies via `human_agents`, pauses AI on that conversation |
 | `tag_customer(tag)` | Apply a CRM tag | Platform |
 | `generate_summary()` | Produce the handoff summary (PRD 8.7) | Can be model-generated text, but is always stored, never just spoken |
@@ -204,7 +204,22 @@ This table is the literal enforcement of PRD Philosophy 3 — every row's "Execu
 
 ## 9. Follow-Up Scheduling
 
-`create_followup` schedules a `pg-boss` delayed job for Day 1 / Day 3 / Day 7 (PRD 8.6). When a job fires, the worker checks whether the order has since completed (`orders.status = verified`) or the follow-up was cancelled — if either, it's a no-op logged as `FOLLOWUP_CANCELLED`. Otherwise it re-enters the same AI Employee Runtime with the follow-up context so the message stays natural rather than a fixed template blast (though a template is the fallback if generation fails).
+*Updated 2026-09-03 to match the implementation — the original "Day 1 / Day 3 / Day 7" cadence and the `create_followup(days, template)` signature both predate the built system.*
+
+**The sequence** (`src/lib/followup-sequence.ts`) is fixed in code, not business-editable: five steps at **+1h, +5h, +18h, +48h, +96h**, each measured from the previous step's actual fire time rather than a fixed offset from the trigger. What *is* business-editable is how many of those steps run before giving up (`business_config.max_followups`, clamped 1–5, Settings → Follow-ups).
+
+**Who creates what.** The AI only ever creates step 1, via `create_followup(hours, message, reason)`. Every step after that is scheduled by the worker itself once the previous one sends — no AI judgment is needed to keep a sequence going, only to start one. The opening greeting is the exception: it schedules step 1 directly in code without an AI turn (§7.4, `src/lib/greeting-shortcut.ts`).
+
+**When a job fires** (`src/worker/followup-worker.ts`), it is cancelled as a no-op if any of these now hold: the customer replied (any inbound message cancels pending follow-ups), an order was verified since it was scheduled, the conversation reached a stage that blocks follow-ups (`SALE_COMPLETED`, `LOST_LEAD`, `RESOLVED`, `PAYMENT_VERIFIED`, or either human stage), or follow-ups are paused business-wide.
+
+**How the message is produced** depends on WhatsApp's 24-hour customer service window, measured from the customer's **most recent inbound message** (`src/lib/whatsapp-window.ts`) — every reply from them resets it:
+
+* **Inside the window** — re-enters the AI Employee Runtime with that step's angle, so the wording is composed fresh against current conversation state rather than blasted from a template. `followups.message` holds a fallback used only if that generation throws; it is resolved through the playbook first, since the model sometimes stores a playbook *key* there rather than the text (`resolveFallbackMessage`, `src/lib/followups.ts`).
+* **Outside the window** — free-form text is rejected by WhatsApp regardless of what generated it, so the one Meta-approved re-engagement template is sent instead (`business_meta_connections.followup_template_name`). A failure here is recorded as `FOLLOWUP_TEMPLATE_SEND_FAILED` and leaves the row pending for redelivery rather than throwing out of the job handler.
+
+**Ending a sequence.** One step past `max_followups`, the worker schedules a silent check 24h after the last real message — no content, nothing sent. When it fires, the conversation is marked `LOST_LEAD` and the customer tagged "Uninterested", *unless* the sequence was waiting on payment evidence (`FollowupReason.AWAITING_PAYMENT_EVIDENCE`), in which case it escalates to a human instead, since silence there may mean real money is unreconciled. That trailing row is internal bookkeeping and is filtered out of both the conversation view and the Customers list.
+
+**Opt-out is enforced ahead of all of this.** An explicit "stop" is detected in code at ingest and closes the conversation before any AI turn (`src/lib/opt-out.ts`); `create_followup` then refuses unconditionally for that customer. See `docs/COMPLIANCE_AUDIT_2026-09.md`.
 
 ---
 

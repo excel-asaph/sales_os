@@ -38,9 +38,21 @@ Source: [developers.facebook.com — Messaging Limits](https://developers.facebo
 
 **Practical read**: hitting the messaging-limit cap causes mechanical throttling/rejection of further template sends — it's a different, less severe enforcement mechanism than a Business Terms of Service violation. Don't conflate the two when diagnosing why an account was actually restricted.
 
+## The 24-hour customer service window
+
+Source: [developers.facebook.com — send message templates](https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-message-templates)
+
+- The window is measured from the customer's **most recent inbound message**, not their first. Every reply from them resets it.
+- Inside it, any free-form message can be sent.
+- Outside it, **only a Meta-approved message template** can reach them — free-form text is rejected by WhatsApp regardless of what generated it.
+
+**Practical read**: this is why a follow-up firing more than a day after someone went quiet behaves completely differently from one firing an hour later. See `docs/ARCHITECTURE.md` §9 for how the follow-up engine handles each case.
+
 ## Business Verification and templates
 
-Per Meta's January 2026 policy update: **Business Verification and a valid privacy policy URL are required before sending any template messages at all** — not just before scaling past 250. If a business is sending template messages (e.g. a follow-up fallback template outside the 24h window) without having completed Business Verification, that's an independent compliance gap regardless of message content.
+Business Verification lifts a number off the starting **TIER_250** messaging limit (250 unique recipients per rolling 24h for business-initiated messages).
+
+> **Corrected 2026-09-03.** This section previously claimed that "Business Verification and a valid privacy policy URL are required before sending any template messages at all," attributed to a January 2026 policy update. Re-checking Meta's own [messaging limits](https://developers.facebook.com/documentation/business-messaging/whatsapp/messaging-limits) page does **not** support that: it says newly created business portfolios start at 250 and describes verification as one route to scale *beyond* it, not as a prerequisite for sending templates at all. The stronger claim could not be reconfirmed at the source and should not be relied on. What is verified: verification is required to exceed 250.
 
 **Marketing/re-engagement templates require an opt-out mechanism.** Meta's Jan 2026 policy explicitly categorizes re-engagement messages as "marketing conversations," which require an easy opt-out option. Worth confirming any approved re-engagement template actually includes one.
 
