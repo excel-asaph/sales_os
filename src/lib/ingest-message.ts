@@ -5,6 +5,7 @@ import type {
 } from "@/generated/prisma/client";
 import type { WhatsAppChangeValue } from "@/lib/whatsapp";
 import { runAIEmployeeTurn } from "@/lib/ai-runtime";
+import { tryGreetingShortcut } from "@/lib/greeting-shortcut";
 import { downloadWhatsAppMedia, persistMediaFile } from "@/lib/media-storage";
 import { withCustomerLock } from "@/lib/customer-lock";
 import { scheduleDebounced } from "@/lib/message-debounce";
@@ -279,6 +280,15 @@ async function processInboundMessage(
   scheduleDebounced(customerId, () =>
     withCustomerLock(customerId, async () => {
       try {
+        // The opening turn on a brand-new conversation is the same standard
+        // pitch every time (98.1% byte-identical in production), so it's
+        // sent directly rather than paid for — see greeting-shortcut.ts for
+        // the gates and docs/GREETING_SHORTCUT.md for how to revert. Runs
+        // inside the debounce and the lock, so a burst of opening messages
+        // is already coalesced by the time it's consulted. Anything it
+        // isn't certain about returns false and falls through untouched.
+        if (await tryGreetingShortcut(conversation!.id)) return;
+
         await runAIEmployeeTurn(conversation!.id);
       } catch (error) {
         console.error(`AI Employee Runtime failed for conversation ${conversation!.id}`, error);
