@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { notFound, redirect } from "next/navigation";
-import { getNumberFilterCookie } from "@/lib/number-filter";
+import { getNumberFilterCookie, resolveEffectiveNumber } from "@/lib/number-filter";
 import { Check, ExternalLink, FileText, AlertTriangle, UserX2, UserRound, Info } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
@@ -75,11 +75,13 @@ export default async function ConversationReviewPage({
   // they always have been. Resolved the same way as every other page: no
   // cookie yet defaults to the primary number, same as the sidebar shows.
   const [business, numberFilter] = await Promise.all([
-    prisma.business.findUnique({ where: { id: session.businessId }, select: { whatsappPhoneNumberId: true } }),
+    prisma.business.findUnique({
+      where: { id: session.businessId },
+      select: { whatsappPhoneNumberId: true, additionalWhatsappPhoneNumberIds: true },
+    }),
     getNumberFilterCookie(),
   ]);
-  const effectiveNumber =
-    numberFilter === "all" ? undefined : (numberFilter ?? business?.whatsappPhoneNumberId ?? undefined);
+  const effectiveNumber = business ? resolveEffectiveNumber(numberFilter, business) : undefined;
   if (effectiveNumber && conversation.whatsappPhoneNumberId && conversation.whatsappPhoneNumberId !== effectiveNumber) {
     redirect("/dashboard");
   }

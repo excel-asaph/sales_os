@@ -6,7 +6,7 @@ import { getSession } from "@/lib/auth";
 import { formatNaira } from "@/lib/currency";
 import { relativeTime } from "@/lib/relative-time";
 import { AppShell } from "@/components/app-shell";
-import { getNumberFilterCookie } from "@/lib/number-filter";
+import { getNumberFilterCookie, resolveEffectiveNumber } from "@/lib/number-filter";
 import { conversionBadge } from "@/lib/meta-conversions";
 import { StatTile } from "@/components/stat-tile";
 import { Field, ReferralDetails } from "@/components/referral-details";
@@ -48,12 +48,11 @@ export default async function CustomerProfilePage({
   const [business, numberFilter] = await Promise.all([
     prisma.business.findUniqueOrThrow({
       where: { id: session.businessId },
-      select: { whatsappPhoneNumberId: true },
+      select: { whatsappPhoneNumberId: true, additionalWhatsappPhoneNumberIds: true },
     }),
     getNumberFilterCookie(),
   ]);
-  const effectiveNumber =
-    numberFilter === "all" ? undefined : (numberFilter ?? business.whatsappPhoneNumberId ?? undefined);
+  const effectiveNumber = resolveEffectiveNumber(numberFilter, business);
 
   const customer = await prisma.customer.findUnique({
     where: { id },

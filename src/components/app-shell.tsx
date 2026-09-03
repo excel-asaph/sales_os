@@ -99,7 +99,13 @@ export async function AppShell({
   // to the primary number — that's the business's main line, with any
   // additional numbers being deliberate opt-ins (e.g. a test number).
   const defaultNumberId = numbers[0]?.id;
-  const effectiveNumberId = numberFilter === "all" ? null : (numberFilter ?? defaultNumberId);
+  // Validated against this business's own numbers, not trusted verbatim —
+  // the cookie is per-browser and outlives a business switch, so a stale id
+  // from another business would otherwise filter the badge counts (and every
+  // page) down to zero. Same reasoning as resolveEffectiveNumber
+  // (number-filter.ts); done inline here since `numbers` is already loaded.
+  const effectiveNumberId =
+    numberFilter === "all" ? null : (numbers.find((n) => n.id === numberFilter)?.id ?? defaultNumberId);
   const selectedNumber = effectiveNumberId ? numbers.find((n) => n.id === effectiveNumberId) : undefined;
 
   const awaitingHumanWhere = {

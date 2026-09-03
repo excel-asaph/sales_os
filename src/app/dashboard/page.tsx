@@ -14,7 +14,7 @@ import { STAGE_VALUES } from "@/lib/tools";
 import { clampMaxFollowups, FOLLOWUP_SEQUENCE } from "@/lib/followup-sequence";
 import { relativeTime } from "@/lib/relative-time";
 import { getBusinessNumbers } from "@/lib/whatsapp-numbers";
-import { getNumberFilterCookie } from "@/lib/number-filter";
+import { getNumberFilterCookie, resolveEffectiveNumber } from "@/lib/number-filter";
 import { getDateRangeFilterCookie, resolveDateRange } from "@/lib/date-range-filter";
 import type { ConversationStage } from "@/generated/prisma/client";
 
@@ -54,8 +54,7 @@ export default async function DashboardPage({
     getNumberFilterCookie(),
     getDateRangeFilterCookie("dashboard"),
   ]);
-  const effectiveNumber =
-    numberFilter === "all" ? undefined : (numberFilter ?? business.whatsappPhoneNumberId ?? undefined);
+  const effectiveNumber = resolveEffectiveNumber(numberFilter, business);
 
   // Applied to every count/list below so the stat tiles and the list agree
   // with each other once a number is selected — filtering the list alone

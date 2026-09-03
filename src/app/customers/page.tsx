@@ -10,7 +10,7 @@ import type { ConversationStage } from "@/generated/prisma/client";
 import { clampMaxFollowups } from "@/lib/followup-sequence";
 import { getBusinessConfig } from "@/lib/knowledge";
 import { getBusinessNumbers } from "@/lib/whatsapp-numbers";
-import { getNumberFilterCookie } from "@/lib/number-filter";
+import { getNumberFilterCookie, resolveEffectiveNumber } from "@/lib/number-filter";
 import { AppShell } from "@/components/app-shell";
 import { FilterDropdown } from "@/components/filter-dropdown";
 import { FollowupCountdownBar } from "@/components/followup-countdown-bar";
@@ -95,8 +95,7 @@ export default async function CustomersPage({
     }),
     getNumberFilterCookie(),
   ]);
-  const effectiveNumber =
-    numberFilter === "all" ? undefined : (numberFilter ?? business.whatsappPhoneNumberId ?? undefined);
+  const effectiveNumber = resolveEffectiveNumber(numberFilter, business);
 
   const [customers, config] = await Promise.all([
     prisma.customer.findMany({

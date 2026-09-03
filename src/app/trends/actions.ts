@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-import { getNumberFilterCookie } from "@/lib/number-filter";
+import { getNumberFilterCookie, resolveEffectiveNumber } from "@/lib/number-filter";
 import { getFunnelBreakdown, getFollowupStepPerformance, getConversionAttribution, generateTrendsInsights } from "@/lib/trends";
 
 // Re-derives everything server-side from the session + cookie, the same
@@ -15,12 +15,11 @@ export async function generateInsightsAction(): Promise<string> {
   const [business, numberFilter] = await Promise.all([
     prisma.business.findUniqueOrThrow({
       where: { id: session.businessId },
-      select: { whatsappPhoneNumberId: true },
+      select: { whatsappPhoneNumberId: true, additionalWhatsappPhoneNumberIds: true },
     }),
     getNumberFilterCookie(),
   ]);
-  const effectiveNumber =
-    numberFilter === "all" ? undefined : (numberFilter ?? business.whatsappPhoneNumberId ?? undefined);
+  const effectiveNumber = resolveEffectiveNumber(numberFilter, business);
 
   const [funnel, followupSteps, attribution] = await Promise.all([
     getFunnelBreakdown(session.businessId, effectiveNumber),

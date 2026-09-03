@@ -2,7 +2,7 @@ import { Funnel, MessageCircleReply, PackageCheck, TrendingUp } from "lucide-rea
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
-import { getNumberFilterCookie } from "@/lib/number-filter";
+import { getNumberFilterCookie, resolveEffectiveNumber } from "@/lib/number-filter";
 import { getBusinessNumbers } from "@/lib/whatsapp-numbers";
 import { getFunnelBreakdown, getFollowupStepPerformance, getConversionAttribution } from "@/lib/trends";
 import { fetchNumberHealth, qualityBadge } from "@/lib/whatsapp-number-health";
@@ -28,8 +28,7 @@ export default async function TrendsPage() {
     getNumberFilterCookie(),
   ]);
   const numbers = getBusinessNumbers(business);
-  const effectiveNumber =
-    numberFilter === "all" ? undefined : (numberFilter ?? business.whatsappPhoneNumberId ?? undefined);
+  const effectiveNumber = resolveEffectiveNumber(numberFilter, business);
 
   const [funnel, followupSteps, attribution, numberHealth] = await Promise.all([
     getFunnelBreakdown(session.businessId, effectiveNumber),
