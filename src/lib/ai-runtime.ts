@@ -69,7 +69,11 @@ function wasEscalated(toolName: string): boolean {
  * (src/lib/actions.ts) — the model never touches the database or
  * WhatsApp directly (PRD Philosophy 3).
  */
-export async function runAIEmployeeTurn(conversationId: string, followupNote?: string): Promise<boolean> {
+export async function runAIEmployeeTurn(
+  conversationId: string,
+  followupNote?: string,
+  { allowSilentTurn = false }: { allowSilentTurn?: boolean } = {}
+): Promise<boolean> {
   const conversation = await prisma.conversation.findUniqueOrThrow({
     where: { id: conversationId },
     include: { customer: { include: { business: true } } },
@@ -175,7 +179,7 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
           { reason: "max_tokens", summary: "The AI's response was cut off before completing; needs human review." },
           ctx
         );
-      } else if (!hasMessagedCustomer && !noReplyDeclared && !escalatedToHuman) {
+      } else if (!hasMessagedCustomer && !noReplyDeclared && !escalatedToHuman && !allowSilentTurn) {
         console.warn(`AI Employee Runtime: ended turn without messaging the customer on conversation ${conversationId}`);
         await executeAction(
           "escalate_to_human",
@@ -185,6 +189,19 @@ export async function runAIEmployeeTurn(conversationId: string, followupNote?: s
           },
           ctx
         );
+      } else if (!hasMessagedCustomer && allowSilentTurn) {
+        // A turn the platform asked for, not the customer — nobody is
+        // waiting on a reply, so doing only housekeeping (record_fact,
+        // update_stage, create_followup) and saying nothing is the expected
+        // outcome, not a failure. Escalating it anyway made "Return to AI"
+        // look broken: it cleared the human assignment, ran a correct turn,
+        // then immediately handed the conversation straight back to a human
+        // (confirmed in production, 2026-09-03 — three consecutive clicks on
+        // one conversation, each recording the fact, setting the objective,
+        // and scheduling a follow-up, each bounced back with "no_reply_sent"
+        // seconds later). The escalation above still applies to a real
+        // inbound message, which is the case it was written for.
+        console.log(`AI Employee Runtime: silent turn allowed on conversation ${conversationId} (no reply needed)`);
       }
       return hasMessagedCustomer;
     }

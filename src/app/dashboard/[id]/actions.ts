@@ -185,9 +185,16 @@ export async function sendProductAsHuman(formData: FormData) {
 // of-defense pattern as ingest-message.ts: if the AI turn itself throws,
 // hand it straight back to a human rather than leaving it in an ambiguous
 // state with no trace of why.
+//
+// allowSilentTurn because the customer isn't waiting on anything here: a
+// human just spoke to them, and the point of these turns is for the AI to
+// resume its own bookkeeping (tagging, stage, follow-ups — see returnToAI's
+// comment below), replying only if there's genuinely something to say. The
+// default escalate-on-silence guard is written for an inbound message left
+// unanswered, which this isn't.
 async function runAIAfterHumanAction(conversationId: string, note: string) {
   try {
-    await runAIEmployeeTurn(conversationId, note);
+    await runAIEmployeeTurn(conversationId, note, { allowSilentTurn: true });
   } catch (error) {
     console.error(`AI Employee Runtime failed for conversation ${conversationId} after a human action`, error);
     await prisma.$transaction([
