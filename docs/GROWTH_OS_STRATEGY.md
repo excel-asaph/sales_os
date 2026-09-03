@@ -176,6 +176,83 @@ Pair it with a one-button escape hatch: let them download the rendered file and 
 
 **The strategic weighting.** An editor is the most enjoyable and least defensible item available. Nobody will choose Antflow because its editor is good; they might choose it because it stops their ad account being disabled — and that piece (§ the compliance gate, below) is still unbuilt.
 
+## 9. Organic social (posts, trends, carousels) — the DM leg is the real asset
+
+Proposal: pull trends, generate posts/carousels/captions, publish to IG/FB/TikTok, track engagement and DMs, run agents that learn from performance.
+
+**The valuable half is the DM leg, not the content half.**
+
+**Verified** ([Instagram Messaging API](https://developers.facebook.com/docs/instagram-platform/instagram-api-with-instagram-login/messaging-api/)): a webhook fires when someone messages the business account, carrying their Instagram-scoped ID and message; the app has **24 hours** to respond, and cannot message first. That is architecturally identical to the WhatsApp integration already running — same webhook-in model, same 24-hour window. The Conversation Brain, playbook, follow-up engine, receipt verification and opt-out handler all apply unchanged. **This is module 5 ("Multi-channel Conversation Brain") from the main doc, and the work is mostly plumbing.** Needs `instagram_business_manage_messages`.
+
+**The differentiated measurement**: post → DM → recorded objection → verified receipt → sale. Buffer/Later/Hootsuite see the post and the engagement. Bumpa sees the order. Nothing on the market sees the chain, because it requires owning both ends. This extends the moat this doc already identified from paid traffic to organic.
+
+**Where the proposal goes wrong**:
+
+- **Engagement metrics are a vanity trap**, and this repo just spent a session fixing exactly that class of error on the Trends page (`src/lib/trends.ts`, cohort vs snapshot). Reach and likes are what every scheduler already reports and what nobody can bank. Hold the line this doc already set: measure against *verified purchases*, not engagement.
+- **Content generation is the commodity half** — same objection as §1–7, plus trend half-life. Detect, generate, review, publish, and the trend has moved.
+- **Meme/trend content on a health product is live risk.** A joke about blood sugar is still a health claim to Meta's classifiers, on a channel whose enforcement already cost one WABA. Everything generated here must pass the same compliance gate as ad copy, *before* publishing.
+
+**Hard constraints found** (Instagram figures **verified** at [Instagram Insights](https://developers.facebook.com/docs/instagram-platform/insights); TikTok third-party):
+
+| Item | Reality |
+|---|---|
+| IG insights retention | **90 days, then deleted** |
+| IG insights, <100 followers | Some metrics unavailable |
+| IG publishing | Needs `instagram_business_content_publish`; a carousel counts as one post; per-24h cap is documented inconsistently (25 / 50 / 100 — query `GET /<IG_ID>/content_publishing_limit` rather than trusting a number) |
+| TikTok direct post | Requires app audit, reportedly 2–4 weeks and multi-round |
+| TikTok pre-audit | Every post publishes `SELF_ONLY` — looks fine in testing, broken for real users |
+
+**The 90-day retention is the one that changes the design**: snapshot insights into our own Postgres from day one, or the agent has no history to learn from a year in.
+
+**Build order (inverted from the proposal, same as §8):** IG DM ingestion → post-to-sale attribution → metric snapshotting → recommendations → content generation last, assisted rather than autonomous, behind the compliance gate.
+
+## 10. VSL + landing-page funnels
+
+Proposal: 15–30 minute video sales letters, landing pages/funnels built via API, tracking clicks/scrolls/form fills, email follow-up, payments.
+
+### Veo is the wrong tool for a VSL — by an order of magnitude
+
+Veo produces **8-second clips**. A 20-minute VSL is 1,200 seconds, i.e. ~150 disconnected clips with no continuity of person, room or wardrobe. Using the §2 rates:
+
+| Approach | Rough cost, 20-minute VSL |
+|---|---|
+| Veo Standard at $0.40/sec | **~$480** |
+| Veo Lite at $0.05/sec | ~$60, still 150 unrelated clips |
+| HeyGen avatar at ~$1–4/min | ~$20–80, and actually coherent |
+| Founder + phone camera | ~₦0 |
+
+**Third-party**: HeyGen API runs roughly $0.0167–$0.0667 per second depending on avatar engine, with API access from about $108/month; Synthesia gates API behind enterprise pricing (reportedly $899+/month). A talking-head avatar is the correct *shape* for a VSL, unlike generated cinematic clips.
+
+**But the honest recommendation is the last row.** A VSL is one trusted person talking to camera. In this market the founder's actual face outperforms a synthetic presenter, costs nothing, and sidesteps the whole AI-disclosure question flagged in §6. Generate the b-roll and captions around it, not the person — same conclusion as §7.
+
+### Don't buy a landing-page builder — this app *is* one
+
+No compelling "landing page API" category leader surfaced, and it doesn't matter: **this is already a Next.js app on Railway with Postgres.** A funnel page is a dynamic route reading a page definition from our own tables. That gives:
+
+- **Total tracking control.** Clicks, scroll depth, video watch percentage and form events are our own instrumentation writing to the existing `Event` table. A third-party builder makes this *harder*, not easier, because the tracking lives on someone else's domain.
+- **Attribution as a join, not an integration.** Page view, lead, conversation and verified order all sit in one database. That is the entire premise of this doc.
+- **No per-page subscription**, and no vendor between us and the customer.
+
+### Payments: Paystack replaces receipt OCR for web traffic
+
+**Third-party**: Paystack charges 1.5% capped at ₦2,000 for local transactions, supports card/bank transfer/USSD, and fires a `charge.success` webhook on payment.
+
+This is a **material upgrade over the current flow** for anyone arriving via web. Today payment is a bank transfer plus a screenshot run through vision-model receipt verification (`src/lib/receipt-verification.ts`) with confidence scoring and escalation. A `charge.success` webhook is deterministic. Receipt OCR remains necessary for WhatsApp-originated bank transfers; it should not be the path for funnel traffic.
+
+### Question the email assumption
+
+The proposal assumes email capture and email follow-up sequences. **In this market WhatsApp beats email decisively on open and reply rates**, and this system already owns a working follow-up engine, a 24-hour-window-aware sender, template fallback and opt-out enforcement.
+
+**Capture the WhatsApp number, not the email address**, and drop the lead straight into the existing `Followup` sequence. That reuses everything already built and lands the lead in the channel where the AI can actually close. Email can be a secondary capture, not the primary one.
+
+### This funnel would improve Meta attribution, not just add a channel
+
+`src/lib/meta-conversions.ts` currently reports `event_name: "Purchase"` with `action_source: "business_messaging"`. A web funnel adds a Pixel plus `action_source: "website"`, and unlocks the intermediate events messaging conversions can't express — `ViewContent`, `Lead`, `InitiateCheckout`. Richer signal into Meta's optimiser is a real, compounding benefit, distinct from the funnel's own conversion rate.
+
+### The risk that has to be said plainly
+
+**Long-form health VSLs are the single most scrutinised creative format in this category.** The pattern of a 20-minute video making escalating claims about a medical condition is exactly what Meta's Health & Wellness standards target, and exactly the shape of the copy that got this business's WABA disabled on 2026-08-24 (`docs/AD_COPY_COMPLIANCE_AUDIT.md`). A VSL script is the *highest*-risk artifact anywhere in this roadmap and must go through the compliance gate before it is ever recorded, not after.
+
 ## Where this leaves the strategy
 
 Wall 3's conclusion stands and is now better supported. Three separate things say don't build the intelligence half:
