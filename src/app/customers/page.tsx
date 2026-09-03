@@ -50,6 +50,7 @@ function describeFollowupEnd(type: string, payload: unknown): string {
   if (type !== "FOLLOWUP_CANCELLED") return "Stopped";
 
   const reason = (payload as { reason?: string } | null)?.reason;
+  if (reason === "customer_opted_out") return "Stopped — customer opted out";
   if (reason === "customer_replied") return "Stopped — customer replied";
   if (reason === "order_already_verified") return "Stopped — payment already verified";
   if (reason === "business_paused") return "Stopped — follow-ups paused";

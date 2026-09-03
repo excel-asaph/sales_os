@@ -6,6 +6,7 @@ import { verifyReceiptContent, type ReceiptExtraction, type PaymentAccountRef } 
 import { getBoss, FOLLOWUP_QUEUE } from "@/lib/queue";
 import { addCustomerTag } from "@/lib/customer-tags";
 import { cancelPendingFollowups } from "@/lib/followups";
+import { OPTED_OUT_TAG } from "@/lib/opt-out";
 import { reportPurchaseConversion } from "@/lib/meta-conversions";
 import type { ConversationStage, FactKind, FollowupReason, Prisma } from "@/generated/prisma/client";
 
@@ -815,6 +816,17 @@ async function createFollowup(
     include: { customer: { select: { tags: true } } },
   });
   const customerTags = Array.isArray(conversation.customer.tags) ? (conversation.customer.tags as string[]) : [];
+
+  // An explicit opt-out is unconditional, unlike the soft-decline case
+  // below: no stage, and nothing the customer says later, re-enables
+  // automatic nudging. WhatsApp's Business Messaging Policy requires
+  // respecting a request to discontinue outright, and the check can't be
+  // stage-scoped — an opted-out customer's conversation sits at LOST_LEAD,
+  // not NEW_LEAD, so the guard below would never fire for them.
+  if (customerTags.includes(OPTED_OUT_TAG)) {
+    return { scheduled: false, optedOut: true };
+  }
+
   if (customerTags.includes("Uninterested") && conversation.currentStage === "NEW_LEAD") {
     return { scheduled: false, returningDeclinedCustomer: true };
   }

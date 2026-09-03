@@ -6,6 +6,7 @@ import type {
 import type { WhatsAppChangeValue } from "@/lib/whatsapp";
 import { runAIEmployeeTurn } from "@/lib/ai-runtime";
 import { tryGreetingShortcut } from "@/lib/greeting-shortcut";
+import { isOptOutRequest, applyOptOut } from "@/lib/opt-out";
 import { downloadWhatsAppMedia, persistMediaFile } from "@/lib/media-storage";
 import { withCustomerLock } from "@/lib/customer-lock";
 import { scheduleDebounced } from "@/lib/message-debounce";
@@ -203,6 +204,23 @@ async function processInboundMessage(
   // anyone reviewing the transcript, but doesn't warrant re-engaging the
   // AI (there's no media to persist and no reply to generate).
   if (isReaction) return;
+
+  // An explicit "stop" is recorded here, in code, before anything else can
+  // happen to this conversation — deliberately NOT inside the debounced
+  // callback below, so the state lands immediately rather than five seconds
+  // later, and NOT dependent on the AI turn, which may never run. The model
+  // still gets its turn afterwards and signs off politely (a single opt-out
+  // confirmation is a use case Meta names explicitly under Utility
+  // messages); it just no longer decides whether the opt-out counts.
+  // See src/lib/opt-out.ts.
+  if (content && isOptOutRequest(content)) {
+    try {
+      await applyOptOut(conversation!.id);
+      console.log(`[opt-out] honoured explicit opt-out on conversation ${conversation!.id}`);
+    } catch (error) {
+      console.error(`Failed to record opt-out for conversation ${conversation!.id}`, error);
+    }
+  }
 
   // Show "typing…" as early as possible — a reply is coming (Meta's own
   // guidance is to never show this otherwise), and the debounce window

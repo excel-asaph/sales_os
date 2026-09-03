@@ -70,6 +70,30 @@ hours is the first test of a path that has never run. Start verification
 before that happens, not after.
 
 ### 2. Opt-out depends on the AI noticing — no deterministic backstop
+### ✅ CLOSED 2026-09-03 — see `src/lib/opt-out.ts`
+
+An explicit opt-out is now recorded in code at ingest, before and
+independently of the AI turn: pending follow-ups cancelled, customer tagged
+`Opted out`, conversation moved to `LOST_LEAD`, `OPT_OUT_RECEIVED` event
+written. `createFollowup` refuses unconditionally for that tag — deliberately
+not stage-scoped, since an opted-out conversation sits at `LOST_LEAD` and the
+existing "Uninterested" guard only fires at `NEW_LEAD`.
+
+Matching is whole-message only, never substring. That distinction is load
+bearing: a naive `/\bstop\b/` over the same 467 messages matched a customer
+asking *"…urinating frequently can it stop lf am using your dia[betes fix]"* —
+a live lead who would have been silently closed by the compliance feature.
+Verified: 37 fixture phrases matched correctly, and **0 of 469 real inbound
+messages** trigger it.
+
+The AI still replies afterwards, and the prompt now tells it to send one warm
+acknowledgement and nothing else for an opted-out customer — no pitch, no
+asking why. A single opt-out confirmation is a use case Meta names explicitly
+under Utility messages ("Confirm when a customer opts in or opts out of
+WhatsApp messages from your business"), so the acknowledgement itself is
+sanctioned. Enforcement no longer depends on it happening.
+
+**Original finding, kept for context:**
 
 The policy language is unconditional:
 
