@@ -188,6 +188,15 @@ export default async function CustomersPage({
 
       const latestConversation = customer.conversations[0] ?? null;
       const activeFollowup = latestConversation?.followups.find((f) => f.step <= maxFollowups) ?? null;
+      // The sequence has finished sending and the only thing still pending
+      // is the give-up check. Nothing more will reach this customer; the
+      // one useful thing left to say is when they get written off, so the
+      // column reports that instead of going blank (which would look
+      // identical to a customer who never had a sequence at all).
+      const closingAt =
+        !activeFollowup && latestConversation
+          ? (latestConversation.followups.find((f) => f.step > maxFollowups)?.scheduledFor ?? null)
+          : null;
       const lastFollowupEvent = latestConversation ? lastEventByConversation.get(latestConversation.id) : undefined;
 
       const numberLabel = latestConversation?.whatsappPhoneNumberId
@@ -208,6 +217,7 @@ export default async function CustomersPage({
         followupStep: activeFollowup?.step ?? null,
         followupCreatedAt: activeFollowup?.createdAt ?? null,
         followupDue: activeFollowup?.scheduledFor ?? null,
+        closingAt,
         followupEndLabel: lastFollowupEvent
           ? describeFollowupEnd(lastFollowupEvent.type, lastFollowupEvent.payload)
           : null,
@@ -365,6 +375,10 @@ export default async function CustomersPage({
                                 className="w-24"
                               />
                             </div>
+                          ) : row.closingAt ? (
+                            <span className="text-xs text-muted-foreground">
+                              No reply yet — closing {relativeTime(row.closingAt)}
+                            </span>
                           ) : row.followupEndLabel ? (
                             <span className="text-xs text-muted-foreground">{row.followupEndLabel}</span>
                           ) : null}
