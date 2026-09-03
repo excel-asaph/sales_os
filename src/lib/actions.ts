@@ -5,7 +5,7 @@ import { downloadWhatsAppMedia, persistMediaFile, readPersistedMedia } from "@/l
 import { verifyReceiptContent, type ReceiptExtraction, type PaymentAccountRef } from "@/lib/receipt-verification";
 import { getBoss, FOLLOWUP_QUEUE } from "@/lib/queue";
 import { addCustomerTag } from "@/lib/customer-tags";
-import { cancelPendingFollowups } from "@/lib/followups";
+import { cancelPendingFollowups, resolveFallbackMessage } from "@/lib/followups";
 import { OPTED_OUT_TAG } from "@/lib/opt-out";
 import { reportPurchaseConversion } from "@/lib/meta-conversions";
 import type { ConversationStage, FactKind, FollowupReason, Prisma } from "@/generated/prisma/client";
@@ -838,9 +838,16 @@ async function createFollowup(
     return { scheduled: false, alreadyActive: true, scheduledFor: existing.scheduledFor, step: existing.step };
   }
 
+  // Stored as real text even when the model passes a playbook key instead —
+  // this field is sent verbatim if composing fresh fails at send time, so a
+  // bare key would reach the customer as the entire message (followups.ts).
+  // The worker resolves it again on the way out, covering rows written
+  // before this did.
+  const fallbackMessage = resolveFallbackMessage(message, config.playbook as Record<string, string> | null);
+
   const scheduledFor = new Date(Date.now() + hours * 60 * 60 * 1000);
   const followup = await prisma.followup.create({
-    data: { conversationId: ctx.conversationId, step: 1, message, scheduledFor, reason },
+    data: { conversationId: ctx.conversationId, step: 1, message: fallbackMessage, scheduledFor, reason },
   });
 
   const boss = await getBoss();

@@ -12,6 +12,27 @@ import { prisma } from "@/lib/prisma";
  * discovers it's stale, even though the worker's own stage check means it
  * was never actually going to send anything.
  */
+/**
+ * A follow-up's stored `message` is the fallback used only when composing
+ * fresh fails at send time. The model sometimes fills it with a playbook
+ * KEY ("payment_followup") rather than the text — an understandable
+ * generalisation, since `send_template_message` genuinely does take a key —
+ * which would then be sent to a customer verbatim as the entire message.
+ *
+ * Found in production 2026-09-03: 26 rows stored a bare key. None had
+ * reached a customer, but only because the compose step hadn't failed on
+ * one yet — and every AI call did fail for hours that same day on an
+ * expired API key. Resolved at send time rather than only at write time so
+ * rows already in the database are covered too.
+ */
+export function resolveFallbackMessage(
+  message: string,
+  playbook: Record<string, string> | null | undefined
+): string {
+  const text = playbook?.[message.trim()];
+  return text?.trim() ? text : message;
+}
+
 export async function cancelPendingFollowups(conversationId: string, reason: string) {
   const { count } = await prisma.followup.updateMany({
     where: { conversationId, sent: false, cancelled: false },

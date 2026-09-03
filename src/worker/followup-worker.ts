@@ -7,6 +7,7 @@ import { getMetaCredentials } from "@/lib/meta-credentials";
 import { isWithinCustomerServiceWindow } from "@/lib/whatsapp-window";
 import { FOLLOWUP_SEQUENCE, stepDefinition, clampMaxFollowups } from "@/lib/followup-sequence";
 import { addCustomerTag } from "@/lib/customer-tags";
+import { resolveFallbackMessage } from "@/lib/followups";
 import { formatSystemNote, describeTemplateFallback } from "@/lib/system-notes";
 import type { ConversationStage } from "@/generated/prisma/client";
 
@@ -226,16 +227,24 @@ async function deliverFollowup(followup: LoadedFollowup): Promise<DeliveryResult
     }
   } catch (error) {
     // Template fallback if generation fails — the customer still gets a
-    // reminder even if the Claude call errors.
+    // reminder even if the Claude call errors. Resolved through the
+    // playbook first: the stored text is sometimes a bare playbook key,
+    // which would otherwise be sent to the customer as the whole message
+    // (followups.ts).
     console.error(`Follow-up ${followup.id}: AI runtime failed, sending fallback message`, error);
-    await sendWhatsAppText(businessId, conversation.customer.phoneNumber, followup.message, phoneNumberId);
+    const businessConfig = await prisma.businessConfig.findUnique({ where: { businessId } });
+    const fallbackText = resolveFallbackMessage(
+      followup.message,
+      businessConfig?.playbook as Record<string, string> | null
+    );
+    await sendWhatsAppText(businessId, conversation.customer.phoneNumber, fallbackText, phoneNumberId);
     await prisma.message.create({
       data: {
         conversationId: conversation.id,
         direction: "OUTBOUND",
         sender: "AI",
         type: "TEXT",
-        content: followup.message,
+        content: fallbackText,
       },
     });
   }

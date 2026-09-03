@@ -127,6 +127,20 @@ before the AI turn — cancel pending follow-ups, tag `Uninterested`, move to
 AI can still reply warmly on top; the enforcement just stops depending on it.
 
 ### 3. A playbook key can still reach a customer as message text
+### ✅ CLOSED 2026-09-03 — `resolveFallbackMessage` in `src/lib/followups.ts`
+
+Resolved in two places: at send time in the worker's catch block, which
+covers the 26 rows already in the database, and at write time in
+`createFollowup`, so new rows store real text. A bare key now resolves
+through the playbook to its actual value; anything that isn't a key passes
+through untouched.
+
+Verified against production at the moment of the fix: two rows were pending
+and live, due 19:26 and 20:32 UTC that same day, both storing
+`"payment_followup"`. Both now resolve to *"Hello sir/ma. We sent the ebook
+based on trust, and we're still waiting for your payment."*
+
+**Original finding, kept for context:**
 
 25 follow-up rows store the literal string `"payment_followup"` as their
 fallback text — the model passed the playbook *key* rather than the text,
