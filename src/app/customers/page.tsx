@@ -126,10 +126,12 @@ export default async function CustomersPage({
             currentStage: true,
             whatsappPhoneNumberId: true,
             orders: { select: { status: true, expectedAmount: true } },
+            // Not take: 1 — the lowest pending step can be the internal
+            // give-up check (see below), in which case the real one, if any,
+            // is further down the list.
             followups: {
               where: { sent: false, cancelled: false },
               orderBy: { step: "asc" },
-              take: 1,
             },
           },
         },
@@ -148,9 +150,18 @@ export default async function CustomersPage({
   // follow-up; conversations without one fall back to the last time a
   // sequence ended, if any, so the column reads "why did it stop" rather
   // than just disappearing.
+  //
+  // A pending step past maxFollowups doesn't count as one: that's the
+  // internal "did they ever come back?" check scheduleNext leaves behind a
+  // day after the last real message (followup-worker.ts) — it has no
+  // content and sends nothing, it only decides whether to give up. Counting
+  // it here rendered it as a real step ("2/1 · next in 22 hours" on a
+  // business configured for 1), which reads as the engine ignoring the
+  // configured limit. The conversation detail page already filters it out
+  // the same way (dashboard/[id]/page.tsx).
   const conversationsNeedingLastEvent = customers
     .map((c) => c.conversations[0])
-    .filter((c): c is NonNullable<typeof c> => Boolean(c) && c.followups.length === 0)
+    .filter((c): c is NonNullable<typeof c> => Boolean(c) && !c.followups.some((f) => f.step <= maxFollowups))
     .map((c) => c.id);
 
   const lastEvents = conversationsNeedingLastEvent.length
@@ -176,7 +187,7 @@ export default async function CustomersPage({
       const tags = Array.isArray(customer.tags) ? (customer.tags as string[]) : [];
 
       const latestConversation = customer.conversations[0] ?? null;
-      const activeFollowup = latestConversation?.followups[0] ?? null;
+      const activeFollowup = latestConversation?.followups.find((f) => f.step <= maxFollowups) ?? null;
       const lastFollowupEvent = latestConversation ? lastEventByConversation.get(latestConversation.id) : undefined;
 
       const numberLabel = latestConversation?.whatsappPhoneNumberId
