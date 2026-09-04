@@ -21,6 +21,7 @@ import type { ConversationStage } from "@/generated/prisma/client";
 import { getBusinessNumbers } from "@/lib/whatsapp-numbers";
 import { getNumberFilterCookie } from "@/lib/number-filter";
 import { Badge } from "@/components/ui/badge";
+import { LiveRefresh } from "@/components/live-refresh";
 import {
   Sidebar,
   SidebarContent,
@@ -328,6 +329,10 @@ export async function AppShell({
           <NotificationBell conversations={awaitingHuman} count={awaitingHumanCount} />
         </header>
         <div className="min-h-0 flex-1 overflow-auto p-6 md:p-8">{children}</div>
+        {/* Mounted once here rather than per page, so every signed-in view
+            picks up new customer messages: the conversation thread, the
+            queue counts in the sidebar, and the notification bell above. */}
+        <LiveRefresh />
       </SidebarInset>
     </SidebarProvider>
   );
