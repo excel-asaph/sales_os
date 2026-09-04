@@ -15,7 +15,7 @@ import { VerifyOrderButton } from "@/components/verify-order-button";
 import { CreateOrderButton } from "@/components/create-order-button";
 import { SendProductButton } from "@/components/send-product-button";
 import { DeleteConversationButton } from "@/components/delete-conversation-button";
-import { ScrollToBottomAnchor } from "@/components/scroll-to-bottom-anchor";
+import { MessageScroller } from "@/components/message-scroller";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -364,7 +364,7 @@ export default async function ConversationReviewPage({
         <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
           <div className="flex min-h-0 min-w-0 flex-col gap-5">
             <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
-              <CardContent className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
+              <MessageScroller messageCount={conversation.messages.length}>
                 {conversation.messages.map((message) => {
                   // An internal record of what happened (e.g. "sent the
                   // approved template instead of a composed reply"), not
@@ -415,8 +415,7 @@ export default async function ConversationReviewPage({
                     </div>
                   );
                 })}
-                <ScrollToBottomAnchor />
-              </CardContent>
+              </MessageScroller>
             </Card>
 
             <Card size="sm" className="shrink-0">
