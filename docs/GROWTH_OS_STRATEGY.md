@@ -225,6 +225,44 @@ Veo produces **8-second clips**. A 20-minute VSL is 1,200 seconds, i.e. ~150 dis
 
 **But the honest recommendation is the last row.** A VSL is one trusted person talking to camera. In this market the founder's actual face outperforms a synthetic presenter, costs nothing, and sidesteps the whole AI-disclosure question flagged in §6. Generate the b-roll and captions around it, not the person — same conclusion as §7.
 
+### Revised same day: the intended format is voiceover-led, and that changes the answer
+
+> The table above assumed a *talking-head* VSL, i.e. continuous footage of one person. The actual intent is **voiceover narration over AI clips, stock stills, captions and sound, with no human faces and no avatars.** That is a different production entirely, and the order-of-magnitude objection does not apply to it. Kept above for the reasoning; superseded here.
+
+In a voiceover-led VSL the **script sets the pace** and visuals are cutaways of roughly 3–6 seconds. A 20-minute piece therefore needs on the order of **30 generated clips**, not 150, with the remaining screen time carried by stock stills with slow pan/zoom and text cards.
+
+| Component (20-minute VSL, ~3,000-word script) | Cost |
+|---|---|
+| Voiceover, ~20,000 characters | **$1–2** (third-party: ElevenLabs ~$0.10/1k chars on v2/v3, ~$0.05 on Flash/Turbo) |
+| ~30 Veo clips covering ~4 minutes of screen time | **$12** Lite / **$24** Fast / **$96** Standard |
+| Stock stills with pan/zoom | **Free** |
+| Captions | **Free** — derived from our own script, so no transcription step |
+| **Total** | **~$15–100 per VSL** |
+
+Viable. The faceless format also removes the AI-disclosure exposure discussed in §6 and §7 by construction.
+
+### Correction to §4's "start hosted" advice — it does not survive long-form
+
+§4 recommended starting on a hosted render API and self-hosting only if per-minute cost ever became a real line item. **That holds for short ads and breaks for VSLs.**
+
+| Render budget | 30-second ads | 20-minute VSL |
+|---|---|---|
+| ~200 min/month (~$49 plan) | ~400 ads | **10 renders** |
+
+Nobody iterates on a 20-minute video ten times and stops. **For VSLs, render locally with ffmpeg**: voiceover + stills with a Ken Burns move + clips + burned-in captions is squarely what ffmpeg does well, and it costs nothing but compute. There is already a pg-boss worker service in this repo, so a render job fits the existing pattern. Keep the hosted API for short ads, where per-minute price is irrelevant.
+
+### The stock-photo trap — keep "no human faces" as a rule, not a phase
+
+**Third-party, but consistent across sources**: Pexels, Unsplash and Pixabay all permit commercial use without attribution, but **none guarantee model releases** for the people depicted, and their licenses forbid using an image to imply endorsement.
+
+Put a stock photo of a smiling person beside copy about reversing diabetes and three problems land at once:
+
+1. It implies that person endorses the product — a license violation.
+2. It implies something about that person's medical condition.
+3. Meta's **Personal Attributes** policy (verified, quoted in `docs/META_WHATSAPP_COMPLIANCE.md`) is precisely the rule against asserting or implying a person has a medical condition.
+
+The "no human faces for now" instinct is more protective than it looks. For a health product it should be a **standing rule covering stock as well as generated imagery**, not a temporary phase.
+
 ### Don't buy a landing-page builder — this app *is* one
 
 No compelling "landing page API" category leader surfaced, and it doesn't matter: **this is already a Next.js app on Railway with Postgres.** A funnel page is a dynamic route reading a page definition from our own tables. That gives:
@@ -252,6 +290,39 @@ The proposal assumes email capture and email follow-up sequences. **In this mark
 ### The risk that has to be said plainly
 
 **Long-form health VSLs are the single most scrutinised creative format in this category.** The pattern of a 20-minute video making escalating claims about a medical condition is exactly what Meta's Health & Wellness standards target, and exactly the shape of the copy that got this business's WABA disabled on 2026-08-24 (`docs/AD_COPY_COMPLIANCE_AUDIT.md`). A VSL script is the *highest*-risk artifact anywhere in this roadmap and must go through the compliance gate before it is ever recorded, not after.
+
+## 11. The agent that recommends and structures the funnel
+
+Proposal: after conversation with the user plus thorough web and industry research, agents recommend lander/funnel options, structure the whole sales process, and set up tracking.
+
+### Replace "live web research per user" with a curated pattern library
+
+**This recommendation comes from direct evidence gathered during this very research session.** Searches on marketing tooling topics (e.g. "landing page builder API") returned six near-identical AI-written listicles from content-farm domains. Several other searches in §1–10 returned the same shape. **That is what live web research on marketing topics mostly returns, and it is what the agent would be fed.**
+
+There are only ~8 canonical funnel archetypes worth offering:
+
+1. VSL page
+2. Opt-in with a lead magnet
+3. Tripwire
+4. Quiz
+5. Webinar
+6. Application / call booking
+7. Direct sales page
+8. Free-plus-shipping
+
+Encode them **once**, as data, the way `BusinessConfig.playbook` already stores scripts: each with its page sequence, the events worth tracking, and the conditions where it fits. The agent then **selects and adapts** rather than discovers. Cheaper, faster, deterministic, auditable, and it becomes an asset that compounds instead of a per-run cost that doesn't.
+
+The end state is that the recommendation is driven by **our own outcome data across businesses** — "businesses selling X at price Y converted best on archetype Z" — which is the moat this doc keeps returning to, and the one version competitors cannot copy.
+
+### Two assumptions to test rather than inherit
+
+**Is 20 minutes right for this market?** The long-VSL playbook is US direct response, which assumes desktop viewing and cheap unlimited data. The buyer here is on a phone paying for data by the megabyte. Not necessarily wrong — but it is an inherited assumption, and should be tested against a ~3-minute cut rather than adopted wholesale.
+
+**Should the page sell at all?** This is the more consequential one. The closing strength of this system is the WhatsApp conversation: objection handling, follow-up sequencing, receipt verification, opt-out enforcement, all built and running. **A VSL page ending in a checkout throws that away and substitutes a weaker closer. A VSL page ending in a WhatsApp button feeds it.**
+
+The second keeps the entire chain — ad, page, watch depth, click, conversation, objection, verified payment — inside one database, which is the premise of this whole document. **The funnel is best understood as a better top-of-funnel for the machine that already exists, not as a second, parallel sales mechanism.**
+
+That is the version worth building.
 
 ## Where this leaves the strategy
 
