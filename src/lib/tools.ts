@@ -70,11 +70,18 @@ export const actionContractTools: Anthropic.Tool[] = [
   {
     name: "send_product",
     description:
-      "Deliver a digital product to the customer. Only call this when business policy or a verified payment allows it — the platform enforces this and will refuse if not allowed.",
+      "Deliver a digital product to the customer. Only call this when business policy or a verified payment allows it — the platform enforces this and will refuse if not allowed. " +
+      "If this product has already been sent to this customer, the platform refuses and tells you when it was sent: the file is still in their WhatsApp history, so point them to it rather than resending. " +
+      "Set resend only when the customer has actually told you they cannot find, download or open it.",
     input_schema: {
       type: "object",
       properties: {
         product_id: { type: "string", description: "The product's id, from search_products." },
+        resend: {
+          type: "boolean",
+          description:
+            "Send the file again even though it was already delivered. Only true when the customer has said they did not receive it, cannot find it, or cannot open it. Never set this just because a payment was confirmed.",
+        },
       },
       required: ["product_id"],
     },

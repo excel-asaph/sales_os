@@ -37,7 +37,7 @@ export async function executeAction(
     case "search_products":
       return searchProducts(ctx.businessId, input.query as string);
     case "send_product":
-      return sendProduct(ctx, input.product_id as string);
+      return sendProduct(ctx, input.product_id as string, input.resend === true);
     case "send_payment_details":
       return sendPaymentDetails(ctx);
     case "request_payment_verification":
@@ -99,12 +99,50 @@ async function sendTemplateMessage(ctx: ActionContext, templateKey: string) {
   return sendMessage(ctx, text);
 }
 
-async function sendProduct(ctx: ActionContext, productId: string) {
+async function sendProduct(ctx: ActionContext, productId: string, resend = false) {
   const [product, config] = await Promise.all([
     prisma.product.findUnique({ where: { id: productId } }),
     getBusinessConfig(ctx.businessId),
   ]);
   if (!product) return { delivered: false, reason: "product not found" };
+
+  // Don't send a file the customer already has. Enforced here rather than
+  // only in the prompt for the same reason createFollowup checks opt-out in
+  // code: the Conversation Brain feeds the model the last 8 messages, so a
+  // delivery from a day or two ago has usually scrolled out of view and the
+  // model genuinely cannot see that it already sent the PDF.
+  //
+  // The case that exposed this (2026-09-06): the ebook goes out on trust,
+  // payment lands days later, a human records it manually, and the AI turn
+  // that follows re-attaches the same PDF — while its own message says "you
+  // already have the ebook on your WhatsApp". Note that "a newer order
+  // exists" cannot be the test here: under deliver-before-payment the order
+  // is *always* created after the delivery, which is exactly this case.
+  //
+  // A repeat purchase of the same digital product doesn't need the file
+  // resent either — the customer still has it. The one real exception is a
+  // customer who says they can't find or open it, which is what `resend` is
+  // for.
+  if (!resend) {
+    const deliveries = await prisma.event.findMany({
+      where: { conversationId: ctx.conversationId, type: "PRODUCT_DELIVERED" },
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true, payload: true },
+    });
+    const previous = deliveries.find(
+      (e) => (e.payload as { productId?: string } | null)?.productId === productId
+    );
+    if (previous) {
+      return {
+        delivered: false,
+        alreadyDelivered: true,
+        deliveredAt: previous.createdAt.toISOString(),
+        reason:
+          `"${product.name}" was already sent to this customer on ${previous.createdAt.toISOString()} and is still in their WhatsApp chat history. ` +
+          "Point them to it instead of sending it again. Only call this tool again with resend set to true if they tell you they cannot find, download or open it.",
+      };
+    }
+  }
 
   if (!config.deliverBeforePayment) {
     // The most recent order for this product, not "does a verified one
