@@ -47,3 +47,9 @@ next-env.d.ts
 # locally-persisted receipt images (media-storage.ts) — a stand-in for real
 # object storage (S3/R2), not meant to be committed
 /storage
+
+# Source material dropped in for analysis, not part of the app — ad video
+# creatives and their copy. Measured findings live in
+# docs/GROWTH_OS_STRATEGY.md §13b instead; the media itself is ~170MB and has
+# no business in git history.
+/Diabetes Fix  Ads/

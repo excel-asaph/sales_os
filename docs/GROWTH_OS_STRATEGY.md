@@ -461,11 +461,100 @@ script (Claude) → shot list with timings → narration (ElevenLabs) → assets
 MP4. **Build it at 2–3 minutes first**: same pipeline as 20 minutes, but
 minutes per test render instead of an hour.
 
-**Local machine as of 2026-09-05**: Python 3.9.11 + pip and winget present;
-**ffmpeg, ffprobe and yt-dlp are all NOT installed.** Resuming this needs
-`pip install yt-dlp` and `winget install Gyan.FFmpeg`.
+**Local machine — RESOLVED 2026-09-07.** `yt-dlp` 2025.10.14 installed via
+pip. ffmpeg 9.0.1 full build installed via winget at
+`%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg_*fmpeg-9.0.1-full_buildin`
+(the winget shim didn't land in `Links`, so call it by path or refresh PATH).
+A second copy sits behind `python -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())"`
+— worth knowing, because on a slow connection `pip install imageio-ffmpeg`
+succeeded when two direct 80 MB downloads from gyan.dev failed mid-transfer.
 
-**Still outstanding when this resumes**: the reference videos themselves.
+## 13b. Measured teardown of the 8 existing ads (2026-09-07)
+
+Eight ads live in `Diabetes Fix  Ads/`, with a matching `Diabetes Fix Ad
+copies.txt`. **The txt is Facebook caption copy, not video narration** —
+copy 7 runs ~380 words against a 66-second video, which cannot fit.
+
+Measured with ffmpeg (scene threshold 0.3):
+
+| Ad | Format | Duration | Shots | Avg shot |
+|---|---|---|---|---|
+| 1 | 720×720 | 198s | 52 | 3.8s |
+| 2 | 720×720 | 184s | 38 | 4.8s |
+| 3 | 720×720 | 161s | 35 | 4.6s |
+| 4 | 720×1280 | 210s | 62 | 3.4s |
+| 5 | 720×1280 | 150s | 21 | 7.1s |
+| 6 | 1080×1080 | 203s | 57 | 3.6s |
+| 7 | 476×846 | 65s | 11 | 5.9s |
+| 8 | 720×720 | 138s | 22 | 6.3s |
+
+**Mean 2m 44s, nothing over 3m 30s.** This settles §10's open question about
+length from the business's own data: the proven format is 2–3 minutes, not
+20. The sample script supplied (~430 words ≈ 2m 50s at narration pace) lands
+on that mean. **Spec for anything written: ~430 words, ~2m 45s.** A
+full-length render is therefore under three minutes, so the "build a 2–3
+minute test version first" step in §13 is unnecessary — the real thing is
+already that short.
+
+**What the frames actually show** (contact sheets from ads 1, 4, 5):
+
+- **The face carries the ad.** Real customers, filmed on phones, in domestic
+  settings. Not stock, not generated.
+- **B-roll is picture-in-picture, not a cut away.** Market stalls, cooking, a
+  Morning/Afternoon/Night meal-plan card, a crossed-out pill bottle — all
+  inset while the speaker stays on screen.
+- **Proof is screenshots and devices**: a glucometer held to the lens reading
+  89, WhatsApp payment confirmations, the PDF delivering, and a customer's
+  own message reading "this is just the fifth day, my sugar has come down
+  from 387 to 113".
+- **Persistent red "TESTIMONY" watermark** on every speaker shot.
+- **Identical end card**: product mockup on a phone, ₦10,000, WhatsApp logo,
+  tap below.
+- **The ebook cover reads "10 Days to fully reverse Type 2 Diabetes for
+  good"** and appears in every video. The prohibited claim is printed on the
+  product itself, so no script rewrite alone can clear it.
+
+## 13c. Correction: the production method and the model (2026-09-07)
+
+§10 and §13 assumed a voiceover-led faceless VSL built on Veo. **Both
+premises were wrong for what this business actually does.**
+
+The real method: a consenting real customer's photo drives **image-to-video**
+generation of a talking head in Google Flow, 15+ clips, merged with b-roll by
+hand in CapCut.
+
+And the model is not Veo. It is **Gemini Omni 1.1 Flash** (shipped
+2026-08-27), which changes the §10 voice-consistency objection materially:
+
+- 3–10s clips at 24fps, **extendable in 10s increments to 40s cumulative**,
+  carrying **up to 10s of prior context** (earlier models saw only the final
+  second).
+- First-and-last-frame control; **video reference up to 3s** for preserving a
+  character — a stronger handle on likeness than a single still.
+- **Available via API** as `gemini-omni-1.1-flash` through Google AI Studio
+  and the Gemini Enterprise Agent Platform, so the manual Flow work is
+  automatable.
+- Pricing per output second: **$0.03 (360p), $0.10 (720p), $0.15 (1080p),
+  $0.30 (4K)** — so a 2m45 render is ~$5 as a 360p draft, ~$17 at 720p. The
+  360p tier is the iteration loop.
+
+**Revised conclusion**: the earlier worry about ~20 independent generations
+drifting apart was correct for Veo and overstated for Omni. Five chained
+40-second segments is a different problem from twenty independent rolls.
+
+**What a system would actually replace**: not the generation (Flow already
+does it well) but everything around it — Claude writes the script and shot
+list, code drives Omni per segment with chained extensions, and **ffmpeg
+replaces the by-hand CapCut assembly**. That last step is the real prize,
+because assembly in code is what turns one script into ten variants.
+
+Everything stays inside Google except the script, which is already Claude.
+**Decision recorded: run the test Google-only, and set compliance aside for
+it, on the explicit basis that nothing here is being published.**
+
+**Still outstanding when this resumes**: the second customer's own account,
+in his words — the supplied sample is Mrs Charity's and must not be put in
+his mouth.
 
 
 ---
