@@ -369,6 +369,105 @@ Wall 3's conclusion stands and is now better supported. Three separate things sa
 
 Note the ordering matches this doc's existing thesis rather than fighting it: the defensible asset is verified data and a compliance/trust position, not the creative itself.
 
+## 13. VSL production: parked working notes (2026-09-05)
+
+Picked up again as a **capability test** — can this system build a VSL end to
+end — explicitly *not* something being published to an ad or a website. That
+framing matters: ad review is not in play, and placeholder testimonial text
+in an unpublished test render is placeholder content, not a fabricated
+endorsement. Parked here to resume later.
+
+### The script is the deliverable; the standard structure needs rework
+
+A VSL runs hook → problem → origin → mechanism → offer → proof → objections →
+close. Three of those beats are where health advertisers get killed, and they
+are the three you naturally write hardest:
+
+- **Problem agitation** is normally second person ("your energy crashes at
+  2pm"). That is Meta's Personal Attributes violation almost verbatim, and
+  what the August 2026 ad copy did. Third person or general framing instead.
+- **Mechanism** is where cure language creeps in. Diabetes is named
+  explicitly in Meta's Health & Wellness standard. Explain what the ebook
+  *teaches*, never what it *fixes*.
+- **Proof** is where testimonials become medical claims. Safe proof is about
+  the product (clear, practical, easy to follow), not about the body.
+
+Retrofitting compliance onto a finished VSL usually means rewriting it, so
+write against these from the first draft — including for a test, since a test
+script that can't ever ship teaches less.
+
+**What actually makes top ClickBank/JVZoo VSLs convert is not the claims**:
+a named unique mechanism, specificity (real names, exact numbers, particular
+times), open loops, objections pre-handled, and one single action. All
+available at full strength with no claim at all. The claims are the part that
+gets those advertisers sued and their accounts closed.
+
+**Length follows price**, not ambition. A 20-minute VSL exists to justify a
+large purchase; for a low-priced ebook it is likely too long, and every extra
+minute is data the Nigerian buyer pays for.
+
+### Production stack (all verified available)
+
+| Piece | Answer |
+|---|---|
+| Voiceover | ElevenLabs — Nigerian-accented English voices ship off the shelf (Yoruba-accented male and female), or clone the founder's own voice. ~$2 for a 20-minute script |
+| Stock stills + video | Pexels, free, commercial, no attribution |
+| Generated clips | Veo, ~30 clips for a 20-min voiceover-led piece (§10) |
+| B/W text cards | Trivial — a title card in the edit, drawable directly by ffmpeg |
+| Assembly | ffmpeg locally, **not** a hosted render API (§10 correction: ~200 min/month is ~10 renders of one VSL) |
+| Hosting | **Vimeo paid, not YouTube.** Vimeo can hide logo, play bar, title/byline, disable skip-ahead, embed chromeless, and handles adaptive delivery itself — so no separate CDN needed. YouTube's parameter is `modestbranding`, not `nobranding`; you keep the giant play button, end screens and related videos |
+
+### Browser constraints that shape the creative
+
+- **Only muted autoplay is available.** Chrome and Safari both allow muted
+  autostart; sound requires prior user interaction with the domain. The
+  opening seconds must therefore work silently — **captions are structural,
+  not decoration.**
+- **iOS Low Power Mode disables autoplay entirely**, whatever the player is
+  configured to do. Many Nigerian users run their phones that way, so a
+  deliberate poster frame and an intentional-looking play button are required,
+  not optional.
+- **Instrument watch depth** at 25/50/75%, at offer reveal, and at the end.
+  The retention curve is the only way to improve a VSL rather than guess, and
+  it is the concrete reason owning the page beats renting a builder.
+
+### Working from reference videos
+
+**Constraint: I can't watch video.** References decompose into three inputs,
+and this decomposition is the right one anyway because the transferable part
+of a VSL is never the footage:
+
+1. **Transcript** — the whole prize. `yt-dlp` pulls subtitles from a URL
+   without downloading the video; local files go through Whisper or
+   ElevenLabs speech-to-text.
+2. **Screenshots at key moments** — hook frame, first text card, offer
+   reveal, close. These give the visual grammar.
+3. **Timestamps** — section starts, which give beat durations (the thing
+   first-time VSL writers get most wrong).
+
+**Teardown, captured as structured data per reference** (not prose — so it
+becomes an asset the generator can consume, same reasoning as the funnel
+archetype library in §11): hook verbatim; beat map with durations; named
+mechanism and how it's introduced; where price first appears and what
+precedes it; objection-handling order; text-card-to-footage ratio; shot
+changes per minute; CTA count and placement. Three or four references is the
+right number — fewer copies one person's habits, more stops paying for itself.
+
+### Definition of "capable", and the local tooling gap
+
+The system is capable when it runs this unattended and produces a real file:
+script (Claude) → shot list with timings → narration (ElevenLabs) → assets
+(Pexels + Veo + drawn text cards) → timeline description → ffmpeg render →
+MP4. **Build it at 2–3 minutes first**: same pipeline as 20 minutes, but
+minutes per test render instead of an hour.
+
+**Local machine as of 2026-09-05**: Python 3.9.11 + pip and winget present;
+**ffmpeg, ffprobe and yt-dlp are all NOT installed.** Resuming this needs
+`pip install yt-dlp` and `winget install Gyan.FFmpeg`.
+
+**Still outstanding when this resumes**: the reference videos themselves.
+
+
 ---
 
 # Recommendation (2026-09-04): the actual next milestone is not a feature

@@ -44,7 +44,7 @@ const SEVERITY: Record<FindingSeverity, { label: string; icon: typeof CheckCircl
 // On-demand, not auto-generated on page load and not cached — a couple of
 // cents per click at Sonnet 5 pricing, cheap enough that click-to-generate
 // is simpler than adding storage for a cached copy (see src/lib/trends.ts).
-export function TrendsInsightsPanel() {
+export function TrendsInsightsPanel({ windowDays }: { windowDays: number }) {
   const [state, formAction, isPending] = useActionState(action, null);
 
   return (
@@ -53,7 +53,8 @@ export function TrendsInsightsPanel() {
         <div>
           <CardTitle>Insights</CardTitle>
           <CardDescription>
-            A short AI read on the last 30 days against the 30 before it — generated on demand, not automatic.
+            A short AI read on the last {windowDays} {windowDays === 1 ? "day" : "days"} against the {windowDays}{" "}
+            before — generated on demand, not automatic.
           </CardDescription>
         </div>
         <form action={formAction}>

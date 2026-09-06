@@ -78,11 +78,13 @@ export default async function TrendsPage() {
           />
         </div>
 
-        <TrendsInsightsPanel />
+        <TrendsInsightsPanel windowDays={comparison.days} />
 
         <Card>
           <CardHeader>
-            <CardTitle>Last 30 days vs. the 30 before</CardTitle>
+            <CardTitle>
+              Last {comparison.days} {comparison.days === 1 ? "day" : "days"} vs. the {comparison.days} before
+            </CardTitle>
             <CardDescription>
               Conversations that <em>started</em> in each window, and how far they got. Unlike the funnel below, these
               counts follow the same people over time, so the steps are comparable to each other and to the previous

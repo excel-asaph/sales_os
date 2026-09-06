@@ -2,6 +2,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { prisma } from "@/lib/prisma";
 import { Prisma, type ConversationStage } from "@/generated/prisma/client";
 import { PIPELINE_MILESTONES, milestoneIndexForStage, milestoneIndexOrNull } from "@/lib/stage-display";
+import { clampMaxFollowups, MAX_SEQUENCE_STEPS } from "@/lib/followup-sequence";
 import { claude, CLAUDE_MODEL } from "@/lib/claude";
 
 // Trends is the one page with enough real aggregation logic across several
@@ -69,16 +70,41 @@ export interface FollowupStepPerformance {
   replyRate: number;
 }
 
+/**
+ * How many follow-up steps this business actually runs. Anything above this
+ * is the worker's internal give-up check, not a message a customer ever
+ * received — see getFollowupStepPerformance below.
+ */
+async function resolveMaxFollowups(businessId: string): Promise<number> {
+  const config = await prisma.businessConfig.findUnique({
+    where: { businessId },
+    select: { maxFollowups: true },
+  });
+  return clampMaxFollowups(config?.maxFollowups ?? MAX_SEQUENCE_STEPS);
+}
+
 // A correlated EXISTS per step isn't expressible through Prisma's query
 // builder — same shape as the ad-hoc audit query used earlier this session
 // to find the real reply rate per step, now scoped and parameterized
 // properly rather than a one-off. businessId/effectiveNumber are both
 // server-derived (session + cookie), never user input, but tagged-template
 // binding is used regardless — never string-interpolated SQL.
+//
+// Steps past the business's configured cap are excluded, and that exclusion
+// is load-bearing rather than cosmetic. The worker schedules one extra
+// Followup row at `maxFollowups + 1` as a silent "did they ever come back?"
+// check (followup-worker.ts): it has an empty message, sends the customer
+// nothing, and is still marked `sent: true` when it fires. Counting it here
+// invented a phantom step that could never receive a reply — in production
+// on 2026-09-06 that showed as "step 2: 351 sent, 0 replies", which the
+// Insights panel then reported as a dead follow-up step, and which dragged
+// the headline reply rate from a real 27.4% down to 17%. The Customers page
+// already filters the same row out of its countdown; Trends did not.
 export async function getFollowupStepPerformance(
   businessId: string,
   effectiveNumber?: string
 ): Promise<FollowupStepPerformance[]> {
+  const maxSteps = await resolveMaxFollowups(businessId);
   const rows = await prisma.$queryRaw<Array<{ step: number; sent: bigint; got_reply: bigint }>>`
     SELECT
       f.step,
@@ -96,6 +122,7 @@ export async function getFollowupStepPerformance(
     JOIN customers cu ON cu.id = c.customer_id
     WHERE cu.business_id = ${businessId}
     AND f.sent = true
+    AND f.step <= ${maxSteps}
     ${effectiveNumber ? Prisma.sql`AND c.whatsapp_phone_number_id = ${effectiveNumber}` : Prisma.empty}
     GROUP BY f.step
     ORDER BY f.step
@@ -203,7 +230,14 @@ export interface PeriodComparison {
   previous: PeriodSnapshot;
 }
 
-export const COMPARISON_WINDOW_DAYS = 30;
+// Two days, not thirty. At ~250 conversations a day a 30-day window buried
+// the last two days inside a month of history, and the prior window was
+// empty outright — the panel's own first finding on 2026-09-06 was "no
+// prior-window data to compare". Short windows are noisier (a weekend or an
+// ad-spend change moves them), so this is deliberately a named constant:
+// revisit it toward 7 once there are several weeks of history and
+// day-of-week effects are worth cancelling out.
+export const COMPARISON_WINDOW_DAYS = 2;
 
 /**
  * How far each conversation in a cohort ever got, rolled up into cumulative
@@ -256,6 +290,10 @@ async function cohortSnapshot(
     customer: { businessId },
     ...(effectiveNumber ? { whatsappPhoneNumberId: effectiveNumber } : {}),
   };
+  // Excludes the worker's silent give-up row the same way
+  // getFollowupStepPerformance does — otherwise "follow-ups sent" counts
+  // messages no customer ever received.
+  const maxSteps = await resolveMaxFollowups(businessId);
 
   const [conversations, escalations, followupRows] = await Promise.all([
     prisma.conversation.findMany({
@@ -285,6 +323,7 @@ async function cohortSnapshot(
       JOIN customers cu ON cu.id = c.customer_id
       WHERE cu.business_id = ${businessId}
       AND f.sent = true
+      AND f.step <= ${maxSteps}
       AND f.scheduled_for >= ${start}
       AND f.scheduled_for < ${end}
       ${effectiveNumber ? Prisma.sql`AND c.whatsapp_phone_number_id = ${effectiveNumber}` : Prisma.empty}
