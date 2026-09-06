@@ -369,7 +369,24 @@ Wall 3's conclusion stands and is now better supported. Three separate things sa
 
 Note the ordering matches this doc's existing thesis rather than fighting it: the defensible asset is verified data and a compliance/trust position, not the creative itself.
 
-## 13. VSL production: parked working notes (2026-09-05)
+## 13. Video production — TWO SEPARATE TRACKS, don't conflate them
+
+> **Terminology correction, 2026-09-07.** §13 through §13c were written as if
+> "VSL" and "ad video" were one thing. They are not, and merging them produced
+> a script brief aimed at the wrong format. Keeping them apart:
+>
+> | | **Ad video** (active now) | **VSL** (later) |
+> |---|---|---|
+> | Runs where | Facebook/Instagram ad placement | On the website / lander |
+> | Format | Talking head — a real customer's face carries it | Faceless: whiteboard, voiceover |
+> | Built from | Consenting customer's photo → image-to-video (Omni) | Voiceover over b-roll, product shots, WhatsApp screenshots, testimonials |
+> | Length | 2–3 min (measured, §13b) | To be determined when we get there |
+> | Status | **In progress** — script written for Jude Adeyini | **Parked** |
+>
+> Everything in §13 below describes the **VSL** track and stays parked.
+> §13b and §13c describe the **ad video** track and are live.
+
+## 13a. VSL production: parked working notes (2026-09-05)
 
 Picked up again as a **capability test** — can this system build a VSL end to
 end — explicitly *not* something being published to an ad or a website. That
@@ -469,7 +486,7 @@ A second copy sits behind `python -c "import imageio_ffmpeg; print(imageio_ffmpe
 — worth knowing, because on a slow connection `pip install imageio-ffmpeg`
 succeeded when two direct 80 MB downloads from gyan.dev failed mid-transfer.
 
-## 13b. Measured teardown of the 8 existing ads (2026-09-07)
+## 13b. AD VIDEO TRACK — measured teardown of the 8 existing ads (2026-09-07)
 
 Eight ads live in `Diabetes Fix  Ads/`, with a matching `Diabetes Fix Ad
 copies.txt`. **The txt is Facebook caption copy, not video narration** —
@@ -514,7 +531,7 @@ already that short.
   good"** and appears in every video. The prohibited claim is printed on the
   product itself, so no script rewrite alone can clear it.
 
-## 13c. Correction: the production method and the model (2026-09-07)
+## 13c. AD VIDEO TRACK — the production method and the model (2026-09-07)
 
 §10 and §13 assumed a voiceover-led faceless VSL built on Veo. **Both
 premises were wrong for what this business actually does.**
@@ -552,9 +569,14 @@ Everything stays inside Google except the script, which is already Claude.
 **Decision recorded: run the test Google-only, and set compliance aside for
 it, on the explicit basis that nothing here is being published.**
 
-**Still outstanding when this resumes**: the second customer's own account,
-in his words — the supplied sample is Mrs Charity's and must not be put in
-his mouth.
+**Script written 2026-09-07**: `Diabetes Fix  Ads/VSL script - Jude Adeyini.md`
+(gitignored — local only). 430 words, 2m46s, five chained 33s segments inside
+Omni's 40s cap, with per-segment PiP b-roll cues and a voice block to repeat
+verbatim in every prompt. The supplied sample was originally this customer's
+account, adapted to Mrs Charity for a different cut; restored to him here.
+
+**Still outstanding**: a Google AI Studio API key, and Jude's reference
+image, before any of it can be driven from code.
 
 
 ---
