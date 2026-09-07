@@ -579,6 +579,80 @@ account, adapted to Mrs Charity for a different cut; restored to him here.
 image, before any of it can be driven from code.
 
 
+## 14. Would anyone pay for automated ad video? (2026-09-07)
+
+Question: would businesses pay to automate ad/business video creation, at
+more than the cost of doing it by hand in Flow + CapCut? Is it worth building
+into Antflow long-term? Who else does it, what sets us apart, what are the
+risks?
+
+### The market is real and already priced
+
+**Arcads** does exactly this: ~1,500 AI actors, paste a script, get a
+talking-head UGC ad. **$77–$385/month**, talking-actor video at 800 credits
+per actor-minute. Creatify occupies the same space. Willingness to pay is
+established, well above Flow + CapCut's cost.
+
+**The demand driver is creative fatigue, and it is faster than expected**:
+this format holds for **10–14 days** before CTR and conversion fall 25–40%;
+some campaigns decline inside 7–12 days. If a creative dies in a fortnight,
+you need a new one every fortnight, permanently. That recurring 2–3 hours in
+CapCut is what people are actually paying to remove.
+
+**Note what Arcads customers are buying**: a large part of the value is the
+*actor library* — no photo, no consent, no release needed. That is an asset
+this business does not have.
+
+### Three risks
+
+1. **The format is decaying while we deliberate.** The same 2026 research
+   showing the demand also names overused AI as a cause of falling
+   performance, and notes that manufactured authenticity *accelerates*
+   fatigue. Building on a format with a visible decay curve is a bet.
+2. **We would be a wrapper over Omni** — wall 1 from the top of this doc,
+   the same argument that undercut the chat layer. Google owns generation,
+   sets the price, and can ship the assembly step itself.
+3. **The consent problem, weighted heaviest, and not raised before this
+   point.** Jude is a real customer who agreed. A *platform* where any
+   business uploads any photograph and generates that person delivering a
+   scripted health testimonial is categorically different: it makes Antflow
+   the party enabling fabricated endorsements, at volume, in a category where
+   the harm is real, with no verification infrastructure and no way to know
+   whose face is being animated. **Arcads sidesteps this by licensing actors;
+   we would inherit it.** This is a moderation function that has to be
+   staffed, not a compliance footnote.
+
+### What actually differentiates us — and it isn't generation
+
+Arcads makes a video and has no idea whether it worked. AdCreative scores
+creative against a model trained on generic data. **Neither sees what happens
+after the click.**
+
+This system sees the whole chain: ad → conversation → recorded objection →
+verified bank transfer → sale. So it can say what no creative tool on the
+market can say:
+
+> Your last ad produced 40 conversations and 9 verified sales. The one before
+> produced 12 and 1. The difference was the opening line, and here is the
+> objection that showed up in the losing one.
+
+That does not decay with the format, does not compete with Google, does not
+require animating anyone's face, and **gets stronger with every business
+added** rather than weaker.
+
+**The strongest framing is therefore not "Antflow makes your ad videos" but
+"Antflow tells you which ad to make next, and which one actually made
+money."** Generation can be bolted on later, or never; the value holds.
+
+### What costs nothing to start today
+
+When Jude's ad runs, record which conversations came from it and which ended
+in verified sales. Do that for every creative shipped. In six months that is
+the dataset the real product needs, acquired for free. Everything else here
+is a two-years-out conversation, and the constraint in the Recommendation
+below has not moved.
+
+
 ---
 
 # Recommendation (2026-09-04): the actual next milestone is not a feature
