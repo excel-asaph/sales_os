@@ -579,6 +579,126 @@ account, adapted to Mrs Charity for a different cut; restored to him here.
 image, before any of it can be driven from code.
 
 
+## 13d. AD VIDEO TRACK — the pipeline, proven end to end (2026-09-07/08)
+
+Working state after building and testing against the live API. Everything
+below was observed, not read in documentation.
+
+### Cloud setup that actually works
+
+| Item | Value |
+|---|---|
+| Project | `project-1ba10870-3c75-4ab3-b10` |
+| Billing | enabled, $300 trial, $250 spend cap on Vertex AI |
+| API | `aiplatform.googleapis.com` |
+| Auth | `gcloud auth login` + `gcloud auth application-default login` |
+| Required header | `x-goog-user-project: <project>` — without it every call 403s |
+
+**Two traps.** gcloud was pointed at `resonant-augury-481716-m7`, a project the
+account does not own, which produced a misleading permissions warning. And
+ADC needs the quota project set explicitly (`gcloud auth
+application-default set-quota-project`).
+
+### Model IDs — the GA/preview distinction cost hours
+
+| Model ID | Result |
+|---|---|
+| `veo-3.1-fast-generate-001` | **works** |
+| `veo-3.1-generate-001` | **works** |
+| `veo-3.1-*-preview` | 404 — preview names need allowlisting |
+| `gemini-omni-flash-preview` | 404 — not served on this platform |
+| `gemini-omni-1.1-flash` | 404 — that is the AI Studio id, not Vertex's |
+
+> **Correction.** The 404s were diagnosed as a free-trial tier restriction and
+> the user was advised to click Activate on that basis. **Wrong.** The cause
+> was using preview model IDs. Activation was probably unnecessary. Found via
+> the Vertex release notes, which name the GA IDs.
+
+**Omni is not available on Vertex.** Flow uses Omni; the API gives Veo 3.1.
+Different consistency mechanisms, so §13c's five-segment plan does not apply.
+
+### The three generation modes, and the constraint that decides everything
+
+| Mode | Duration | Fills 9:16 | Holds the room |
+|---|---|---|---|
+| `referenceImages` (character) | **8s only**, 4s rejected | Yes | **No** |
+| `image` (first frame) | 4s or 8s | Only if source is 9:16 | **Yes** |
+| Both together | **Rejected**: *"Image and reference images cannot be both set."* | — | — |
+
+That mutual exclusion forces the architecture:
+
+**Clip 1** uses Jude's photo as `referenceImages` — establishes him *and* the
+room, full 9:16.
+**Clips 2..n** each chain from the previous clip's final frame via `image`.
+
+Likeness then rides the chain rather than being re-asserted. Proven over one
+hop; drift over ~20 hops is untested. If it drifts, re-anchor periodically and
+accept a visual reset at those points, which the existing ads already have as
+cuts to picture-in-picture.
+
+### What was proven
+
+- **Video chaining is seamless.** `jude_chained_16s.mp4` — two independent API
+  calls, concatenated. Wall, light, sofa, shirt and face identical across the
+  join. Reads as one continuous take.
+- **A 3:4 reference photo letterboxes** into 9:16 in first-frame mode. Use
+  reference mode, or supply a 9:16 source.
+- **Native speech works.** Put the line in quotes in the prompt and spell
+  numbers as words. `jude_with_audio.mp4`.
+- **Audio does NOT survive chaining.** Confirmed by listening: picture held,
+  voice shifted across the join. Structural — the image is handed forward as
+  an actual image, the voice is only ever a text description, so every clip
+  re-invents it.
+
+### The audio fix
+
+**Google has no answer.** Chirp 3 is TTS and STT plus voice cloning for TTS;
+there is no speech-to-speech conversion.
+
+**ElevenLabs Voice Changer is the fix.** It converts existing audio to a target
+voice *preserving original timing and delivery*, so the lip sync Veo already
+generated stays correct. Post-process, not regeneration — meaning the voice
+can be changed later without touching a frame of video.
+
+**Free tier blocks it.** Speech-to-speech itself works on free (tested, HTTP
+200), but *library/professional voices are paid-only via API*, and all 36
+free `premade` voices are American/British/Australian. **There is no Nigerian
+voice on the free tier.** Chosen voice: `TyAD2ntJFdDReoa55SLn` ("Bill",
+professional, `accent=nigerian`, `locale=en-NG`, `age=young` — worth watching
+against a fifties face). Needs **Starter, $6/month**, which also carries the
+commercial licence required the moment an ad runs.
+
+### Costs
+
+| Item | Rate | Per 2m46 ad (21 × 8s = 168s) |
+|---|---|---|
+| Veo 3.1 Fast | $0.10/sec | **$16.80** |
+| Veo 3.1 Lite | $0.05/sec | $8.40 |
+| ElevenLabs voice conversion | ~$6/month flat | ~$0.30 marginal |
+
+**The voice fix is ~2% of generation cost.** Vendor preference, not economics.
+Reusing existing b-roll instead of generating it is the real lever: it takes a
+full ad from ~$17 to ~$6.
+
+### Assets on disk (all gitignored, `Diabetes Fix  Ads/`)
+
+`Ad video script - Jude Adeniyi.md` (430 words, needs re-segmenting from 5
+Omni segments to 21 × 8s beats ≈ 20 words each) · `Jude Adeniyi.jpg` (460×612,
+a 9:16 original would be better) · `pipeline output/` (8 clips) · `broll
+library/` (4 full-frame cooking clips extracted from ad 4).
+
+**PiP inserts in the existing ads are composited into the frame** and cannot
+be lifted out cleanly, though they are axis-aligned rectangles so cropping is
+possible if the WhatsApp screenshots and meal-plan card are wanted as assets.
+
+### Next when this resumes
+
+1. ElevenLabs Starter → rerun conversion on the two talking clips, stitch, listen.
+2. Re-segment the script to 21 × 8s beats.
+3. Write the loop: generate → chain → convert audio → mux → ffmpeg assemble.
+4. Test likeness drift across the full 21-clip chain.
+
+
 ## 14. Would anyone pay for automated ad video? (2026-09-07)
 
 Question: would businesses pay to automate ad/business video creation, at
