@@ -773,6 +773,112 @@ is a two-years-out conversation, and the constraint in the Recommendation
 below has not moved.
 
 
+## 15. VSL TRACK — teardown of 3 real long-form VSLs (2026-09-08)
+
+Three competitor VSLs supplied as reference (not ours): Yastimadhu (ulcers /
+acid reflux) and Brahmi Shakti (blood pressure), both targeting Nigeria with
+local names and cities in testimonials. **This supersedes the assumptions in
+§13a, which were guesses.**
+
+### They are not whiteboard videos. They are text cards.
+
+Plain off-white background. Black centred bold text, one sentence or short
+paragraph at a time. **The on-screen text IS the narration**, read aloud —
+a read-along, not an illustrated explainer. No drawing, no animation, no
+presenter, no motion.
+
+The only departures from that:
+- **Anatomical illustrations** (blood vessel cutaway, endothelial cells)
+- **Research artefacts** — a bar chart comparing a herb vs a drug, a
+  screenshot of a study page
+- **Testimonial blocks** — small headshot, italic quote, Nigerian name + city
+- **Product shot** at the reveal (bottles)
+- **Red text, used only for price and offer names** (`₦76,000`, "VIP Customer
+  Club"). Everything else is black. That is the entire colour system.
+
+### Measurements
+
+| | Duration | Shots | Avg shot | Format |
+|---|---|---|---|---|
+| VSL 1 | 44m 47s | 24 | 112s | 1280×720 |
+| VSL 2 | 45m 28s | 14 | 195s | 1278×720 |
+| VSL 3 | 24m 33s | 42 | 35s | 1280×720 |
+
+**Mean 38 minutes. All landscape** — against the ads at 720×1280 vertical.
+Shot counts are low because nothing cuts; text simply swaps. Scene detection
+undercounts this format badly.
+
+### Beat map (VSL 3, 24m 33s, sampled every ~37s)
+
+| Time | Beat |
+|---|---|
+| 0:00 | Hook: *"flies in the face of everything you've ever seen, heard, or even tried"* |
+| 1:14 | Negation: not diet, not exercise, not "woo-woo stuff you've tried before and failed" |
+| 1:50 | Promise + effort anchor: *"in just about 20 seconds a day"* |
+| 2:27 | Ancestral proof: why our fathers lived long without it |
+| 3:04 | Future pace, intimate: *"Your wife notices the change in you"* |
+| 4:18 | Fear removed: stroke, heart attack, kidney failure *"finally out of the way"* |
+| 4:55 | Scale proof: *"the reality of over 14,000 people right now"* |
+| 6:09 | Problem framing: *"a silent killer... destroying homes"* |
+| 6:46 | **Testimonial grid** ("Just like these people"), held ~1.5 min |
+| 8:37 | Pivot: *"But why is this happening?"* |
+| 9:14 | **Named mechanism**: endothelial cells → "e-cells" |
+| 9:51 | Metaphor: *"little traffic wardens in your blood vessels"* |
+| 11:05 | Research citation: Federico II University, Italy |
+| 11:42 | Why alternatives fail: *"you'll forever be stuck managing symptoms"* |
+| 12:17 | **Product reveal + bottle shot**: *"We call it Brahmi Shakti"* |
+| 13:31 | Objection surfaced: *"will this actually work for me?"* |
+| 16:00 | Urgency: *"it can be yours too if you act fast enough"* |
+| 17:50 | **Price reveal, in red**: ₦76,000 regular |
+| 18:27 | Volume proof: 14,000 reviews, on track for 50,000 |
+| 19:04 | **Offer name, in red**: VIP Customer Club |
+| 19:41 | Bulk logic: *"the more you stock up, the more you save"* |
+| 20:18 | Cost of inaction: hospital visits, lost freedom, guilt |
+| 22:35 | Positive future pace: *"what the hell did you do to keep your BP this low?"* |
+| 24:00 | Close: *"You must act. Will you do it?"* |
+
+**The offer lands at ~72% of runtime.** Compare the ad videos, which put the
+price in the final seconds. A VSL spends two-thirds of its length before
+naming a price.
+
+### Production implications — the important part
+
+**No video generation is needed at all.** No Veo, no reference images, no
+chaining, none of the character-consistency work in §13d. A VSL in this format
+is: script → voiceover → text cards timed to the audio → a handful of images.
+**ffmpeg alone can produce it.**
+
+| | Production cost |
+|---|---|
+| 2m 46s ad video (21 Veo clips) | **~$16.80** |
+| 38 min VSL (~38k chars of narration) | **~$4** |
+
+**A VSL 13× longer costs a quarter as much**, because the expensive part was
+never length — it was generated faces. This inverts the assumption in §13a
+that VSLs were the harder build.
+
+### On adding animation
+
+The references have **zero** animation — 24 to 45 minutes of completely static
+text that presumably converts. Adding animated/typewriter text would go
+*beyond* these references, not match them. It needs no new AI, only a
+different renderer:
+
+- **ffmpeg `drawtext`** with timed `enable` expressions — free, no licence,
+  painful beyond simple fades.
+- **Remotion** — React components as video frames, fits the existing stack,
+  designed for audio-synced text. Licensing per §8: free ≤3 people, then
+  Company License; Automators tier $0.01/render with a $100/month minimum.
+
+Recommendation: build the static version first, because that is what the
+proven references do, and treat animation as an A/B test rather than a
+prerequisite.
+
+**Copyright note (repeat of §6):** studying structure is fine; reproducing a
+competitor's creative closely is a copyright and trademark question separate
+from any platform policy.
+
+
 ---
 
 # Recommendation (2026-09-04): the actual next milestone is not a feature
