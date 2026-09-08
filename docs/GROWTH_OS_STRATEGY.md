@@ -874,6 +874,39 @@ Recommendation: build the static version first, because that is what the
 proven references do, and treat animation as an A/B test rather than a
 prerequisite.
 
+### Renderer built and proven (2026-09-08)
+
+`scripts/vsl-render.py` — copy in, finished VSL out. Tested on ad copy 5 (397
+words → 39 cards → 2m 31s): `Diabetes Fix  Ads/pipeline output/vsl_test_copy5.mp4`.
+Rhythm confirmed acceptable by the user.
+
+**The timing problem is solved by construction.** Each card's line is
+synthesised as its *own* audio file, and that file's duration becomes the
+card's on-screen duration. No forced alignment, no guessing. Measured drift
+across 39 cards: **video 151.280s vs audio 151.284s — 4ms**, which is
+rounding, not drift.
+
+Three bugs worth remembering, all fixed in the file:
+- **gcloud needs explicit resolution on Windows** (`shutil.which`) — it is a
+  `.cmd` shim that `CreateProcess` will not find from a bare name.
+- **`-vsync` was removed in ffmpeg 9.** `-fps_mode` replaces it, but it
+  contradicts `-r`; CFR is the right choice for a slideshow anyway.
+- **Inter-card silence must be padded per card.** Padding the concatenated
+  track only adds silence at the very end, drifting further on every card.
+
+**Not yet built:** image cards. The references also carry testimonial blocks,
+anatomical illustrations, research screenshots and a product shot at the
+reveal. Same loop, different card renderer.
+
+**Voice is a placeholder** (`en-US-Chirp3-HD-Charon`). Swapping it re-times
+the deck automatically, since timing is derived rather than stored.
+
+> **Correction, 2026-09-08.** I reported that Google has "99 Nigerian English
+> voices". **Wrong.** Querying `languageCode=en-NG` returns results, but every
+> voice returned is tagged `en-US`; across all 2,066 voices, **0 are tagged
+> en-NG**. Both tracks therefore need the same ElevenLabs Starter ($6) for a
+> Nigerian voice.
+
 **Copyright note (repeat of §6):** studying structure is fine; reproducing a
 competitor's creative closely is a copyright and trademark question separate
 from any platform policy.
