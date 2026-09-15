@@ -67,12 +67,17 @@ const HUMAN_STAGES = ["HUMAN_REVIEW_REQUIRED", "HUMAN_ASSIGNED"] as const;
 export async function AppShell({
   active,
   title,
+  titleHref,
   description,
   actions,
   children,
 }: {
   active: NavKey;
   title: string;
+  // Set only where the title names something that has its own page — a
+  // customer, say. Pages whose title is just a label ("Trends") leave it
+  // unset and the heading stays plain text.
+  titleHref?: string;
   description?: string;
   actions?: React.ReactNode;
   children: React.ReactNode;
@@ -320,7 +325,18 @@ export async function AppShell({
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-5" />
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-sm font-semibold">{title}</h1>
+            <h1 className="truncate text-sm font-semibold">
+              {titleHref ? (
+                <Link
+                  href={titleHref}
+                  className="rounded-sm underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
+                >
+                  {title}
+                </Link>
+              ) : (
+                title
+              )}
+            </h1>
             {description && (
               <p className="truncate text-xs text-muted-foreground">{description}</p>
             )}

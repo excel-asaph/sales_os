@@ -271,6 +271,7 @@ export default async function ConversationReviewPage({
     <AppShell
       active="conversations"
       title={name ?? phoneNumber}
+      titleHref={`/customers/${conversation.customer.id}`}
       description={name ? phoneNumber : undefined}
       actions={
         <div className="flex items-center gap-2">
