@@ -17,6 +17,11 @@ const MUST_PASS: [string, string][] = [
   ["audit refusal 2", "it's best to discuss that with your doctor or health provider"],
   ["audit refusal 3", "for your health it's best to also confirm with your doctor"],
   ["audit refusal 4", "I cannot guarantee it will cure anything — please speak to your doctor"],
+  // Flagged in production on 2026-09-15, one day after shipping. A refusal,
+  // and the reason the fixed 60-character lookback had to become
+  // sentence-scoped: "cannot" sits 66 characters before "eliminate".
+  ["production false positive", "However, we cannot guarantee that it will completely cure or permanently eliminate high blood sugar. If you have high blood sugar or are currently on medication, please speak with your doctor."],
+  ["long compound refusal", "We do not claim this will heal, reverse, permanently eliminate or in any way cure your condition."],
   // Ordinary sales and support traffic that happens to brush the vocabulary.
   ["plain pitch", "The ebook costs ₦10,000 and is delivered to your WhatsApp immediately."],
   ["support answer", "On Day 3 take cucumber, half a cup sliced, between your main meals."],
@@ -34,6 +39,8 @@ const MUST_FLAG: [string, string][] = [
   // The shapes a model drifts into under pressure from a customer.
   ["drift: promise", "Yes, this will heal your diabetes completely within 10 days."],
   ["drift: permanence", "The results are permanent once you finish the routine."],
+  // A negation earlier in the sentence must not shield a claim after "but".
+  ["drift: negation then but", "I can't promise much, but this will completely cure your diabetes."],
 ];
 
 let failures = 0;

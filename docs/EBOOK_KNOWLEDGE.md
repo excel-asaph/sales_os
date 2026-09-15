@@ -119,6 +119,30 @@ that, and `scripts/check-claim-filter.ts` shows it passing on all four —
 until it was run against 469 real inbound messages and found to fire on
 *"can it stop"*.
 
+### First real hit, 2026-09-15 — a false positive, and the fix
+
+One day after shipping, the filter flagged its first message. It was a refusal:
+
+> However, we cannot guarantee that it will completely cure or permanently
+> **eliminate** high blood sugar.
+
+`cure` was correctly ignored — "cannot" sits 53 characters back, inside the
+then-60-character lookback. `eliminate` was flagged, because "cannot" sits 66
+characters back. **The window missed by six characters.**
+
+The design was right and the constant was wrong: a single negation can govern a
+long compound clause, so the boundary has to be grammatical rather than a
+guessed distance. `governingWindow()` now scopes to the term's own **sentence**,
+restarting at any contrastive conjunction ("but", "however", "although") so a
+negation cannot shield a claim that follows one — *"I can't promise much, but
+this will cure your diabetes"* still flags.
+
+Both that real message and the contrastive case are now fixtures in
+`scripts/check-claim-filter.ts`.
+
+**This is exactly what shadow mode was for.** Had the filter been enforcing, it
+would have withheld a well-judged refusal on day one.
+
 **Review the Trends card after a few days of real traffic. Only flip
 `CLAIM_FILTER_ENFORCE` to `true` once the logged hits show the negation
 handling holds.** When enforcing, `sendWhatsAppText` throws `ClaimBlockedError`

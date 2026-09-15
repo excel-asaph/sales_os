@@ -59,15 +59,50 @@ const NEGATORS = [
   "unable to", "shouldn't", "should not", "rather than", "instead of",
 ];
 
-const NEGATION_WINDOW = 60; // characters before the hit
+/**
+ * A contrastive conjunction cancels an earlier negation:
+ *   "I can't say much, BUT this will cure you"
+ * so the window restarts after the last one before the term.
+ */
+const CONTRASTIVE = [", but ", "; but ", " but ", " however", " although", " though "];
 
 export interface ClaimHit {
   term: string;
   snippet: string;
 }
 
-function windowBefore(text: string, at: number): string {
-  return text.slice(Math.max(0, at - NEGATION_WINDOW), at).toLowerCase();
+/**
+ * The text a negator would have to appear in to be governing this term:
+ * from the start of the term's own sentence, or from the last contrastive
+ * conjunction after that, whichever is later.
+ *
+ * This replaced a fixed 60-character lookback, which was wrong within a day
+ * of shipping. Production flagged:
+ *
+ *   "we cannot guarantee that it will completely cure or permanently
+ *    eliminate high blood sugar"
+ *
+ * "cure" was correctly ignored — "cannot" is 53 characters back. "eliminate"
+ * was flagged, because "cannot" is 66 characters back and the window was 60.
+ * A single negation can govern a long compound clause, so the boundary has to
+ * be grammatical rather than a guessed distance.
+ */
+function governingWindow(text: string, at: number): string {
+  const before = text.slice(0, at);
+  // Plain scan rather than a regex. Sentence enders are four literal
+  // characters, and comparing the newline by char code sidesteps escaping
+  // it inside a pattern entirely.
+  let start = 0;
+  for (let i = 0; i < before.length; i++) {
+    const c = before[i];
+    if (".!?".includes(c) || c.charCodeAt(0) === 10) start = i + 1;
+  }
+  const lower = before.toLowerCase();
+  for (const marker of CONTRASTIVE) {
+    const idx = lower.lastIndexOf(marker);
+    if (idx >= start) start = idx + marker.length;
+  }
+  return before.slice(start).toLowerCase();
 }
 
 /**
@@ -82,7 +117,7 @@ export function findClaims(text: string): ClaimHit[] {
     const re = new RegExp(`\\b${term}\\b`, "gi");
     let match: RegExpExecArray | null;
     while ((match = re.exec(text)) !== null) {
-      const before = windowBefore(text, match.index);
+      const before = governingWindow(text, match.index);
       if (NEGATORS.some((n) => before.includes(n))) continue;
       if (seen.has(term)) break;
       seen.add(term);
