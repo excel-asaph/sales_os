@@ -39,7 +39,7 @@ export async function sendHumanReply(formData: FormData) {
   const phoneNumberId = conversation.whatsappPhoneNumberId ?? conversation.customer.business.whatsappPhoneNumberId ?? "";
 
   if (withinWindow) {
-    await sendWhatsAppText(session.businessId, conversation.customer.phoneNumber, text, phoneNumberId);
+    await sendWhatsAppText(session.businessId, conversation.customer.phoneNumber, text, phoneNumberId, conversationId);
   } else {
     // Free-form text — including a human's own typed reply — is rejected
     // by WhatsApp outside the 24-hour customer service window. The exact

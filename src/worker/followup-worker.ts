@@ -263,7 +263,7 @@ async function deliverFollowup(followup: LoadedFollowup): Promise<DeliveryResult
       followup.message,
       businessConfig?.playbook as Record<string, string> | null
     );
-    await sendWhatsAppText(businessId, conversation.customer.phoneNumber, fallbackText, phoneNumberId);
+    await sendWhatsAppText(businessId, conversation.customer.phoneNumber, fallbackText, phoneNumberId, conversation.id);
     await prisma.message.create({
       data: {
         conversationId: conversation.id,

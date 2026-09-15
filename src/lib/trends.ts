@@ -4,6 +4,7 @@ import { Prisma, type ConversationStage } from "@/generated/prisma/client";
 import { PIPELINE_MILESTONES, milestoneIndexForStage, milestoneIndexOrNull } from "@/lib/stage-display";
 import { clampMaxFollowups, MAX_SEQUENCE_STEPS } from "@/lib/followup-sequence";
 import { claude, CLAUDE_MODEL } from "@/lib/claude";
+import { CLAIM_FILTER_ENFORCE } from "@/lib/claim-filter";
 
 // Trends is the one page with enough real aggregation logic across several
 // panels to be worth its own lib file, unlike Dashboard/Home which compute
@@ -379,6 +380,81 @@ export interface TrendsSnapshot {
   /// data because you forgot", and it confidently recommended adding a
   /// follow-up step the owner had deliberately removed.
   config: { maxFollowups: number; followupsEnabled: boolean };
+}
+
+// ---------------------------------------------------------------------------
+// Claim filter review
+// ---------------------------------------------------------------------------
+
+export interface ClaimFilterHit {
+  at: Date;
+  conversationId: string | null;
+  terms: string[];
+  snippet: string;
+  sentAnyway: boolean;
+}
+
+export interface ClaimFilterSummary {
+  hits: ClaimFilterHit[];
+  total: number;
+  enforcing: boolean;
+}
+
+/**
+ * What the outbound claim filter caught in the window (src/lib/claim-filter.ts).
+ *
+ * This is the instrument for whether the prompt rule is holding now that the
+ * product's own text — which contains 39 instances of the vocabulary Meta
+ * names — sits in the prompt after delivery. The baseline to compare against
+ * is four hits across 719 messages, and all four of those were the AI refusing
+ * to make a claim rather than making one.
+ *
+ * A rate that stays near zero means the rule holds. A jump means it doesn't,
+ * and that is worth knowing from a dashboard rather than from an enforcement
+ * notice.
+ */
+export async function getClaimFilterHits(
+  businessId: string,
+  effectiveNumber: string | undefined,
+  days: number = COMPARISON_WINDOW_DAYS,
+  limit = 8
+): Promise<ClaimFilterSummary> {
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const where = {
+    type: "CLAIM_FILTER_HIT",
+    createdAt: { gte: since },
+    conversation: {
+      customer: { businessId },
+      ...(effectiveNumber ? { whatsappPhoneNumberId: effectiveNumber } : {}),
+    },
+  };
+
+  const [rows, total] = await Promise.all([
+    prisma.event.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      take: limit,
+      select: { createdAt: true, conversationId: true, payload: true },
+    }),
+    prisma.event.count({ where }),
+  ]);
+
+  const hits = rows.map((row) => {
+    const p = (row.payload ?? {}) as {
+      terms?: string[];
+      snippets?: string[];
+      sentAnyway?: boolean;
+    };
+    return {
+      at: row.createdAt,
+      conversationId: row.conversationId,
+      terms: p.terms ?? [],
+      snippet: p.snippets?.[0] ?? "",
+      sentAnyway: p.sentAnyway !== false,
+    };
+  });
+
+  return { hits, total, enforcing: CLAIM_FILTER_ENFORCE };
 }
 
 export type FindingSeverity = "good" | "watch" | "risk";

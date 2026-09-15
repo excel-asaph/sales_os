@@ -1,6 +1,19 @@
 import { getMetaCredentials } from "@/lib/meta-credentials";
+import { CLAIM_FILTER_ENFORCE, findClaims, recordClaimHits } from "@/lib/claim-filter";
 
 const GRAPH_API_VERSION = "v21.0";
+
+/**
+ * Thrown instead of sending when the claim filter is enforcing. Distinct from
+ * a network failure so callers can escalate to a human rather than retry —
+ * retrying would produce the same text and the same block.
+ */
+export class ClaimBlockedError extends Error {
+  constructor(public readonly terms: string[]) {
+    super(`Message withheld: health-claim vocabulary (${terms.join(", ")})`);
+    this.name = "ClaimBlockedError";
+  }
+}
 
 /**
  * Sends a WhatsApp text message via the Cloud API. Falls back to logging
@@ -8,7 +21,28 @@ const GRAPH_API_VERSION = "v21.0";
  * AI Employee Runtime is testable locally before WhatsApp is provisioned
  * (ARCHITECTURE.md §12 prerequisites).
  */
-export async function sendWhatsAppText(businessId: string, to: string, text: string, phoneNumberId: string): Promise<void> {
+export async function sendWhatsAppText(
+  businessId: string,
+  to: string,
+  text: string,
+  phoneNumberId: string,
+  // Optional so the dry-run and any future caller stay simple; when present,
+  // outbound text is checked against the health-claim vocabulary here rather
+  // than at each call site, because this is the one place every text message
+  // actually leaves (claim-filter.ts). Shadow mode by default: a hit is
+  // recorded and the message still goes.
+  conversationId?: string
+): Promise<void> {
+  if (conversationId) {
+    const hits = findClaims(text);
+    if (hits.length > 0) {
+      await recordClaimHits(conversationId, hits, !CLAIM_FILTER_ENFORCE);
+      if (CLAIM_FILTER_ENFORCE) {
+        throw new ClaimBlockedError(hits.map((h) => h.term));
+      }
+    }
+  }
+
   const credentials = await getMetaCredentials(businessId);
 
   if (!credentials || !phoneNumberId) {

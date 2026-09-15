@@ -65,7 +65,7 @@ export async function executeAction(
 }
 
 async function sendMessage(ctx: ActionContext, text: string) {
-  await sendWhatsAppText(ctx.businessId, ctx.customerPhoneNumber, text, ctx.whatsappPhoneNumberId);
+  await sendWhatsAppText(ctx.businessId, ctx.customerPhoneNumber, text, ctx.whatsappPhoneNumberId, ctx.conversationId);
   await prisma.$transaction([
     prisma.message.create({
       data: {

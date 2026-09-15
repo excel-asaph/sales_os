@@ -245,6 +245,15 @@ model Product {
   price       Decimal
   currency    String  @default("NGN")
   fileUrl     String? @map("file_url")
+  /// The product's own text, extracted once from fileUrl and stored here so
+  /// the AI can answer "what does the book actually say" without a retrieval
+  /// layer (scripts/extract-product-text.ts). Only injected into the system
+  /// prompt from PRODUCT_DELIVERED onward — see src/lib/system-prompt.ts —
+  /// because before delivery a content question is a sales objection, and
+  /// after it the customer owns the thing and is asking for support.
+  /// Null is the normal state: a business without this behaves exactly as
+  /// it did before the field existed.
+  contentText String? @map("content_text")
   format      String?
   category    String?
   available   Boolean @default(true)

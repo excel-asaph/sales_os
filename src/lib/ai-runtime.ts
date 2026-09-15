@@ -1,6 +1,6 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { claude, CLAUDE_MODEL } from "@/lib/claude";
-import { buildSystemPrompt } from "@/lib/system-prompt";
+import { buildSystemPrompt, buildProductContentBlock } from "@/lib/system-prompt";
 import { actionContractTools } from "@/lib/tools";
 import { executeAction, type ActionContext } from "@/lib/actions";
 import { loadConversationBrain, renderConversationBrain } from "@/lib/conversation-brain";
@@ -69,6 +69,37 @@ function wasEscalated(toolName: string): boolean {
  * (src/lib/actions.ts) — the model never touches the database or
  * WhatsApp directly (PRD Philosophy 3).
  */
+/**
+ * The text of whatever product this conversation has actually been sent, or
+ * null. Gated on delivery rather than on the business having an ebook at all:
+ * before delivery a content question is a sales objection the playbook covers,
+ * and answering it from the book invites claims into a pitch. After delivery
+ * the customer owns the thing and is asking for support.
+ *
+ * Reads the PRODUCT_DELIVERED event rather than the conversation's stage,
+ * because escalate_to_human overwrites currentStage in place — a customer who
+ * received the book and then got escalated would otherwise lose access to it
+ * the moment a human touched the conversation.
+ */
+async function loadDeliveredProductContent(
+  conversationId: string
+): Promise<{ name: string; contentText: string } | null> {
+  const delivered = await prisma.event.findFirst({
+    where: { conversationId, type: "PRODUCT_DELIVERED" },
+    orderBy: { createdAt: "desc" },
+    select: { payload: true },
+  });
+  const productId = (delivered?.payload as { productId?: string } | null)?.productId;
+  if (!productId) return null;
+
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { name: true, contentText: true },
+  });
+  if (!product?.contentText?.trim()) return null;
+  return { name: product.name, contentText: product.contentText };
+}
+
 export async function runAIEmployeeTurn(
   conversationId: string,
   followupNote?: string,
@@ -97,10 +128,11 @@ export async function runAIEmployeeTurn(
       conversation.whatsappPhoneNumberId ?? conversation.customer.business.whatsappPhoneNumberId ?? "",
   };
 
-  const [brain, config, faq] = await Promise.all([
+  const [brain, config, faq, productContent] = await Promise.all([
     loadConversationBrain(conversationId),
     getBusinessConfig(businessId),
     getFaqEntries(businessId),
+    loadDeliveredProductContent(conversationId),
   ]);
 
   const system = buildSystemPrompt({
@@ -132,7 +164,21 @@ export async function runAIEmployeeTurn(
       // covers tools (tools render before system), but keeping an explicit
       // one on tools too (tools.ts) lets that half survive even when a
       // different business's system prompt text misses.
-      system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
+      // Two blocks, not one concatenated string. The stable prompt is an
+      // identical prefix for every conversation of this business, so it
+      // caches once; the product text is a ~7,700-token tail that only
+      // appears after delivery. Appending it to `system` would fork the
+      // cache into two full copies instead of sharing the prefix.
+      system: [
+        { type: "text" as const, text: system, cache_control: { type: "ephemeral" as const } },
+        ...(productContent
+          ? [{
+              type: "text" as const,
+              text: buildProductContentBlock(productContent),
+              cache_control: { type: "ephemeral" as const },
+            }]
+          : []),
+      ],
       tools: actionContractTools,
       // Automatic caching: the API places (and moves) this breakpoint on
       // the last cacheable block itself as `messages` grows across this

@@ -137,6 +137,69 @@ ${flowLines.join("\n")}
 }
 
 /**
+ * The product's own text, for a customer who already has it and is asking
+ * what it says. Returned as a SEPARATE system block from buildSystemPrompt so
+ * the two cache independently: the stable prompt is one prefix shared by every
+ * conversation, and this ~7,700-token tail only appears on conversations past
+ * delivery. Appending it to the main prompt instead would fork the cache into
+ * two full copies.
+ *
+ * The rule below is the important part, and it is narrower than "be careful".
+ * The book contains two kinds of sentence:
+ *
+ *   - instructions — what to eat, how much, when, how to prepare it
+ *   - claims       — what it will supposedly do to the body
+ *
+ * A scan on 2026-09-15 found 39 instances of the vocabulary Meta's Health &
+ * Wellness standard names ("nerve damage ... is reversible", "consistency is
+ * the cure", "flushes toxins from the kidneys", and day titles like "Deep
+ * Cellular Cleanse"). Repeating any of those to a customer is the exact
+ * pattern that got this business's previous WABA disabled on 2026-08-24
+ * (docs/AD_COPY_COMPLIANCE_AUDIT.md).
+ *
+ * Every real support question so far has been answerable from instructions
+ * alone. src/lib/claim-filter.ts is the deterministic backstop for when this
+ * instruction is not enough, on the same principle as the opt-out guard in
+ * actions.ts: a compliance rule should not depend on the model remembering it.
+ */
+export function buildProductContentBlock(product: { name: string; contentText: string }) {
+  return `# The full text of "${product.name}"
+
+This customer already has this product. They can read it themselves, so your
+job is to explain it more clearly than they can on their own — find the part
+they are asking about and put it in plain words.
+
+## What you may say
+Anything practical the text actually states: which foods, what quantity, what
+time of day, how to prepare something, what order to do things in, what a day
+covers. Quote portions and timings exactly as written rather than rounding or
+paraphrasing them.
+
+## What you must never repeat, even though it is written here
+Any sentence about what the product does to the body. This text contains
+phrases like "reversible", "cure", "flushes toxins", and day titles such as
+"Deep Cellular Cleanse" and "Nerve Repair". Those are marketing claims, not
+instructions, and you must not reproduce them, paraphrase them, or confirm
+them — not even by reading a heading aloud. Refer to a day by its number and
+describe what it involves.
+
+If a customer quotes a claim back at you from their own copy, do not deny it
+is in the book and do not affirm it. Move to what the day actually asks them
+to do.
+
+## What still goes to a human
+Anything about medication, whether something is safe alongside a drug they
+name, a condition this product does not cover, dosage for a child or during
+pregnancy, or any question shaped like "will this cure me". Also escalate if
+they seem to be blaming the product for a symptom. The book does not make you
+qualified to answer those, and having it in front of you does not change that.
+
+## The text
+
+${product.contentText}`;
+}
+
+/**
  * Curated FAQ (PRD Ch 11, Knowledge Engine): business-owner-authored answers
  * to the questions customers actually ask, injected verbatim so the AI
  * answers consistently instead of improvising from the product description.

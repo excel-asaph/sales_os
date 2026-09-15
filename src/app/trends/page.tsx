@@ -4,7 +4,7 @@ import { getSession } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { getNumberFilterCookie, resolveEffectiveNumber } from "@/lib/number-filter";
 import { getBusinessNumbers } from "@/lib/whatsapp-numbers";
-import { getFunnelBreakdown, getFollowupStepPerformance, getConversionAttribution, getPeriodComparison } from "@/lib/trends";
+import { getFunnelBreakdown, getFollowupStepPerformance, getConversionAttribution, getPeriodComparison, getClaimFilterHits } from "@/lib/trends";
 import { fetchNumberHealth, qualityBadge } from "@/lib/whatsapp-number-health";
 import { StatTile } from "@/components/stat-tile";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { CategoryBarChart } from "@/components/category-bar-chart";
 import { FollowupStepChart } from "@/components/followup-step-chart";
 import { TrendsInsightsPanel } from "@/components/trends-insights-panel";
 import { PeriodComparisonTable } from "@/components/period-comparison";
+import { ClaimFilterCard } from "@/components/claim-filter-card";
 
 // Everything on this page pulls together, by hand, what earlier this
 // session got pulled via ad-hoc SQL: where the funnel leaks, whether
@@ -31,11 +32,12 @@ export default async function TrendsPage() {
   const numbers = getBusinessNumbers(business);
   const effectiveNumber = resolveEffectiveNumber(numberFilter, business);
 
-  const [funnel, followupSteps, attribution, comparison, numberHealth] = await Promise.all([
+  const [funnel, followupSteps, attribution, comparison, claimFilter, numberHealth] = await Promise.all([
     getFunnelBreakdown(session.businessId, effectiveNumber),
     getFollowupStepPerformance(session.businessId, effectiveNumber),
     getConversionAttribution(session.businessId, effectiveNumber),
     getPeriodComparison(session.businessId, effectiveNumber),
+    getClaimFilterHits(session.businessId, effectiveNumber),
     Promise.all(numbers.map((n) => fetchNumberHealth(session.businessId, n.id))),
   ]);
 
@@ -143,6 +145,8 @@ export default async function TrendsPage() {
             <CategoryBarChart data={attributionChartData} />
           </CardContent>
         </Card>
+
+        <ClaimFilterCard summary={claimFilter} windowDays={comparison.days} />
 
         <Card>
           <CardHeader>
