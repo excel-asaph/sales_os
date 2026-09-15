@@ -82,8 +82,17 @@ function wasEscalated(toolName: string): boolean {
  * the moment a human touched the conversation.
  */
 async function loadDeliveredProductContent(
-  conversationId: string
+  conversationId: string,
+  businessId: string
 ): Promise<{ name: string; contentText: string } | null> {
+  // Settings → General can switch this off without deleting the text, so a
+  // business can flip it while watching the claim-filter card and flip back.
+  const config = await prisma.businessConfig.findUnique({
+    where: { businessId },
+    select: { productContentEnabled: true },
+  });
+  if (config && !config.productContentEnabled) return null;
+
   const delivered = await prisma.event.findFirst({
     where: { conversationId, type: "PRODUCT_DELIVERED" },
     orderBy: { createdAt: "desc" },
@@ -132,7 +141,7 @@ export async function runAIEmployeeTurn(
     loadConversationBrain(conversationId),
     getBusinessConfig(businessId),
     getFaqEntries(businessId),
-    loadDeliveredProductContent(conversationId),
+    loadDeliveredProductContent(conversationId, businessId),
   ]);
 
   const system = buildSystemPrompt({

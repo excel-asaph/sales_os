@@ -186,6 +186,18 @@ model BusinessConfig {
   /// follow-ups outright rather than deferring them, deliberately, to
   /// avoid a stale nudge arriving days late.
   followupsEnabled             Boolean  @default(true) @map("followups_enabled")
+  /// Whether the AI may answer from the product's own text (Product.contentText)
+  /// once a conversation has reached delivery. Settings → General.
+  ///
+  /// Separate from whether the text exists: loading it is a rare, technical
+  /// job (scripts/set-product-text.ts) but switching it off is a decision a
+  /// business owner might make on any afternoon, and that should not need a
+  /// terminal and a production database URL. Same split as followupsEnabled,
+  /// where the engine exists regardless and this decides whether it runs.
+  ///
+  /// Defaults true so the migration changes nothing for a business that has
+  /// already loaded its text.
+  productContentEnabled       Boolean  @default(true) @map("product_content_enabled")
   businessHours               Json?    @map("business_hours")
   greetingTemplate            String?  @map("greeting_template")
   /// Sales Playbook (PRD 11.3, Knowledge Engine) — this business's own

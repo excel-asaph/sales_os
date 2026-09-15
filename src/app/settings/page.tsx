@@ -17,6 +17,7 @@ import {
   updatePlaybookTemplate,
   updateMaxFollowups,
   updateFollowupsEnabled,
+  updateProductContentEnabled,
   updateAiHandlesReceiptIssues,
   addFaqEntry,
   updateFaqEntry,
@@ -38,13 +39,18 @@ export default async function SettingsPage() {
   const session = await getSession();
   if (!session?.isAdmin) return null;
 
-  const [business, faqEntries, metaConnection] = await Promise.all([
+  const [business, faqEntries, metaConnection, productsWithText] = await Promise.all([
     prisma.business.findUnique({
       where: { id: session.businessId },
       include: { config: true },
     }),
     prisma.faqEntry.findMany({ where: { businessId: session.businessId }, orderBy: { order: "asc" } }),
     prisma.businessMetaConnection.findUnique({ where: { businessId: session.businessId } }),
+    // Count only. Selecting contentText itself would pull ~30KB per product
+    // into a page render that never displays it.
+    prisma.product.count({
+      where: { businessId: session.businessId, NOT: { contentText: null } },
+    }),
   ]);
 
   if (!business) {
@@ -59,6 +65,10 @@ export default async function SettingsPage() {
   const aiHandlesReceiptIssues = business.config?.aiHandlesReceiptIssues ?? true;
   const maxFollowups = business.config?.maxFollowups ?? FOLLOWUP_SEQUENCE.length;
   const followupsEnabled = business.config?.followupsEnabled ?? true;
+  const productContentEnabled = business.config?.productContentEnabled ?? true;
+  // Whether there is anything for the toggle to switch on. A business with no
+  // loaded text gets an explanation instead of a control that does nothing.
+  const hasProductText = productsWithText > 0;
   const playbook = (business.config?.playbook as Record<string, string> | null) ?? {};
 
   const followupTimeline = FOLLOWUP_SEQUENCE.reduce<Array<(typeof FOLLOWUP_SEQUENCE)[number] & { cumulativeHours: number }>>(
@@ -242,6 +252,54 @@ export default async function SettingsPage() {
                     Save
                   </SubmitButton>
                 </form>
+              </CardContent>
+            </Card>
+
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>Answer from the product itself</CardTitle>
+                <CardDescription>
+                  Lets the AI read the product&apos;s own text when a customer who already has it asks what
+                  something in it means — a portion, a timing, how to prepare something. It only applies
+                  <em> after</em> delivery: before that, a question about the contents is a sales question and the
+                  scripts handle it. The AI explains the instructions and never repeats claims about what the
+                  product does to the body.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {hasProductText ? (
+                  <form action={updateProductContentEnabled} className="flex flex-col gap-5">
+                    <RadioGroup name="productContentEnabled" defaultValue={productContentEnabled ? "true" : "false"}>
+                      <Label className="flex items-start gap-3 rounded-lg border p-4 has-data-checked:border-primary has-data-checked:bg-primary/5">
+                        <RadioGroupItem value="true" className="mt-0.5" />
+                        <span className="flex flex-col gap-0.5 text-sm font-normal">
+                          <span className="font-medium">Enabled</span>
+                          <span className="text-muted-foreground">
+                            The AI can answer questions about what the product says
+                          </span>
+                        </span>
+                      </Label>
+                      <Label className="flex items-start gap-3 rounded-lg border p-4 has-data-checked:border-primary has-data-checked:bg-primary/5">
+                        <RadioGroupItem value="false" className="mt-0.5" />
+                        <span className="flex flex-col gap-0.5 text-sm font-normal">
+                          <span className="font-medium">Off</span>
+                          <span className="text-muted-foreground">
+                            The AI answers from the FAQ and scripts only, as it did before. Takes effect on the
+                            next message; nothing already sent changes.
+                          </span>
+                        </span>
+                      </Label>
+                    </RadioGroup>
+                    <SubmitButton className="self-start" pendingLabel="Saving…" successMessage="Setting saved">
+                      Save
+                    </SubmitButton>
+                  </form>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No product text has been loaded yet, so there is nothing for the AI to read. Loading it is a
+                    one-off job run from the command line, since the text runs to tens of thousands of characters.
+                  </p>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

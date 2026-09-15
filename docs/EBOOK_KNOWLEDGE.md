@@ -162,6 +162,31 @@ instead of sending.
 | `src/components/claim-filter-card.tsx`, `src/app/trends/page.tsx` | the card |
 | `scripts/extract-product-text.py`, `scripts/set-product-text.ts`, `scripts/check-claim-filter.ts` | tooling |
 
+## Turning it on and off
+
+**Settings → General → "Answer from the product itself"** is the switch, added
+2026-09-16. `BusinessConfig.productContentEnabled`, defaulting to true so the
+migration changed nothing for a business that had already loaded its text.
+
+The split is deliberate and mirrors `followupsEnabled`:
+
+| | How | How often |
+|---|---|---|
+| **Loading** the text | `scripts/set-product-text.ts` | Rare, technical, ~30KB |
+| **Switching** it on/off | Settings toggle | A decision any afternoon |
+
+Before the toggle existed the only "off" was `--clear`, which deleted the data
+— so coming back meant re-uploading. Now the useful state exists: **text
+loaded, feature off.** Flip it while watching the claim-filter card, flip back.
+
+The card hides the control and explains why when no product text is loaded,
+rather than showing a switch that does nothing. The page counts products with
+text rather than selecting it — a `SELECT` of `contentText` would pull ~30KB
+into a render that never displays it.
+
+Off takes effect on the next message, not retroactively, and the first turn
+after a flip pays a cache miss.
+
 ## Loading the text
 
 ```
@@ -172,7 +197,10 @@ npx tsx scripts/set-product-text.ts --product-id <id> --file ebook.txt
 
 ## Reverting
 
-**To turn the whole feature off without touching code or deploying:**
+**To turn the whole feature off:** Settings → General → "Answer from the
+product itself" → Off. No terminal, no deploy, effective on the next message.
+
+**To remove the data as well** (rarely needed now the toggle exists):
 
 ```
 npx tsx scripts/set-product-text.ts --product-id <id> --clear

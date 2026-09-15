@@ -31,6 +31,18 @@ export async function updateAiHandlesReceiptIssues(formData: FormData) {
   revalidatePath("/settings");
 }
 
+export async function updateProductContentEnabled(formData: FormData) {
+  const session = await requireAdminSession();
+  const productContentEnabled = formData.get("productContentEnabled") === "true";
+
+  await prisma.businessConfig.update({
+    where: { businessId: session.businessId },
+    data: { productContentEnabled },
+  });
+
+  revalidatePath("/settings");
+}
+
 export async function updateMaxFollowups(formData: FormData) {
   const session = await requireAdminSession();
   const raw = Number(formData.get("maxFollowups"));
