@@ -148,6 +148,55 @@ would have withheld a well-judged refusal on day one.
 handling holds.** When enforcing, `sendWhatsAppText` throws `ClaimBlockedError`
 instead of sending.
 
+## Medication questions now get answered, not escalated (2026-09-19)
+
+*"Good morning, please can I take drugs along the recipes?"* turned out to be
+one of the most common things customers ask after delivery, and every one of
+them was stopping the AI and waiting for a human.
+
+The original rule in `buildProductContentBlock` sent **anything about
+medication** to a person. That was the cautious-looking choice and it was the
+wrong one, for a reason that only shows up when you look at the timestamps:
+the question above arrived at 7:30am. Until someone replied, a diabetic was
+sitting with an unanswered question about whether to keep taking her
+medication. **Waiting is not the safe state here.** A person who waits long
+enough may decide on their own, and the decision they are weighing is the one
+that harms them.
+
+So the general case is now answered immediately by **hard rule 9** in
+`buildSystemPrompt`, and the product block's escalation list was narrowed to
+stop contradicting it.
+
+### What the AI may now say, and what it still may not
+
+| | |
+|---|---|
+| **Always, immediately** | Keep taking exactly what your doctor prescribed; this product does not replace treatment; tell your doctor you're starting it |
+| **Never** | Advise stopping, reducing, delaying or changing a prescription |
+| **Never** | Assert the product is safe to combine with a drug |
+| **Still a human** | A drug named by name, dose or timing, a child, a pregnancy, blame for a symptom, "will this cure me" |
+
+The "never assert it's safe to combine" line is the one that matters and the
+one that was nearly written the other way. The owner's first draft of the
+answer ended *"this routine works alongside your treatment — not against it."*
+That is a pharmacological claim, and it is not reliably true: cinnamon, bitter
+leaf, moringa and fenugreek all lower blood sugar independently, and stacked on
+a sulfonylurea (glibenclamide is widely prescribed in Nigeria) or on insulin
+the effects add, with hypoglycemia as the failure mode. The shipped wording
+describes what the product *is* — food, not a replacement — and routes the
+interaction question to the person holding the prescription.
+
+The exact customer-facing wording lives in the **FAQ**, not in code, so the
+owner can change it in Settings without a deploy. Rule 9 says to use it.
+
+It is also pinned as a fixture in `scripts/check-claim-filter.ts`: this answer
+goes out on every medication question, so a future reword that happens to trip
+the claim filter has to fail in the check rather than in front of a customer.
+
+**To revert:** delete rule 9 and restore the product block's original
+"Anything about medication…" line. Both are additive text edits in
+`src/lib/system-prompt.ts`; nothing else depends on them.
+
 ## Files changed
 
 | File | Change |

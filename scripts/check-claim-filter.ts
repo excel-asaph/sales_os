@@ -28,6 +28,11 @@ const MUST_PASS: [string, string][] = [
   ["negated claim", "This is not a cure and it will not reverse anything on its own."],
   ["polite decline", "I don't want to guarantee results — everyone's body responds differently."],
   ["payment chase", "We are still waiting for your payment. Kindly complete it when you see this."],
+  // The standing answer to "can I take my drugs along the recipes?" (hard rule
+  // 9 in system-prompt.ts). It goes out on every medication question, so if
+  // anyone ever rewords it into something the filter would withhold, that has
+  // to fail here rather than in front of a customer.
+  ["medication answer", "Please don't stop or change any medication your doctor prescribed. The plan is food, not a replacement for your treatment. Since your doctor knows exactly what you're taking, mention the routine to them before you start."],
 ];
 
 const MUST_FLAG: [string, string][] = [
