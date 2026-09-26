@@ -270,7 +270,7 @@ doctor's specific instructions.
 
     python hepatitis-b-book/build.py && python hepatitis-b-book/topdf.py
 
-Output is `Hepatitis Clear.pdf`, **79 pages, A4, ~2.7MB**, gitignored like
+Output is `Hepatitis Clear.pdf`, **84 pages, A4, ~2.7MB**, gitignored like
 `book.html`. Rendered through headless Chrome rather than WeasyPrint or
 wkhtmltopdf, because it is the same Blink engine the book is authored and
 previewed in — `clamp()`, grid, `break-inside` and `object-fit` behave
@@ -295,7 +295,7 @@ showing up as half-empty pages.
 **Print now flows.** Breaks are forced only where a book would take one —
 the cover, every chapter opener, and the standalone front and back sections
 — and `break-inside: avoid` keeps each unit whole. Chrome paginates the
-rest: 93 → 75 → 73 → 79 pages, no content clipped, nothing running past the trim.
+rest: 93 → 75 → 73 → 79 → 84 pages, no content clipped, nothing running past the trim.
 
 ### Why A4
 
@@ -347,6 +347,28 @@ Two things the same pass caught:
   print is the sheet, so they came out small and had to be set explicitly.
   Widening the verse to a 64ch measure also mattered: at 46ch the longest
   authored line re-wrapped and left an em dash alone on a line.
+
+### Cream paper, splitting tables, and room to breathe
+
+Three faults found by reading the PDF rather than the numbers, and two of
+them pull in opposite directions, which is why one global adjustment would
+not have fixed either:
+
+- **The paper had gone white.** Print was forcing `#FFFFFF` on `html`,
+  `body` and `.page`, left over from assuming this would be printed on real
+  paper. It is sold as a PDF, so it uses `--paper` now, and `@page` paints
+  the sheet too or the margins stay white.
+- **Voids under tables.** `.t-wrap` carried `break-inside: avoid`, so a
+  table that could not finish on a page moved to the next one whole and
+  left the space behind it empty. Tables are the one block that splits
+  well, given `thead { display: table-header-group }` to repeat the header
+  and `tr { break-inside: avoid }` to keep rows intact. The two Chapter 2
+  tables now share a page instead of taking one each.
+- **Everything else was jammed.** The print scale cut the type but cut the
+  space between things by more. Paragraph spacing, list gaps, heading
+  margins, box padding and table cell padding all went back up.
+
+Costs 79 → 84 pages.
 
 ### Where it stands
 

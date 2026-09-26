@@ -249,8 +249,8 @@
 
      Screen reading is completely unaffected by any of this. */
   @media print {
-    @page { size: A4; margin: 20mm 25mm 20mm; }
-    html, body { background: #FFFFFF !important; }
+    @page { size: A4; margin: 20mm 25mm 20mm; background: var(--paper); }
+    html, body { background: var(--paper) !important; }
     .stack { display: block !important; max-width: none !important; margin: 0 !important; padding: 0 !important; gap: 0 !important; }
     footer.meta { display: none !important; }
 
@@ -259,13 +259,13 @@
     .page { box-shadow: none !important; border-radius: 0 !important;
             margin: 0 !important; padding: 0 !important;
             width: auto !important; min-height: 0 !important;
-            background: #FFFFFF !important; }
+            background: var(--paper) !important; }
     .page.flush { padding: 0 !important; }
     /* A break is forced only where a book would take one: the cover, every
        chapter opener, and the standalone front and back sections. */
     .page:has(.chap-band), .page:has(.cover-shell), .page.flush,
     .page:has(.prayer), .page:has(.toc-banner), .page:has(.myth),
-    .page:has(.tracker), .page:has(.qa), .page:has(.signoff) { break-before: page; }
+    .page:has(.tracker), .page:has(.qa) { break-before: page; }
     .page:first-child { break-before: auto; }
     .folio { display: none !important; }
     /* Short pages that are forced onto a sheet of their own get centred on
@@ -288,26 +288,26 @@
                  height: 297mm !important; object-fit: cover !important;
                  display: block !important; margin: 0 !important; }
 
-    p, li, .box p, .box li { font-size: 11pt !important; line-height: 1.56 !important; }
+    p, li, .box p, .box li { font-size: 11pt !important; line-height: 1.62 !important; }
     td, th { font-size: 10pt !important; line-height: 1.45 !important; }
-    p { margin: 0 0 8pt !important; max-width: none !important; }
-    ul, ol { margin: 0 0 9pt !important; gap: 3pt !important; padding-left: 16pt !important; max-width: none !important; }
+    p { margin: 0 0 11pt !important; max-width: none !important; }
+    ul, ol { margin: 0 0 13pt !important; gap: 7pt !important; padding-left: 18pt !important; max-width: none !important; }
     p.lead { font-size: 12.5pt !important; line-height: 1.45 !important; margin-bottom: 10pt !important; }
     h2.chaptitle { font-size: 21pt !important; }
-    h3 { font-size: 13.5pt !important; margin: 15pt 0 6pt !important; }
+    h3 { font-size: 13.5pt !important; margin: 20pt 0 8pt !important; }
     h3.first { margin-top: 0 !important; }
-    h4 { font-size: 11pt !important; margin: 9pt 0 4pt !important; }
+    h4 { font-size: 11.5pt !important; margin: 13pt 0 6pt !important; }
     .kicker, .runhead, .fig-title, .box .k, .lbl, .col > p.h { font-size: 7.5pt !important; }
     .box .k { margin-bottom: 4pt !important; }
     .chap-band { padding: 14pt 16pt 16pt !important; margin-bottom: 14pt !important; }
-    th, td { padding: 6pt 8pt !important; }
+    th, td { padding: 8pt 10pt !important; }
     thead th { font-size: 8pt !important; }
-    .box { padding: 9pt 12pt !important; margin: 11pt 0 !important; }
-    figure { margin: 12pt 0 16pt !important; }
+    .box { padding: 13pt 16pt !important; margin: 16pt 0 !important; }
+    figure { margin: 16pt 0 20pt !important; }
     figcaption { font-size: 9.5pt !important; line-height: 1.45 !important; margin-top: 7pt !important; }
-    .fig { margin: 12pt 0 !important; }
+    .fig { margin: 16pt 0 !important; }
     .col li { font-size: 10pt !important; padding: 5pt 0 5pt 20pt !important; }
-    .pullquote { font-size: 12pt !important; line-height: 1.42 !important; margin: 12pt 0 !important; }
+    .pullquote { font-size: 12pt !important; line-height: 1.5 !important; margin: 18pt 0 !important; padding: 14pt 18pt !important; }
     .folio { font-size: 8pt !important; bottom: 10mm !important; right: 18mm !important; }
     .qa { gap: 12pt !important; }
     .qa-line { height: 18pt !important; }
@@ -330,8 +330,14 @@
 
 
     /* Nothing that reads as one unit may split across a sheet. */
-    .box, .fig, figure, .t-wrap, .week, .mealgrid, .recipe, .col, .prayer,
+    .box, .fig, figure, .week, .mealgrid, .recipe, .col, .prayer,
     .myth, .qa-item, .tracker, .signoff, .pullquote { break-inside: avoid; }
+    /* A table is the one block that splits well, provided the reader can
+       still see which column is which on the continuation. Keeping them
+       whole was leaving half-empty pages behind them. */
+    .t-wrap { break-inside: auto; margin: 16pt 0 !important; }
+    thead { display: table-header-group; }
+    tr { break-inside: avoid; }
     h2, h3, h4, .fig-title, .mealhead, .chap-band { break-after: avoid; }
   }
 
