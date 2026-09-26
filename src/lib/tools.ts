@@ -201,6 +201,10 @@ export const actionContractTools: Anthropic.Tool[] = [
     // knowing before moving this breakpoint), so it's reused across every
     // turn, every conversation, every business, for as long as it stays
     // warm — the closest thing to a free win the API offers.
-    cache_control: { type: "ephemeral" },
+    //
+    // 1h, and it has to match the system blocks: the API rejects any
+    // ttl='1h' block that renders *after* a ttl='5m' one, and tools render
+    // first. Verified by scripts/check-cache-ttl.ts.
+    cache_control: { type: "ephemeral", ttl: "1h" },
   },
 ];

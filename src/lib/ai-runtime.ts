@@ -179,18 +179,21 @@ export async function runAIEmployeeTurn(
       // appears after delivery. Appending it to `system` would fork the
       // cache into two full copies instead of sharing the prefix.
       system: [
-        { type: "text" as const, text: system, cache_control: { type: "ephemeral" as const } },
-        // Stays at the default 5m. A 1h ttl was tried here on 2026-09-26 and
-        // broke every post-delivery conversation with a 400: a ttl='1h'
-        // block may not come *after* a ttl='5m' one, and blocks render in
-        // the order tools, system, messages — so this block, which has to
-        // sit after the stable prompt to share its cache prefix, can only
-        // be 1h if everything before it is too. See docs/AI_COST.md.
+        { type: "text" as const, text: system, cache_control: { type: "ephemeral" as const, ttl: "1h" as const } },
+        // 1h, and so are the two blocks that render before it (tools and
+        // the stable prompt) — the API rejects a ttl='1h' block that comes
+        // after a ttl='5m' one, which is what broke production on
+        // 2026-09-26. Worth the 2x write price because this block is
+        // ~13,000 tokens and only ~43% of turns touch it, so on five
+        // minutes it went cold on 18.5% of ebook turns, and a cold turn
+        // costs $0.050 against a warm turn's $0.018 (docs/AI_COST.md).
+        // The messages breakpoint below stays 5m, which is legal: it
+        // renders last. Verified by scripts/check-cache-ttl.ts.
         ...(productContent
           ? [{
               type: "text" as const,
               text: buildProductContentBlock(productContent),
-              cache_control: { type: "ephemeral" as const },
+              cache_control: { type: "ephemeral" as const, ttl: "1h" as const },
             }]
           : []),
       ],
