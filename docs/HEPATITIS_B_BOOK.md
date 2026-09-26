@@ -208,6 +208,42 @@ this back where it belongs:
 </div>
 ```
 
+---
+
+## Print pagination — deliberately deferred, must not be skipped
+
+**Agreed 2026-09-26: hold this until the content is frozen, then do it.**
+Doing it before the title is set and before Dr. Akinyode's review would mean
+doing it twice, because any clinical edit reflows everything after it.
+
+The `.page` divs are **not pages**. They are cards with a shadow. There is no
+`@page` rule, no `@media print`, no fixed height and no `page-break-after`
+anywhere in `book.src.html` or the built `book.html`. Nothing tells a PDF
+renderer where a page ends, so printing today paginates purely by paper
+height: cards sliced mid-figure, folios landing halfway down a sheet, and the
+drop shadows and rounded corners printing as artifacts.
+
+Measured on 2026-09-26: 54 cards, 27 to 515 words, median 210, 12,535 words
+total. The variation itself is fine — there is no word-count standard, only a
+fixed trim and a consistent type area — but at a fixed height roughly a dozen
+of the heavy cards will overflow.
+
+What it takes:
+
+1. Pick a trim. **6x9in** is the standard print-on-demand size; **A5** if it
+   will ever be printed locally in Nigeria.
+2. `@page { size: <trim>; margin: 0 }`, a fixed height on `.page` in `mm`,
+   `page-break-after: always`, and shadow/radius stripped under print.
+3. **Reflow.** This is the real work — moving text between pages so nothing
+   overflows, and deciding whether each light page is deliberate breathing
+   space or should merge.
+
+### Duplicate folios, blocking the same pass
+
+Nine numbers appear twice, from the fourteen meal pages being added without
+renumbering: **iii, 40, 41, 44, 45, 46, 49, 50, 51.** Renumber as part of
+step 3, not before — the reflow may change which content lands where.
+
 ## The title shortlist
 
 Subtitle direction is settled: **name the enemy** — "...and What the Herb
