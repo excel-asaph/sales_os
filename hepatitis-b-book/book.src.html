@@ -491,33 +491,38 @@
 
   <div class="fig">
     <p class="fig-title">Figure 1 &mdash; the road, and where people usually notice</p>
-    <svg viewBox="0 0 700 210" role="img" aria-label="Four stages from healthy liver to cirrhosis, with symptoms appearing only at the final stage">
-      <line x1="40" y1="96" x2="660" y2="96" stroke="var(--rule)" stroke-width="2"/>
+    <svg viewBox="0 0 700 250" role="img" aria-label="Four stages from a healthy liver to cirrhosis. You feel completely normal through the first three; symptoms only appear at cirrhosis, and most people who test early are at the healthy end.">
       <g font-family="var(--body)">
-        <circle cx="90" cy="96" r="13" fill="var(--moss)"/>
-        <text x="90" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">Healthy</text>
-        <text x="90" y="156" text-anchor="middle" font-size="11" fill="var(--ink-2)">Soft, working</text>
+        <!-- what the reader feels, across the whole road -->
+        <rect x="40" y="18" width="536" height="30" rx="6" fill="var(--moss-soft)"/>
+        <text x="58" y="38" font-size="13" font-weight="600" fill="var(--moss)">You feel completely normal through all of this</text>
+        <rect x="586" y="18" width="74" height="30" rx="6" fill="var(--clay-soft)"/>
+        <text x="623" y="38" text-anchor="middle" font-size="13" font-weight="600" fill="var(--clay)">Symptoms</text>
 
-        <circle cx="280" cy="96" r="13" fill="var(--ochre)"/>
-        <text x="280" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">Inflammation</text>
-        <text x="280" y="156" text-anchor="middle" font-size="11" fill="var(--ink-2)">Cells being injured</text>
+        <!-- the road -->
+        <line x1="40" y1="112" x2="660" y2="112" stroke="var(--rule)" stroke-width="2"/>
 
-        <circle cx="460" cy="96" r="13" fill="var(--ochre)"/>
-        <text x="460" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">Scarring</text>
-        <text x="460" y="156" text-anchor="middle" font-size="11" fill="var(--ink-2)">Stiffening, still reversible</text>
+        <circle cx="90" cy="112" r="14" fill="var(--moss)"/>
+        <text x="90" y="152" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink)">Healthy</text>
+        <text x="90" y="172" text-anchor="middle" font-size="12" fill="var(--ink-2)">Soft, working</text>
 
-        <circle cx="620" cy="96" r="13" fill="var(--clay)"/>
-        <text x="620" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">Cirrhosis</text>
-        <text x="620" y="156" text-anchor="middle" font-size="11" fill="var(--ink-2)">Heavy, permanent</text>
+        <circle cx="280" cy="112" r="14" fill="var(--ochre)"/>
+        <text x="280" y="152" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink)">Inflammation</text>
+        <text x="280" y="172" text-anchor="middle" font-size="12" fill="var(--ink-2)">Cells being injured</text>
 
-        <rect x="40" y="36" width="540" height="26" fill="var(--moss-soft)"/>
-        <text x="52" y="54" font-size="12" font-weight="600" fill="var(--moss)">You feel completely normal through all of this</text>
+        <circle cx="462" cy="112" r="14" fill="var(--ochre)"/>
+        <text x="462" y="152" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink)">Scarring</text>
+        <text x="462" y="172" text-anchor="middle" font-size="12" fill="var(--ink-2)">Stiffening, still reversible</text>
 
-        <rect x="584" y="36" width="76" height="26" fill="var(--clay-soft)"/>
-        <text x="622" y="54" text-anchor="middle" font-size="12" font-weight="600" fill="var(--clay)">Symptoms</text>
+        <circle cx="623" cy="112" r="14" fill="var(--clay)"/>
+        <text x="623" y="152" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink)">Cirrhosis</text>
+        <text x="623" y="172" text-anchor="middle" font-size="12" fill="var(--ink-2)">Heavy, permanent</text>
 
-        <line x1="90" y1="96" x2="90" y2="76" stroke="var(--indigo)" stroke-width="2"/>
-        <text x="90" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="var(--indigo)">Most people who test early are here</text>
+        <!-- where the reader most likely is: below the road, so it collides
+             with nothing, and left-aligned so it cannot run off the edge -->
+        <line x1="90" y1="228" x2="90" y2="192" stroke="var(--indigo)" stroke-width="2"/>
+        <circle cx="90" cy="192" r="3" fill="var(--indigo)"/>
+        <text x="40" y="244" font-size="13" font-weight="700" fill="var(--indigo)">Most people who test early are standing here</text>
       </g>
     </svg>
   </div>
