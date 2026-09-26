@@ -27,13 +27,13 @@ IMGDIR = os.path.join(HERE, "img")
 
 # The cover is the one image a reader looks at closely, so it gets more pixels
 # and less compression than the in-body figures.
-WIDTH = {"cover_v3": 1240}
-QUALITY = {"cover_v3": 92}
+WIDTH = {"cover_v4": 1240}
+QUALITY = {"cover_v4": 92}
 
 # Alt text is not decoration here: this is a health book and the figures carry
 # meaning for anyone using a screen reader.
 ALT = {
-    "cover_v3": "Cover artwork: a smiling Nigerian couple framed by green leaves, vegetables and fruit",
+    "cover_v4": "Book cover: Hepatitis Clear, published by Dr David Akinyode. A Nigerian couple behind fresh vegetables and fruit, framed by green leaves, above the promises the book makes.",
     "result_paper": "Hands holding a folded medical result slip in a clinic corridor",
     "clinic": "A doctor explaining results to a patient in a consulting room",
     "agbo": "Unlabelled bottles of homemade herbal liquid on a roadside table",

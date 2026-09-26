@@ -62,3 +62,4 @@ __pycache__/
 /hepatitis-b-book/book.html
 # 25MB of source PNGs; the committed img/*.jpg are what the book ships with
 /hepatitis-b-book/img/*.png
+/hepatitis-b-book/img/*.jfif
