@@ -139,9 +139,36 @@ minutes. The ebook block is larger, touched by under half of traffic, and
 runs at roughly five turns an hour — so its five-minute window lapses
 between hits, and each miss rewrites 13,000 tokens.
 
-**Shipped: `ttl: "1h"` on the product block only.** The 2x write premium is
-paid exactly where a miss is expensive and nowhere else. Expected 10-15%,
-growing as more customers pass delivery.
+**First attempt (854c69e): `ttl: "1h"` on the product block only. It took
+production down.** Every request carrying that block was rejected:
+
+    system.1.cache_control.ttl: a ttl='1h' cache_control block must not
+    come after a ttl='5m' cache_control block. Note that blocks are
+    processed in the following order: `tools`, `system`, `messages`.
+
+Longer TTLs must come **first**. The layout was tools (5m) -> stable prompt
+(5m) -> product (1h), which is exactly backwards. It broke every conversation
+past delivery — 43% of turns — for about four hours, and surfaced to the
+owner as "the AI ran into a technical error right after a human action",
+because *Return to AI* and *Record payment* both re-enter the runtime on
+conversations that are by definition post-delivery.
+
+Typecheck, lint and build all passed. Only the API could catch it.
+
+**Shipped (0c9a395): `ttl: "1h"` on all three blocks that render before
+`messages`** — the tools breakpoint, the stable prompt, and the product text.
+The automatic breakpoint on `messages` stays 5m, which is legal because it
+renders last. Expected 10-15%, growing as more customers pass delivery.
+
+**`scripts/check-cache-ttl.ts` is the durable outcome.** It sends the real
+request shape at `max_tokens: 1` and asserts three layouts: the old one is
+accepted, the outage layout is rejected, and the proposed one is accepted.
+Run it before touching `cache_control` again:
+
+    npx --yes @railway/cli@latest run --service sales_os --       npx tsx scripts/check-cache-ttl.ts <product-text.txt>
+
+`railway run` injects production credentials into a local process, so the key
+never has to be copied anywhere.
 
 ### Setting `effort` — not where the money is
 
@@ -215,3 +242,30 @@ Worth recording so nobody "optimizes" them later:
 - **Model choice is not the lever.** Haiku 4.5 is $1/$5 against Sonnet 5's
   $2/$10 — exactly 2x, not the order of magnitude it sounds like — and this
   system is entirely tool-driven, which is where smaller models are weakest.
+
+## The lesson worth keeping
+
+Three separate conclusions in this document were wrong when first written,
+and each was wrong in a way the next measurement caught:
+
+| Claim | Why it was wrong |
+|---|---|
+| "The cache is near-perfect, 95.3% hit rate" | `input_tokens` cannot see a cache miss — a miss bills as `cache_write` |
+| "The follow-up worker is the smallest prize" | It is 42% of spend |
+| "The 1h TTL carries zero risk, the model sees identical bytes" | True of the model, irrelevant to the request, which the API rejected |
+
+The pattern: each was a confident inference from reading code, and each
+survived until something actually measured it. Nothing in this file should be
+trusted over a fresh run of `scripts/analyze-claude-usage.py`.
+
+## Related: the duplicate-order guard (a0b2527)
+
+The outage's second-order effect. While the AI was failing behind *Record
+payment*, the button looked broken and was clicked four times on one
+conversation — four VERIFIED orders, 40,000 naira against a 10,000 naira
+sale. The rows were deleted; `createAndVerifyOrder` now ignores a second
+VERIFIED order for the same conversation and product within ten minutes and
+writes a `DUPLICATE_ORDER_IGNORED` event instead.
+
+A silent no-op, not a thrown error: the dialog has no error surface, so
+throwing would close it and still report success.

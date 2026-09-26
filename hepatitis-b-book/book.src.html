@@ -1,0 +1,2265 @@
+<title>The First 90 Days</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap">
+<style>
+  /* A printed guide book, deliberately single-theme: this is paper. Every
+     colour is painted explicitly so the page holds on any host background. */
+  :root {
+    --bench: #D8CFC0;
+    --paper: #F5EFE6;
+    --paper-2: #FBF8F2;
+    --paper-edge: #E0D4C4;
+    --ink: #2C2C2C;
+    --ink-2: #5A5347;
+    --ink-3: #8A8272;
+    --rule: #E0D4C4;
+
+    --indigo: #0F6E8A;
+    --indigo-soft: #DCEEF4;
+    --ochre: #D2840F;
+    --ochre-soft: #FBEFD6;
+    --clay: #A52A1F;
+    --clay-soft: #FBE0DC;
+    --moss: #3A7A3A;
+    --moss-soft: #E1F0DF;
+    --plum: #6B2D82;
+    --plum-soft: #F0E4F5;
+    --on-solid: #FFFFFF;
+
+    --display: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --body: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "Poppins", system-ui, sans-serif;
+
+    --r: 16px;
+    --r-sm: 11px;
+    --shadow: 0 2px 14px rgba(44,44,44,0.07);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bench); color: var(--ink); font-family: var(--body); line-height: 1.78; -webkit-font-smoothing: antialiased; }
+  img { max-width: 100%; display: block; }
+
+  .stack { max-width: 860px; margin: 0 auto; padding-inline: 14px; padding-block: 0 90px; display: flex; flex-direction: column; gap: 30px; }
+
+  .page { background: var(--paper); border-radius: var(--r); box-shadow: var(--shadow); padding: clamp(30px, 5.5vw, 62px) clamp(24px, 5vw, 60px) clamp(48px, 5.5vw, 64px); position: relative; }
+  .page.flush { padding: 0; overflow: hidden; }
+  .folio { position: absolute; bottom: 18px; right: clamp(24px, 5vw, 60px); font-size: 0.78rem; font-weight: 600; color: var(--ink-3); }
+  .runhead { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; color: var(--indigo); margin-bottom: 28px; }
+
+  p { font-size: 1.07rem; line-height: 1.78; margin: 0 0 19px; max-width: 62ch; }
+  p:last-child { margin-bottom: 0; }
+  p.lead { font-size: 1.24rem; line-height: 1.62; font-weight: 500; margin-bottom: 22px; }
+  .kicker { font-size: 0.76rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700; color: var(--ochre); margin: 0 0 11px; }
+
+  .chap-band { background: var(--indigo); color: var(--on-solid); border-radius: var(--r); padding: 32px clamp(24px, 4vw, 40px) 34px; margin-bottom: 34px; }
+  .chap-band .kicker { color: #FFDFA4; margin-bottom: 2px; }
+  h2.chapno { font-size: clamp(2.6rem, 9vw, 4rem); font-weight: 800; line-height: 0.92; letter-spacing: -0.04em; margin: 0; color: rgba(255,255,255,0.30); }
+  h2.chaptitle { font-size: clamp(1.4rem, 4.2vw, 2rem); font-weight: 700; line-height: 1.12; letter-spacing: -0.02em; margin: -8px 0 0; color: var(--on-solid); text-wrap: balance; }
+
+  h3 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.015em; margin: 38px 0 12px; line-height: 1.35; color: var(--indigo); text-wrap: balance; }
+  h3.first { margin-top: 0; }
+  h4 { font-size: 1.05rem; font-weight: 700; margin: 24px 0 9px; }
+
+  .pullquote { background: var(--indigo-soft); border-radius: var(--r); padding: 28px 32px; font-size: clamp(1.14rem, 2.9vw, 1.38rem); font-weight: 600; font-style: italic; line-height: 1.48; color: var(--indigo); margin: 34px 0; max-width: 50ch; }
+
+  ul, ol { margin: 0 0 19px; padding-left: 22px; display: flex; flex-direction: column; gap: 12px; max-width: 62ch; }
+  li { font-size: 1.05rem; line-height: 1.7; }
+  ul.marks { list-style: none; padding: 0; gap: 9px; }
+  ul.marks li { position: relative; padding-left: 28px; }
+  ul.marks li::before { content: ""; position: absolute; left: 0; top: 0.62em; width: 10px; height: 10px; border-radius: 50%; background: var(--ochre); }
+
+  .box { padding: 26px 28px; margin: 30px 0; border-radius: var(--r); background: var(--ochre-soft); border: 1.5px solid var(--ochre); }
+  .box.warn { background: var(--clay-soft); border-color: var(--clay); }
+  .box.good { background: var(--moss-soft); border-color: var(--moss); }
+  .box.cool { background: var(--indigo-soft); border-color: var(--indigo); }
+  .box h4 { margin-top: 0; color: var(--ochre); }
+  .box.warn h4 { color: var(--clay); }
+  .box.good h4 { color: var(--moss); }
+  .box.cool h4 { color: var(--indigo); }
+  .box p, .box li { font-size: 1.03rem; line-height: 1.72; }
+  .box .k { font-size: 0.73rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: var(--ochre); margin: 0 0 11px; }
+  .box.warn .k { color: var(--clay); }
+  .box.good .k { color: var(--moss); }
+  .box.cool .k { color: var(--indigo); }
+
+  figure { margin: 30px 0; }
+  figure img { border-radius: var(--r); }
+  figcaption { font-size: 0.94rem; line-height: 1.62; color: var(--ink-2); margin-top: 13px; font-weight: 500; max-width: 56ch; }
+  .bleed { margin-inline: calc(-1 * clamp(20px, 4.4vw, 52px)); }
+  .bleed img { border-radius: 0; }
+
+  .t-wrap { overflow-x: auto; margin: 30px 0; border-radius: var(--r); border: 1.5px solid var(--rule); background: var(--paper-2); }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 16px 18px; border-bottom: 1px solid var(--rule); font-size: 1rem; line-height: 1.62; vertical-align: top; }
+  thead th { background: var(--indigo); color: var(--on-solid); font-size: 0.76rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border-bottom: 0; }
+  tbody tr:nth-child(even) td { background: rgba(224,212,196,0.24); }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.k { font-weight: 700; color: var(--ink); }
+  th, td { overflow-wrap: break-word; }
+
+  .week { border-radius: var(--r); overflow: hidden; margin: 26px 0; background: var(--paper-2); border: 1.5px solid var(--rule); }
+  .week-head { background: var(--indigo); color: var(--on-solid); padding: 17px 22px; display: flex; flex-wrap: wrap; gap: 2px 14px; align-items: baseline; }
+  .week-head .n { font-size: 0.76rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; color: #FFDFA4; }
+  .week-head .t { font-size: 1.3rem; font-weight: 700; line-height: 1.15; letter-spacing: -0.015em; }
+  .week-body { padding: 22px 22px 24px; }
+  .week-body .job { font-size: 1.09rem; font-weight: 600; margin: 0 0 18px; line-height: 1.6; color: var(--ink); }
+  .week-sec { margin-top: 19px; }
+  .week-sec .lbl { font-size: 0.72rem; letter-spacing: 0.13em; text-transform: uppercase; font-weight: 700; color: var(--ochre); display: block; margin-bottom: 8px; }
+  .week-sec ul { margin: 0; gap: 9px; }
+  .week-sec li, .week-sec p { font-size: 1.02rem; line-height: 1.68; }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+  .chip { background: var(--moss); color: var(--on-solid); border-radius: 999px; font-size: 0.82rem; font-weight: 600; padding: 6px 15px; }
+  .week-quote { background: var(--ochre-soft); border-radius: var(--r-sm); padding: 17px 20px; font-style: italic; font-weight: 600; color: var(--ink); font-size: 1.04rem; line-height: 1.6; margin-top: 20px; }
+
+  .toc { display: flex; flex-direction: column; gap: 11px; }
+  .toc-row { display: grid; grid-template-columns: 44px minmax(0,1fr) 40px; gap: 16px; padding: 17px 18px; border-radius: var(--r-sm); background: var(--paper-2); border: 1px solid var(--rule); align-items: center; }
+  .toc-row .n { font-size: 1.02rem; font-weight: 800; color: var(--on-solid); background: var(--indigo); border-radius: 50%; width: 34px; height: 34px; display: grid; place-items: center; }
+  .toc-row .t { font-weight: 600; font-size: 1.06rem; line-height: 1.45; }
+  .toc-row .s { font-size: 0.95rem; line-height: 1.5; margin-top: 4px; color: var(--ink-2); display: block; font-weight: 400; }
+  .toc-row .p { font-size: 0.88rem; font-weight: 700; color: var(--ochre); text-align: right; }
+
+  .cover { position: relative; background: #FFFFFF; }
+  .cover img { width: 100%; }
+  .cover-top { position: absolute; top: 9.5%; left: 0; right: 0; padding-inline: clamp(30px, 9vw, 92px); text-align: center; }
+  .cover-top .eyebrow { font-size: clamp(0.46rem, 1.5vw, 0.7rem); letter-spacing: 0.13em; text-transform: uppercase; font-weight: 700; color: #0F6E8A; margin: 0 0 clamp(2px, 0.8vw, 7px); }
+  .cover-top h1 { font-size: clamp(1.55rem, 6.6vw, 3.1rem); font-weight: 800; line-height: 0.92; letter-spacing: -0.035em; color: #A52A1F; margin: 0 0 clamp(3px, 0.9vw, 8px); }
+  .cover-top .sub { font-size: clamp(0.58rem, 1.95vw, 0.94rem); font-weight: 700; line-height: 1.28; color: #1F4D22; margin: 0 auto; max-width: 30ch; }
+  .cover-top .sub em { font-style: normal; color: #C4750A; }
+  .cover-band { position: absolute; left: 0; right: 0; bottom: 4.5%; background: #A52A1F; color: #FFFFFF; text-align: center; padding: clamp(6px, 1.5vw, 12px) 10px; font-weight: 700; font-size: clamp(0.6rem, 1.8vw, 0.95rem); }
+
+  .fig { margin: 32px 0; }
+  .fig svg { width: 100%; height: auto; display: block; }
+  .fig-title { font-size: 0.73rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: var(--ochre); margin: 0 0 10px; }
+
+  .days { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin: 30px 0; }
+  .day { border-radius: var(--r); overflow: hidden; border: 1.5px solid var(--rule); background: var(--paper-2); }
+  .day-head { background: var(--moss); color: var(--on-solid); padding: 12px 18px; }
+  .day-head .dn { font-size: 0.92rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .day-body { padding: 18px 20px 20px; }
+  .day-body p { font-size: 1rem; margin: 0 0 13px; line-height: 1.6; max-width: none; }
+  .day-body .ml { display: block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+  .day-habit { margin-top: 16px !important; padding-top: 14px; border-top: 1px solid var(--rule); color: var(--ochre); font-weight: 600; }
+  .mealhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; background: var(--moss); color: var(--on-solid); border-radius: var(--r); padding: 18px 24px; margin-bottom: 26px; }
+  .mealhead .mn { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; }
+  .mealhead .mt { font-size: 1.12rem; font-weight: 600; font-style: italic; opacity: 0.94; }
+  .mealgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+  .mealcol { background: var(--paper-2); border: 1.5px solid var(--rule); border-radius: var(--r-sm); padding: 16px 18px 18px; }
+  .mealcol ul, .recipe ul, .between ul { margin: 0; padding-left: 20px; gap: 9px; }
+  .mealcol li, .recipe li { font-size: 0.99rem; line-height: 1.6; }
+  .lbl { display: block; font-size: 0.72rem; letter-spacing: 0.13em; text-transform: uppercase; font-weight: 700; color: var(--ochre); margin-bottom: 10px; }
+  .between { background: var(--ochre-soft); border-radius: var(--r-sm); padding: 16px 20px; margin-top: 16px; font-size: 1rem; line-height: 1.7; }
+  .recipe { border: 1.5px solid var(--indigo); border-radius: var(--r); overflow: hidden; margin-top: 26px; }
+  .recipe-head { background: var(--indigo); color: var(--on-solid); padding: 14px 20px; font-weight: 700; font-size: 1.05rem; }
+  .recipe-body { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 22px; padding: 20px; background: var(--paper-2); }
+  .recipe-body p { font-size: 1rem; line-height: 1.7; margin: 0 0 12px; max-width: none; }
+  .recipe-body .makes { font-size: 0.95rem; color: var(--ink-2); margin: 0; }
+  .exrow { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 18px; padding: 15px 0; border-bottom: 1px solid var(--rule); }
+  .exrow:last-of-type { border-bottom: 0; }
+  @media (max-width: 620px) { .exrow { grid-template-columns: minmax(0, 1fr); gap: 5px; } }
+  .exrow .ex { font-weight: 700; font-size: 1.02rem; color: var(--indigo); }
+  .exrow .dose { font-size: 1.01rem; font-weight: 600; margin: 0 0 6px; max-width: none; }
+  .exrow .cue { font-size: 0.97rem; line-height: 1.65; color: var(--ink-2); margin: 0; max-width: none; }
+  .tracker { display: grid; grid-template-columns: repeat(auto-fit, minmax(146px, 1fr)); gap: 12px; margin: 28px 0; }
+  .tcell { border-radius: var(--r-sm); background: var(--paper-2); border: 1.5px solid var(--rule); padding: 15px 16px 16px; min-height: 104px; display: flex; flex-direction: column; gap: 9px; }
+  .tcell .w { font-size: 0.71rem; letter-spacing: 0.11em; text-transform: uppercase; font-weight: 700; color: var(--ochre); }
+  .tcell .t { font-size: 0.94rem; font-weight: 600; line-height: 1.42; }
+  .tcell .box-tick { width: 17px; height: 17px; border: 2px solid var(--indigo); border-radius: 5px; margin-top: auto; }
+
+  .signoff { margin-top: 36px; padding: 28px 30px; border-radius: var(--r); background: var(--indigo); color: var(--on-solid); }
+  .signoff .who { font-weight: 700; font-size: 1.06rem; }
+  .signoff .what { font-size: 0.86rem; opacity: 0.86; }
+  .signoff p { color: var(--on-solid); }
+
+  footer.meta { max-width: 820px; margin: 0 auto; padding: 20px 14px 0; font-size: 0.7rem; color: var(--ink-2); line-height: 1.7; }
+</style>
+
+<div class="stack">
+
+<!-- ============ COVER ============ -->
+<div class="page flush cover">
+  {{IMG:cover_v3}}
+  <div class="cover-top">
+    <p class="eyebrow">What nobody tells you after a positive result</p>
+    <h1>HEPATITIS&nbsp;B</h1>
+    <p class="sub">90 Days to Take Control &mdash;<br>and <em>Protect Everyone You Love</em></p>
+  </div>
+  <div class="cover-band">Published by Dr David Akinyode</div>
+</div>
+
+<!-- ============ PRAYER ============ -->
+<div class="page">
+  <p class="kicker">Before you begin</p>
+  <div class="box good">
+    <p style="font-family:var(--display);font-style:italic;font-size:1.06rem;line-height:1.5">Father, I did not choose this, but I am not without help.</p>
+    <p style="font-family:var(--display);font-style:italic;font-size:1.06rem;line-height:1.5">Steady my hands as I do what must be done. Give me the sense to seek good counsel, the patience to keep going when nothing feels different, and peace in the waiting.</p>
+    <p style="font-family:var(--display);font-style:italic;font-size:1.06rem;line-height:1.5">Guard the people who live under my roof.</p>
+    <p style="font-size:0.88rem;color:var(--ink-2)">In Jesus' name, Amen. &middot; <em>Bismillahir Rahmanir Raheem. Ya Allah, You are Ash-Shafi. Grant us strength, protection and understanding. Ameen.</em></p>
+  </div>
+  <div class="box warn">
+    <p class="k">Please read this first</p>
+    <p>This book is education, not treatment. It does not diagnose you, it does not prescribe for you, and it cannot replace a doctor who has seen your results. Nothing in these pages should be used as a reason to delay, change or stop any medicine you have been given. If you are unwell, go to hospital. Everything here is written to make you better at working <em>with</em> your doctor, not instead of one.</p>
+  </div>
+  <span class="folio">i</span>
+</div>
+
+<!-- ============ CONTENTS ============ -->
+<div class="page">
+  <p class="runhead">Contents</p>
+  <div class="toc">
+    <div class="toc-row"><span class="n">1</span><span class="t">What Just Happened<span class="s">Your result, your liver, and why you feel perfectly fine</span></span><span class="p">1</span></div>
+    <div class="toc-row"><span class="n">2</span><span class="t">The Two Questions That Decide Everything<span class="s">Is it active, and has it caused damage yet</span></span><span class="p">7</span></div>
+    <div class="toc-row"><span class="n">3</span><span class="t">The Silent Enemies<span class="s">What is quietly making it worse, starting with what you were sold</span></span><span class="p">14</span></div>
+    <div class="toc-row"><span class="n">4</span><span class="t">The First 90 Days, Week by Week<span class="s">Twelve weeks, one job each</span></span><span class="p">22</span></div>
+    <div class="toc-row"><span class="n">5</span><span class="t">Nigerian Foods for a Working Liver<span class="s">The traffic light, the protein mistake, and a 14-day meal plan</span></span><span class="p">34</span></div>
+    <div class="toc-row"><span class="n">6</span><span class="t">Weight, Movement and the Second Disease<span class="s">Your waist, and a four-week movement plan</span></span><span class="p">40</span></div>
+    <div class="toc-row"><span class="n">7</span><span class="t">Who to Tell, and How to Sleep Again<span class="s">Stigma, marriage, secrecy and the weeks that feel heavy</span></span><span class="p">44</span></div>
+    <div class="toc-row"><span class="n">8</span><span class="t">Warning Signs &mdash; When to Go Now<span class="s">The emergencies, the six-month scan, and the eight questions</span></span><span class="p">49</span></div>
+    <div class="toc-row"><span class="n">9</span><span class="t">Protecting Everyone Else<span class="s">How it spreads, how it does not, and how to end it in your family</span></span><span class="p">55</span></div>
+    <div class="toc-row"><span class="n">&mdash;</span><span class="t">Your 90-Day Tracker<span class="s">One page to tick, and a log to take to your doctor</span></span><span class="p">61</span></div>
+  </div>
+  <span class="folio">ii</span>
+</div>
+
+<!-- ============ ABOUT ============ -->
+<div class="page">
+  <p class="runhead">About this book</p>
+  <p class="lead">You are reading this because of a piece of paper.</p>
+  <p>Maybe it came from a test before a wedding. Maybe you went to donate blood and somebody called you aside. Maybe you were pregnant, and the nurse's face changed while she was reading.</p>
+  <p>However it reached you, one thing is true this morning: <b>you feel completely fine, and you have been told that you are not.</b></p>
+  <figure class="bleed">{{IMG:result_paper}}<figcaption style="padding-inline:clamp(20px,4.6vw,58px)">The worst part of the day you found out was not the result. It was the silence afterwards.</figcaption></figure>
+  <p>That is the strangest part of it. No pain. No fever. Nothing at all. Just a word on a result sheet &mdash; <em>reactive</em> &mdash; and then a silence that nobody filled in for you. You were handed the paper. You were not handed an explanation. If nobody sat you down and explained, you are not alone — that is how it goes in most places. They give you the result, they call the next person.</p>
+  <p>So let us fill in the silence.</p>
+  <span class="folio">iii</span>
+</div>
+
+<div class="page">
+  <p class="runhead">About this book</p>
+  <h3 class="first">What nobody said to you that day</h3>
+  <p>You are not dying. Not this year. Most likely not for a very long time, and possibly not from this at all.</p>
+  <p>About one in every twelve Nigerian adults is carrying exactly what you are carrying. Almost none of them know. They will find out in ten years, or fifteen, when something finally starts to hurt &mdash; and by then their choices will be fewer than yours are today.</p>
+  <p>You found out early. That sounds like the worst day of your life. It is actually the best advantage anybody with this virus can have, and this book is about spending it well.</p>
+
+  <h3>Inside this book</h3>
+  <ul class="marks">
+    <li>The tests that show what is truly happening in your liver &mdash; and the ones your first hospital visit almost certainly skipped</li>
+    <li>Why you feel perfectly healthy, and why that is the most dangerous thing about this virus</li>
+    <li>The everyday Nigerian foods quietly damaging your liver while you are trying to protect it</li>
+    <li>The mixtures sold to "flush" hepatitis from your body &mdash; and why the people selling them are the biggest danger you face this year</li>
+    <li>How to protect your husband, your wife, your children, your brothers and sisters &mdash; starting this week</li>
+    <li>What to say, who to say it to, and what you never have to explain to anybody</li>
+  </ul>
+
+  <div class="box warn">
+    <h4>What this book will not do</h4>
+    <p>It will not tell you that hepatitis B can be washed out of your body by food, by herbs, by hot water, by bitter roots, or by prayer alone. It cannot. Anybody charging you money for that is charging you for a story.</p>
+    <p>Some of them will do worse than take your money. A number of the mixtures sold for "liver cleansing" are hard on the liver itself &mdash; and yours is the organ already under strain. We come back to this in Chapter 3, because it matters more than anything else in these pages.</p>
+    <p><b>Here is what can be done.</b> This virus can be watched properly. It can be held down with medicine when medicine is needed. Damage that has already started can often ease once the virus is under control. And the people sleeping in your house tonight can be protected completely, this month, for less than you think.</p>
+    <p>That is not a small promise. It is simply a true one.</p>
+  </div>
+  <span class="folio">iv</span>
+</div>
+
+<!-- ============ CHAPTER 1 ============ -->
+<div class="page">
+  <div class="chap-band"><p class="kicker">Chapter one</p><h2 class="chapno">01</h2><h2 class="chaptitle">What just happened</h2></div>
+  <p class="lead"><b>Reactive. Positive. HBsAg&nbsp;+ve.</b> Three different ways of writing the same sentence: there is a virus living in your liver, and it has been there a long while.</p>
+  <p>Probably far longer than you think. Most Nigerians carrying hepatitis B did not catch it last year from anything they did. They got it as a baby or a small child &mdash; at birth, or from a cut, a shared blade, an injection given in good faith. It moved in quietly and has been sitting there ever since, doing very little, waiting.</p>
+  <p>This matters because of what it means about you. <b>You did nothing wrong.</b> Not then, and not now. So put that guilt down. Leave it right there on the floor where you are standing. You will need your strength for other things.</p>
+
+  <h3>Your liver, in one paragraph</h3>
+  <p>Everything you swallow goes to your liver first. Food, drink, medicine, whatever the chemist handed you last week &mdash; all of it passes through before it reaches the rest of your body. Your liver decides what gets in and what gets thrown out. It stores your energy. It makes the substance that stops a cut from bleeding forever. It is the busiest organ you own.</p>
+  <p>It is also the only one that can rebuild itself after damage. Hold on to that sentence. It is the reason this book exists.</p>
+
+  <h3>Why you feel fine, and why that is the problem</h3>
+  <p>Your liver cannot feel pain. There are no pain nerves inside it &mdash; only in the thin covering around it, and that covering does not complain until things have gone seriously far.</p>
+  <p>So a liver can lose a great deal of its working tissue and still say nothing. No warning. No symptom. Nothing you would take to a doctor. By the time the yellow shows in somebody's eyes, years have already passed, and the conversation in the consulting room has changed completely.</p>
+  <p>This is why hepatitis B is called a silent disease. Not because it is gentle &mdash; because it is quiet. You are feeling fine. Fine well well. And that, my friend, is exactly the trouble.</p>
+  <div class="pullquote">Feeling well is not evidence. It is the one symptom this virus reliably produces.</div>
+  <span class="folio">1</span>
+</div>
+
+<div class="page">
+  <p class="runhead">One &middot; What just happened</p>
+  <h3 class="first">The long road, and where you are standing</h3>
+  <p>Damage to a liver does not happen in one night. It happens in stages, over years, and each stage is quieter than it deserves to be.</p>
+
+  <div class="fig">
+    <p class="fig-title">Figure 1 &mdash; the road, and where people usually notice</p>
+    <svg viewBox="0 0 700 210" role="img" aria-label="Four stages from healthy liver to cirrhosis, with symptoms appearing only at the final stage">
+      <line x1="40" y1="96" x2="660" y2="96" stroke="var(--rule)" stroke-width="2"/>
+      <g font-family="var(--body)">
+        <circle cx="90" cy="96" r="13" fill="var(--moss)"/>
+        <text x="90" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">Healthy</text>
+        <text x="90" y="156" text-anchor="middle" font-size="11" fill="var(--ink-2)">Soft, working</text>
+
+        <circle cx="280" cy="96" r="13" fill="var(--ochre)"/>
+        <text x="280" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">Inflammation</text>
+        <text x="280" y="156" text-anchor="middle" font-size="11" fill="var(--ink-2)">Cells being injured</text>
+
+        <circle cx="460" cy="96" r="13" fill="var(--ochre)"/>
+        <text x="460" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">Scarring</text>
+        <text x="460" y="156" text-anchor="middle" font-size="11" fill="var(--ink-2)">Stiffening, still reversible</text>
+
+        <circle cx="620" cy="96" r="13" fill="var(--clay)"/>
+        <text x="620" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">Cirrhosis</text>
+        <text x="620" y="156" text-anchor="middle" font-size="11" fill="var(--ink-2)">Heavy, permanent</text>
+
+        <rect x="40" y="36" width="540" height="26" fill="var(--moss-soft)"/>
+        <text x="52" y="54" font-size="12" font-weight="600" fill="var(--moss)">You feel completely normal through all of this</text>
+
+        <rect x="584" y="36" width="76" height="26" fill="var(--clay-soft)"/>
+        <text x="622" y="54" text-anchor="middle" font-size="12" font-weight="600" fill="var(--clay)">Symptoms</text>
+
+        <line x1="90" y1="96" x2="90" y2="76" stroke="var(--indigo)" stroke-width="2"/>
+        <text x="90" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="var(--indigo)">Most people who test early are here</text>
+      </g>
+    </svg>
+  </div>
+
+  <p>Look at that picture again. The whole left side of it &mdash; years of it &mdash; feels like nothing. That is not a warning to frighten you. It is the reason this book is built around ninety days instead of ninety symptoms. Nothing is going to tap you on the shoulder.</p>
+
+  <h3>Two words you will hear</h3>
+  <p><b>Acute</b> means the virus arrived recently. Most healthy adults who catch it as adults fight it off within six months and are finished with it for life.</p>
+  <p><b>Chronic</b> means it has stayed longer than six months. If you caught it as a baby, it is almost certainly chronic &mdash; a young immune system does not know to fight it. This is the situation most Nigerian adults are in, and it is the situation this book is written for.</p>
+  <span class="folio">2</span>
+</div>
+
+<div class="page">
+  <p class="runhead">One &middot; What just happened</p>
+  <h3 class="first">The numbers you do not have yet</h3>
+  <p>"Hepatitis B positive" is not a diagnosis. It is the beginning of one. Two people with the same result can be in completely different situations &mdash; one needing medicine this month, the other needing nothing but a check every six months for the rest of their life.</p>
+  <p>What separates them is numbers, and you probably have not been given them.</p>
+
+  <div class="t-wrap"><table>
+    <thead><tr><th>What it is called</th><th>What it is really asking</th><th>Why it matters</th></tr></thead>
+    <tbody>
+      <tr><td class="k">ALT</td><td>Is the liver being injured right now?</td><td>An enzyme that leaks out of damaged liver cells. Raised means something is actively happening.</td></tr>
+      <tr><td class="k">HBV DNA<br>(viral load)</td><td>How much virus is there?</td><td>The single best measure of how busy the virus is.</td></tr>
+      <tr><td class="k">HBeAg</td><td>Is it multiplying fast?</td><td>A flag the virus flies during its most active phase.</td></tr>
+      <tr><td class="k">Fibrosis<br>assessment</td><td>Has scarring already started?</td><td>Either a scan that measures stiffness, or a score worked out from ordinary blood results.</td></tr>
+      <tr><td class="k">Ultrasound</td><td>What does the liver look like?</td><td>The scan that also looks for anything growing. Repeated every six months for life.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="box">
+    <p class="k">Write this down before your next appointment</p>
+    <p>"Doctor, what is my ALT, and what is my viral load?"</p>
+    <p>"Has anybody checked whether I already have scarring?"</p>
+    <p>Two sentences. Ask them out loud, write the answers in the log at the back of this book, and you will already be ahead of most people in that waiting room.</p>
+  </div>
+  <span class="folio">3</span>
+</div>
+
+<!-- ============ CHAPTER 2 ============ -->
+<div class="page">
+  <div class="chap-band"><p class="kicker">Chapter two</p><h2 class="chapno">02</h2><h2 class="chaptitle">The two questions that decide everything</h2></div>
+  <p class="lead">Two people can walk into the same clinic on the same morning with the same result, and walk out into two completely different lives.</p>
+  <p>One is told to come back in six months. The other is started on a tablet she will take every day for many years. Neither of them is being treated badly. They are simply in different places, and two questions decide which.</p>
+
+  <figure>{{IMG:clinic}}<figcaption>Most people leave this room without the two numbers that decide their treatment. Ask before you stand up.</figcaption></figure>
+
+  <h3>Question one: is the virus active?</h3>
+  <p>A quiet virus and a busy virus need different things. Three results answer this together &mdash; your ALT, your viral load, and HBeAg. No single one of them decides anything on its own, which is why a doctor who has only ordered one of them has not finished the job.</p>
+
+  <h3>Question two: has it already caused scarring?</h3>
+  <p>This is the question almost nobody asks, and it is the more important of the two. Scarring &mdash; doctors call it <em>fibrosis</em> &mdash; is the liver slowly replacing working tissue with something more like a callus.</p>
+  <p>It can be measured two ways. A special scan presses gently on the liver and measures how stiff it has become; stiff means scarred. Or a score can be worked out from blood tests you may already have had, which costs nothing extra and is a reasonable place to start if money is tight.</p>
+  <span class="folio">7</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Two &middot; The two questions</p>
+  <h3 class="first">The four rooms</h3>
+  <p>Put those answers together and you land in one of four situations. Doctors have long names for them. Here is what they actually mean.</p>
+
+  <div class="fig">
+    <p class="fig-title">Figure 2 &mdash; the four situations</p>
+    <svg viewBox="0 0 700 300" role="img" aria-label="Four phases of chronic hepatitis B by virus level and liver damage">
+      <g font-family="var(--body)">
+        <line x1="70" y1="250" x2="660" y2="250" stroke="var(--ink-3)" stroke-width="1.5"/>
+        <line x1="70" y1="30" x2="70" y2="250" stroke="var(--ink-3)" stroke-width="1.5"/>
+        <text x="365" y="284" text-anchor="middle" font-size="12" fill="var(--ink-2)">Liver damage (ALT) &rarr;</text>
+        <text x="30" y="140" text-anchor="middle" font-size="12" fill="var(--ink-2)" transform="rotate(-90 30 140)">Virus level &rarr;</text>
+
+        <rect x="86" y="46" width="270" height="94" fill="var(--ochre-soft)" stroke="var(--ochre)"/>
+        <text x="100" y="72" font-size="14" font-weight="700" fill="var(--ink)">The quiet tenant</text>
+        <text x="100" y="92" font-size="11.5" fill="var(--ink-2)">Plenty of virus, no damage yet.</text>
+        <text x="100" y="109" font-size="11.5" fill="var(--ink-2)">Common in younger people.</text>
+        <text x="100" y="128" font-size="11.5" font-weight="600" fill="var(--ochre)">Usually watched, not treated</text>
+
+        <rect x="374" y="46" width="270" height="94" fill="var(--clay-soft)" stroke="var(--clay)"/>
+        <text x="388" y="72" font-size="14" font-weight="700" fill="var(--ink)">The fight</text>
+        <text x="388" y="92" font-size="11.5" fill="var(--ink-2)">Plenty of virus, and damage</text>
+        <text x="388" y="109" font-size="11.5" fill="var(--ink-2)">being done right now.</text>
+        <text x="388" y="128" font-size="11.5" font-weight="600" fill="var(--clay)">This is when medicine starts</text>
+
+        <rect x="86" y="152" width="270" height="86" fill="var(--moss-soft)" stroke="var(--moss)"/>
+        <text x="100" y="178" font-size="14" font-weight="700" fill="var(--ink)">Settled</text>
+        <text x="100" y="198" font-size="11.5" fill="var(--ink-2)">Little virus, no damage.</text>
+        <text x="100" y="220" font-size="11.5" font-weight="600" fill="var(--moss)">Watched &mdash; which is not ignored</text>
+
+        <rect x="374" y="152" width="270" height="86" fill="var(--indigo-soft)" stroke="var(--indigo)"/>
+        <text x="388" y="178" font-size="14" font-weight="700" fill="var(--ink)">It wakes again</text>
+        <text x="388" y="198" font-size="11.5" fill="var(--ink-2)">Quiet for years, then active.</text>
+        <text x="388" y="220" font-size="11.5" font-weight="600" fill="var(--indigo)">Why you never stop checking</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="box cool">
+    <p class="k">The room nobody warns you about</p>
+    <p>Look at the bottom right. A liver that has been settled and harmless for fifteen years can wake up again, quietly, with no symptom to announce it. This is the single best argument for keeping your six-month appointments even in the years when you feel wonderful and nothing has ever gone wrong.</p>
+  </div>
+  <span class="folio">8</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Two &middot; The two questions</p>
+  <h3 class="first">If you are told you need medicine</h3>
+  <p>It is usually one tablet, once a day. The two most commonly used are <em>tenofovir</em> and <em>entecavir</em>. Both are very good at what they do.</p>
+  <p>Here is what they do, stated honestly. They hold the virus down &mdash; often so far down it cannot be found in your blood at all. They stop the ongoing injury. And when the injury stops, the liver gets its chance to do the thing only a liver can do: repair. <b>Scarring that has already formed often eases once the virus has been suppressed for long enough.</b> Not always, and not overnight. But often.</p>
+  <p>Here is what they do not do. They do not remove the virus from your body. It stays, quietly, in the background. That is why the tablet is usually long-term, and often lifelong.</p>
+
+  <div class="box warn">
+    <h4>Never stop the tablet on your own</h4>
+    <p>This is the most important safety sentence in this book. Stopping hepatitis B medicine suddenly can let the virus come roaring back, and that rebound can do serious harm quickly &mdash; sometimes worse than anything that came before.</p>
+    <p>People stop for ordinary reasons. Money ran out. They felt fine. Somebody at church said they had been healed. If any of those is about to happen to you, <b>tell your doctor first</b> and let them plan it with you. There are cheaper options and there are ways to stop safely. Disappearing is not one of them.</p>
+  </div>
+
+  <h3>If you are told you do not need medicine yet</h3>
+  <p>This is good news and it is not a discharge. "Watch" means blood tests once or twice a year and a scan every six months, forever. The whole value of being watched is that the moment anything changes, you are already in the room.</p>
+  <div class="pullquote">Being watched is not being ignored. It is having someone looking, on a schedule, at the thing that will not announce itself.</div>
+  <span class="folio">9</span>
+</div>
+
+<!-- ============ CHAPTER 3 ============ -->
+<div class="page">
+  <div class="chap-band"><p class="kicker">Chapter three</p><h2 class="chapno">03</h2><h2 class="chaptitle">The silent enemies</h2></div>
+  <p class="lead">Your liver is already carrying something. Everything in this chapter adds a second weight on top of it &mdash; and unlike the virus, every one of these is yours to put down.</p>
+  <p>Read this chapter twice. If you only act on one chapter in this whole book, it should be this one, because avoiding harm is faster and cheaper than repairing it.</p>
+
+  <h3>1. Alcohol</h3>
+  <p>Let me not waste your time: the number is zero.</p>
+  <p>Not "reduce it". Not "only at weekends". Not "only beer". Alcohol and hepatitis B do not simply add together &mdash; they multiply, and the liver that receives both scars faster than either would cause alone.</p>
+  <p>And before you start forming an exception in your mind — yes, beer is alcohol. Palm wine is alcohol. Those bitters they advertise as good for men, sold in the small bottle at the junction, are alcohol. I know somebody is reading this and already choosing which one does not count. Drop it. If you drink, this is the single most valuable change available to you, and it is worth more than every food in Chapter 5 combined.</p>
+  <span class="folio">14</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Three &middot; The silent enemies</p>
+  <h3 class="first">2. The mixtures sold to cure you</h3>
+  <p>Somebody has already offered you one. Possibly this morning.</p>
+  <p><b>Shine your eyes here.</b> Of everything in this book, this is the page most likely to save your life.</p>
+  <p>Agbo. A bottle from a trusted neighbour. A powder from a man on the radio. A tea imported in a tin, with a testimony attached. They all promise the same thing in the same words &mdash; that this will <em>flush it out</em>, <em>wash the liver</em>, <em>clear it completely</em>.</p>
+
+  <figure>{{IMG:agbo}}<figcaption>Nobody can tell you what is in these, in what quantity, or what it does to a liver already under strain. That is the whole problem.</figcaption></figure>
+
+  <p>Two things are true about these, and the second one is worse than the first.</p>
+  <p><b>The first is that they do not work.</b> No herb, no tea, no root, no mixture has ever been shown to clear hepatitis B from a human body. Think about it small: if one of them worked, would it still be in an unlabelled bottle on a table by the roadside? It would be in every hospital in the world before the year finished.</p>
+  <p><b>The second is that some of them cause real harm.</b> Herbal preparations are a recognised cause of liver injury, and in this part of the world they are a documented reason people arrive in hospital with livers failing. The problem is not that herbs are evil. The problem is that nobody can tell you what is in an unlabelled bottle, how much of it, or how strong this week's batch is compared to last week's.</p>
+  <p>And somebody will tell you their uncle drank something and it cleared completely. Ask that person one simple question: <em>“Please, can I see the test result before, and the test result after?”</em> Then wait. You will be waiting for a long time.</p>
+  <p>Your liver is the organ that has to process every one of those substances. It is also the organ already carrying a virus. Ask it to do both and you are running an experiment on the one part of your body you cannot replace.</p>
+
+  <div class="box warn">
+    <p class="k">The hardest sentence in this book</p>
+    <p>If you have been taking something like this, you have not ruined anything. Stop it, tell your doctor exactly what you were taking &mdash; take the bottle with you if you still have it &mdash; and ask for a liver function test. That is the whole repair. Nobody is going to shout at you.</p>
+  </div>
+  <span class="folio">15</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Three &middot; The silent enemies</p>
+  <h3 class="first">3. Paracetamol, and the trap inside it</h3>
+  <p>Paracetamol is in almost every house in Nigeria and it is not the villain here. Taken properly it is one of the safer painkillers for a liver.</p>
+  <p>The trap is that it hides. It is inside many cold-and-catarrh sachets, many flu tablets, many "extra strength" pain mixtures, often under a different name on the packet. People take a paracetamol for a headache, then a cold sachet for the catarrh, and have taken a double dose without knowing.</p>
+  <ul class="marks">
+    <li>Read the packet of every sachet and tablet you take — yes, even the small sachet you buy for a few hundred naira — and look for paracetamol or acetaminophen.</li>
+    <li>Never take two products containing it at the same time.</li>
+    <li>Ask your doctor what daily limit applies <em>to you</em> &mdash; for a liver under strain it is often lower than the number on the box.</li>
+    <li>Never take paracetamol and alcohol together. This combination has put people in intensive care.</li>
+  </ul>
+
+  <h3>4. The mould you cannot always see</h3>
+  <p>Groundnut, maize, egusi, ogiri, dried yam and melon seeds can grow a mould that produces a poison called aflatoxin. You cannot taste it. You cannot smell it in the soup. Frying does not kill it. Roasting does not kill it. Boiling does not kill it. That is exactly what makes it dangerous — it never announces itself.</p>
+  <p>On its own it is bad for a liver. On top of hepatitis B it is much worse than bad &mdash; the two together raise the risk of liver cancer far more than either does alone. This is one of the strongest reasons this chapter exists, and it is almost entirely avoidable.</p>
+
+  <figure>{{IMG:groundnut}}<figcaption>Shrivelled, discoloured or dusty-looking nuts go in the bin, not in the pot. One handful is not worth it.</figcaption></figure>
+  <span class="folio">16</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Three &middot; The silent enemies</p>
+  <ul class="marks">
+    <li>Buy groundnuts and maize you can see. Loose, unsorted, cheap sacks are the highest risk.</li>
+    <li>Throw away anything shrivelled, discoloured, dusty, or smelling musty. Do not pick out the good ones and keep them &mdash; the poison spreads beyond the visibly bad nut.</li>
+    <li>Be careful with roadside ground pepper and ground melon mixes. You cannot inspect what has already been ground.</li>
+    <li>Store dry, sealed and off the floor. Damp is what grows the mould in the first place.</li>
+  </ul>
+
+  <figure>{{IMG:storage}}<figcaption>Sealed, dry, raised off the floor. This shelf costs almost nothing and removes one of the two biggest risks in this chapter.</figcaption></figure>
+
+  <h3>5. The weight around your middle</h3>
+  <p>Fat stored inside the liver is a disease of its own, and when it sits on top of hepatitis B the scarring moves faster. Chapter 6 deals with this properly. For now, know that it belongs on this list.</p>
+
+  <h3>6. Cigarettes</h3>
+  <p>Smoking raises liver cancer risk by itself, separately from the virus. There is no version of this book in which smoking is acceptable.</p>
+
+  <h3>7. Supplements nobody prescribed</h3>
+  <p>Iron tablets you were not told to take, very high-dose vitamin A, bodybuilding and "herbal energy" products, and anything sold as a "liver detox" or "liver booster". If a doctor did not recommend it for a reason they explained to you, it does not go in.</p>
+
+  <h3>8. Blades that have touched someone else</h3>
+  <p>The barber's clipper. The manicure set at the salon. A shared razor at home. An injection given by someone who is not a health worker. This is one of the main ways hepatitis B still moves through Nigerian families, and Chapter 9 covers what to do about it.</p>
+  <span class="folio">17</span>
+</div>
+
+<!-- ============ CHAPTER 4 ============ -->
+<div class="page">
+  <div class="chap-band"><p class="kicker">Chapter four</p><h2 class="chapno">04</h2><h2 class="chaptitle">The first 90 days, week by week</h2></div>
+  <p class="lead">Twelve weeks. One job each. Nothing in here needs a gym, a fancy market or a lot of money &mdash; but every week asks you to actually do something, because reading is not the same as doing.</p>
+  <p>If a week slips, do not start again from the beginning. Do that week late and keep going. The order matters more than the calendar.</p>
+
+  <div class="week">
+    <div class="week-head"><span class="n">Week 1</span><span class="t">Get the full picture</span></div>
+    <div class="week-body">
+      <p class="job">Walk out of a clinic holding actual numbers, not just the word "positive".</p>
+      <div class="week-sec"><span class="lbl">Do this</span><ul>
+        <li>Book an appointment and ask specifically for: ALT, HBV DNA viral load, HBeAg, and a fibrosis assessment.</li>
+        <li>Ask for an abdominal ultrasound if you have never had one.</li>
+        <li>If the full panel is beyond your budget this month, ask which one matters most for you &mdash; and write down the answer.</li>
+      </ul></div>
+      <div class="week-sec"><span class="lbl">Write this down</span><p>Every number, with the date beside it. Use the log at the back. You are starting a record that will outlive several doctors.</p></div>
+      <div class="chips"><span class="chip">Appointment booked</span><span class="chip">Numbers written down</span></div>
+      <p class="week-quote">"Positive" is a door. The numbers are the room behind it.</p>
+    </div>
+  </div>
+
+  <div class="week">
+    <div class="week-head"><span class="n">Week 2</span><span class="t">Protect the house</span></div>
+    <div class="week-body">
+      <p class="job">Nobody who sleeps under your roof should still be unprotected by the end of this week.</p>
+      <div class="week-sec"><span class="lbl">Do this</span><ul>
+        <li>Everyone in your household gets tested &mdash; spouse, children, parents, siblings, anyone living with you.</li>
+        <li>Anyone negative starts the vaccine. Three doses. It is cheap and it works.</li>
+        <li>Anyone positive gets their own appointment, with their own numbers. Give them this book.</li>
+      </ul></div>
+      <div class="week-sec"><span class="lbl">Write this down</span><p>Who was tested, the result, and the date each vaccine dose was given.</p></div>
+      <div class="chips"><span class="chip">Household tested</span><span class="chip">First doses given</span></div>
+      <p class="week-quote">This is the week that can end hepatitis B in your family line.</p>
+    </div>
+  </div>
+  <span class="folio">22</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Four &middot; The first 90 days</p>
+  <div class="week">
+    <div class="week-head"><span class="n">Week 3</span><span class="t">Empty the danger shelf</span></div>
+    <div class="week-body">
+      <p class="job">Physically remove from your house everything in Chapter 3 that you can hold in your hand.</p>
+      <div class="week-sec"><span class="lbl">Do this</span><ul>
+        <li>All alcohol leaves the house. All of it, including the bitters.</li>
+        <li>Every herbal mixture, tonic, "cleanser" and unlabelled bottle goes out.</li>
+        <li>Go through the medicine drawer. Read every packet for paracetamol. Throw away anything expired.</li>
+        <li>Tell your barber you will be bringing your own clipper, or buy your own set.</li>
+      </ul></div>
+      <div class="week-sec"><span class="lbl">Write this down</span><p>What you were taking before this week, so you can tell your doctor exactly.</p></div>
+      <div class="chips"><span class="chip">Alcohol out</span><span class="chip">Mixtures out</span><span class="chip">Own clipper</span></div>
+      <p class="week-quote">Nothing you do in these ninety days is faster than throwing something away.</p>
+    </div>
+  </div>
+
+  <div class="week">
+    <div class="week-head"><span class="n">Week 4</span><span class="t">Fix the store cupboard</span></div>
+    <div class="week-body">
+      <p class="job">Make it impossible for mouldy grain to reach your pot.</p>
+      <div class="week-sec"><span class="lbl">Do this</span><ul>
+        <li>Empty and inspect every bag of groundnut, maize, egusi and dried yam in the house.</li>
+        <li>Discard anything shrivelled, discoloured or musty &mdash; the whole batch, not the bad ones.</li>
+        <li>Buy sealed containers. Store everything dry, closed and off the floor.</li>
+        <li>Change where you buy: visible, sorted, from a seller you can go back to.</li>
+      </ul></div>
+      <div class="week-sec"><span class="lbl">Eat this, not that</span><p>Whole groundnuts you inspected yourself, rather than pre-ground pepper or melon mixes.</p></div>
+      <div class="chips"><span class="chip">Cupboard cleared</span><span class="chip">Containers bought</span></div>
+      <p class="week-quote">You cannot taste this one. That is exactly why it needs a system and not a habit.</p>
+    </div>
+  </div>
+
+  <div class="week">
+    <div class="week-head"><span class="n">Week 5</span><span class="t">Build the plate</span></div>
+    <div class="week-body">
+      <p class="job">Protein at every meal, vegetables at every meal, and smaller portions of swallow.</p>
+      <div class="week-sec"><span class="lbl">Do this</span><ul>
+        <li>Put fish, egg, beans or chicken on the plate at every single meal. Do not skip protein &mdash; see Chapter 5.</li>
+        <li>Fill a third of the plate with green vegetables.</li>
+        <li>Halve your usual portion of eba, fufu, amala or white rice.</li>
+        <li>Water instead of soft drinks and malt.</li>
+      </ul></div>
+      <div class="chips"><span class="chip">Protein every meal</span><span class="chip">Soft drinks out</span></div>
+      <p class="week-quote">You are not eating to cure anything. You are eating so the liver has less work to do.</p>
+    </div>
+  </div>
+  <span class="folio">23</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Four &middot; The first 90 days</p>
+  <div class="week">
+    <div class="week-head"><span class="n">Week 6</span><span class="t">Start moving, and measure your middle</span></div>
+    <div class="week-body">
+      <p class="job">Thirty minutes of brisk walking, five days this week. And find a tape.</p>
+      <div class="week-sec"><span class="lbl">Do this</span><ul>
+        <li>Walk briskly for thirty minutes, five days. Early morning or evening, whichever you will actually do.</li>
+        <li>Measure around your waist at the level of your navel. Write the number down.</li>
+        <li>Take the stairs. Walk after dinner. These add up more than one heroic session.</li>
+      </ul></div>
+      <div class="week-sec"><span class="lbl">Write this down</span><p>Waist measurement, and the days you walked. That is the whole record.</p></div>
+      <div class="chips"><span class="chip">Waist measured</span><span class="chip">5 walks done</span></div>
+      <p class="week-quote">The weight around your middle is the part of this you have the most power over.</p>
+    </div>
+  </div>
+
+  <div class="week">
+    <div class="week-head"><span class="n">Week 7</span><span class="t">Sleep</span></div>
+    <div class="week-body">
+      <p class="job">Seven hours, and the phone out of the bed.</p>
+      <div class="week-sec"><span class="lbl">Do this</span><ul>
+        <li>Pick a bedtime that gives you seven hours and hold it, including weekends.</li>
+        <li>Phone face down, across the room, thirty minutes before sleep.</li>
+        <li>Finish eating two hours before bed.</li>
+        <li>If worry is what is keeping you awake, that is normal and Chapter 7 is about it.</li>
+      </ul></div>
+      <div class="chips"><span class="chip">7 hours, 5 nights</span></div>
+      <p class="week-quote">Sleep is the only repair work you do not have to pay for.</p>
+    </div>
+  </div>
+
+  <div class="week">
+    <div class="week-head"><span class="n">Week 8</span><span class="t">Tell one person</span></div>
+    <div class="week-body">
+      <p class="job">Stop carrying this alone.</p>
+      <div class="week-sec"><span class="lbl">Do this</span><ul>
+        <li>Choose one person. Someone steady, who does not panic and does not gossip.</li>
+        <li>You do not owe anybody a full explanation. "I have hepatitis B, I am being looked after, and I wanted you to know" is a complete sentence.</li>
+        <li>If that person is your husband or wife, read Chapter 7 first.</li>
+      </ul></div>
+      <div class="chips"><span class="chip">One person told</span></div>
+      <p class="week-quote">Secrecy is heavier than the virus. It is also the part nobody is monitoring for you.</p>
+    </div>
+  </div>
+  <span class="folio">24</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Four &middot; The first 90 days</p>
+  <div class="week">
+    <div class="week-head"><span class="n">Week 9</span><span class="t">Prepare the review</span></div>
+    <div class="week-body">
+      <p class="job">Turn twelve weeks of effort into something a doctor can read in one minute.</p>
+      <div class="week-sec"><span class="lbl">Do this</span><ul>
+        <li>Fill in the log at the back of this book properly.</li>
+        <li>Write down the eight questions from Chapter 8 on a sheet of paper.</li>
+        <li>List everything you are taking, including anything herbal, with nothing left out.</li>
+        <li>Book the appointment now, not when you feel ready.</li>
+      </ul></div>
+      <div class="chips"><span class="chip">Log complete</span><span class="chip">Appointment booked</span></div>
+      <p class="week-quote">The patient with a written record gets a different consultation. Every time.</p>
+    </div>
+  </div>
+
+  <div class="week">
+    <div class="week-head"><span class="n">Week 10</span><span class="t">Go, and ask out loud</span></div>
+    <div class="week-body">
+      <p class="job">Ask all eight questions, and leave with the answers written down.</p>
+      <div class="week-sec"><span class="lbl">Do this</span><ul>
+        <li>Take the log, the questions and the list of what you are taking.</li>
+        <li>Ask every question. If you are rushed, say: "There are three more, they are short."</li>
+        <li>Write the answers in the room, not from memory afterwards.</li>
+        <li>Before you leave, ask when the next appointment should be and book it.</li>
+      </ul></div>
+      <div class="chips"><span class="chip">8 questions asked</span><span class="chip">Next date booked</span></div>
+      <p class="week-quote">A quiet patient gets a quiet consultation. You are allowed to take up room.</p>
+    </div>
+  </div>
+
+  <div class="week">
+    <div class="week-head"><span class="n">Week 11</span><span class="t">Set the calendar</span></div>
+    <div class="week-body">
+      <p class="job">Put the rest of your life into your phone, today, while you still remember why.</p>
+      <div class="week-sec"><span class="lbl">Do this</span><ul>
+        <li>Set a repeating reminder every six months: "Liver scan and blood tests."</li>
+        <li>Set the second and third vaccine doses for everyone in the house.</li>
+        <li>If you are on a tablet, set a daily alarm at the same time each day.</li>
+        <li>Tell your one person the dates, so somebody else knows them too.</li>
+      </ul></div>
+      <div class="chips"><span class="chip">6-month reminder set</span><span class="chip">Vaccine dates set</span></div>
+      <p class="week-quote">In five years you will not remember why this mattered. The reminder will.</p>
+    </div>
+  </div>
+  <span class="folio">25</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Four &middot; The first 90 days</p>
+  <div class="week">
+    <div class="week-head"><span class="n">Week 12</span><span class="t">The new ordinary</span></div>
+    <div class="week-body">
+      <p class="job">Work out which of these eleven weeks carries on forever, and let the rest become normal.</p>
+      <div class="week-sec"><span class="lbl">Carries on forever</span><ul>
+        <li>No alcohol. No unlabelled mixtures. Ever.</li>
+        <li>The six-month scan and the blood tests.</li>
+        <li>The daily tablet, if you were given one.</li>
+        <li>Inspecting and storing grain properly.</li>
+      </ul></div>
+      <div class="week-sec"><span class="lbl">Should now be habit</span><ul>
+        <li>Protein and vegetables on the plate. Smaller swallow.</li>
+        <li>Walking. Sleeping. Reading medicine packets.</li>
+      </ul></div>
+      <div class="chips"><span class="chip">90 days done</span></div>
+      <p class="week-quote">You did not cure anything in ninety days. You changed what the next twenty years are made of, which is better.</p>
+    </div>
+  </div>
+
+  <div class="box good">
+    <p class="k">If you managed only three things</p>
+    <p>Alcohol out. Household tested and vaccinated. Six-month scan in the calendar.</p>
+    <p>Those three carry most of the benefit in this entire book. If the other nine weeks never happened, do those and you have still changed your outcome.</p>
+  </div>
+  <span class="folio">26</span>
+</div>
+
+<!-- ============ CHAPTER 5 ============ -->
+<div class="page">
+  <div class="chap-band"><p class="kicker">Chapter five</p><h2 class="chapno">05</h2><h2 class="chaptitle">Nigerian foods for a working liver</h2></div>
+  <p class="lead">Let us be honest with each other before the list starts: <b>no food clears hepatitis B.</b> Not bitter leaf. Not lemon and warm water. Not any tea.</p>
+  <p>What food does is decide how much extra work your liver has to do on top of the work it already has. That is not a small thing. It is simply a different thing from a cure, and anybody who blurs the two is selling something.</p>
+
+  <figure class="bleed">{{IMG:market}}<figcaption style="padding-inline:clamp(20px,4.6vw,58px)">Everything on the good list is in the nearest market, at the usual price. Nothing in this chapter is imported.</figcaption></figure>
+  <span class="folio">34</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Five &middot; Foods for a working liver</p>
+  <h3 class="first">The mistake almost everybody makes</h3>
+  <p>The moment a Nigerian hears “liver problem”, the first thing that leaves the plate is meat and fish. Somebody's aunty said protein is heavy for the liver. So the person begins eating swallow and soup with no fish inside it, and two months later they are looking thin and weak and calling it healing.</p>
+  <p><b>Ah. This is backwards.</b> A liver under strain needs protein to repair itself. Cutting it makes you lose muscle and slows the very repair you are trying to support.</p>
+  <p>There is one exception, and it only applies to people with advanced liver disease who have been given specific instructions by a doctor. If nobody has told you to restrict protein, do not restrict protein.</p>
+
+  <div class="fig">
+    <p class="fig-title">Figure 3 &mdash; the traffic light</p>
+    <svg viewBox="0 0 700 330" role="img" aria-label="Nigerian foods grouped as eat freely, eat in moderation, and stop">
+      <g font-family="var(--body)" font-size="12.5">
+        <rect x="8" y="8" width="220" height="314" fill="var(--moss-soft)" stroke="var(--moss)"/>
+        <rect x="8" y="8" width="220" height="34" fill="var(--moss)"/>
+        <text x="118" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="var(--on-solid)">EAT FREELY</text>
+        <text x="24" y="66" fill="var(--ink)">Ugu, spinach, waterleaf</text>
+        <text x="24" y="90" fill="var(--ink)">Okra, garden egg, cucumber</text>
+        <text x="24" y="114" fill="var(--ink)">Fish &mdash; grilled or boiled</text>
+        <text x="24" y="138" fill="var(--ink)">Eggs</text>
+        <text x="24" y="162" fill="var(--ink)">Beans, well cooked</text>
+        <text x="24" y="186" fill="var(--ink)">Chicken without the skin</text>
+        <text x="24" y="210" fill="var(--ink)">Tomato, pepper, onion</text>
+        <text x="24" y="234" fill="var(--ink)">Pawpaw, orange, guava</text>
+        <text x="24" y="258" fill="var(--ink)">Water</text>
+        <text x="24" y="282" fill="var(--ink)">Black coffee, 1&ndash;2 cups</text>
+
+        <rect x="240" y="8" width="220" height="314" fill="var(--ochre-soft)" stroke="var(--ochre)"/>
+        <rect x="240" y="8" width="220" height="34" fill="var(--ochre)"/>
+        <text x="350" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="var(--on-solid)">SMALLER PORTIONS</text>
+        <text x="256" y="66" fill="var(--ink)">Eba, fufu, amala</text>
+        <text x="256" y="90" fill="var(--ink)">White rice</text>
+        <text x="256" y="114" fill="var(--ink)">Yam, potato</text>
+        <text x="256" y="138" fill="var(--ink)">Ripe plantain</text>
+        <text x="256" y="162" fill="var(--ink)">Bread</text>
+        <text x="256" y="186" fill="var(--ink)">Red meat</text>
+        <text x="256" y="210" fill="var(--ink)">Palm oil in cooking</text>
+        <text x="256" y="234" fill="var(--ink)">Groundnut &mdash; inspected</text>
+        <text x="256" y="258" fill="var(--ink)">Salt</text>
+
+        <rect x="472" y="8" width="220" height="314" fill="var(--clay-soft)" stroke="var(--clay)"/>
+        <rect x="472" y="8" width="220" height="34" fill="var(--clay)"/>
+        <text x="582" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="var(--on-solid)">STOP</text>
+        <text x="488" y="66" fill="var(--ink)">All alcohol</text>
+        <text x="488" y="90" fill="var(--ink)">Palm wine, bitters</text>
+        <text x="488" y="114" fill="var(--ink)">Herbal mixtures, agbo</text>
+        <text x="488" y="138" fill="var(--ink)">"Liver cleanse" products</text>
+        <text x="488" y="162" fill="var(--ink)">Mouldy or musty grain</text>
+        <text x="488" y="186" fill="var(--ink)">Roadside ground mixes</text>
+        <text x="488" y="210" fill="var(--ink)">Soft drinks, malt</text>
+        <text x="488" y="234" fill="var(--ink)">Fried food, most days</text>
+        <text x="488" y="258" fill="var(--ink)">Suya, daily</text>
+        <text x="488" y="282" fill="var(--ink)">Cigarettes</text>
+      </g>
+    </svg>
+  </div>
+  <span class="folio">35</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Five &middot; Foods for a working liver</p>
+  <h3 class="first">What a plate actually looks like</h3>
+  <figure>{{IMG:plate}}<figcaption>Half vegetables, a solid piece of protein, a modest portion of the starch. The swallow is the side dish now, not the meal.</figcaption></figure>
+  <p>Notice what changed. Nothing exotic was added. The vegetables grew, the protein stayed, and the mound of swallow became a portion instead of a mountain. That is the entire dietary instruction in this book.</p>
+
+  <h3>Coffee, of all things</h3>
+  <p>One of the more surprising findings in liver research is that regular coffee drinkers tend to have less scarring and less liver cancer than people who drink none. The evidence is observational rather than proof, so nobody should start drinking coffee as treatment. But if you already drink one or two cups of black coffee a day, there is no reason to stop, and some reason to continue.</p>
+  <p>Black. The sugar and the condensed milk are not part of the finding.</p>
+
+  <div class="box good">
+    <p class="k">The honest summary</p>
+    <p>Eat enough protein. Eat plenty of vegetables. Cut the swallow down. Drink water. Inspect your grain. Nothing on this page is a treatment, and all of it makes your liver's day easier.</p>
+  </div>
+  <span class="folio">36</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Five &middot; Foods for a working liver</p>
+  <h3 class="first">The 14-day plan &mdash; and then you repeat it</h3>
+  <p>
+    Fourteen days, not ten, and it does not end. Hepatitis B is not a
+    fortnight&rsquo;s problem, so this is not a fortnight&rsquo;s diet &mdash; it is two weeks
+    of ordinary Nigerian food that you rotate for as long as you like. Day 15
+    is Day 1 again.
+  </p>
+  <div class="box cool">
+    <p class="k">What this plan is actually doing</p>
+    <p>
+      Not one meal here touches the virus. What it treats is the <b>second
+      disease</b> &mdash; fat stored inside the liver, which sits on top of
+      hepatitis B and makes the scarring move faster. That one <em>is</em>
+      yours to change, and your waist measurement is how you watch it.
+    </p>
+  </div>
+  <div class="box">
+    <p class="k">Three rules for all 14 days</p>
+    <ul class="marks">
+      <li><b>Protein at every meal.</b> Fish, egg, beans, chicken. Never a plate of swallow alone.</li>
+      <li><b>Swallow is the side, not the meal.</b> Half what you used to take.</li>
+      <li><b>Between meals:</b> cucumber, pawpaw, orange, guava, or groundnut you inspected yourself. Water throughout &mdash; no soft drinks, no malt, no alcohol.</li>
+    </ul>
+  </div>
+  <span class="folio">37</span>
+</div>
+
+
+<div class="page">
+  <p class="runhead">Five &middot; The 14-day meal plan</p>
+  <div class="mealhead">
+    <span class="mn">Day 1</span>
+    <span class="mt">Start as you mean to go on</span>
+  </div>
+
+  <div class="mealgrid">
+    <div class="mealcol">
+      <span class="lbl">Morning</span>
+      <ul>
+        <li>Water – 1 glass on waking, before anything else</li>
+        <li>Oats – 1 cup cooked, no sugar</li>
+        <li>Pawpaw – ½ cup diced, stirred in</li>
+        <li>Boiled egg – 1</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Afternoon</span>
+      <ul>
+        <li>Efo riro – 1 full bowl, with titus (mackerel) – 1 medium piece</li>
+        <li>Brown rice – ½ cup cooked</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Evening</span>
+      <ul>
+        <li>Catfish pepper soup – 1 bowl</li>
+        <li>Garden egg – 2, sliced raw on the side</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="between">
+    <span class="lbl">Between meals</span>
+    Cucumber – ½ cup sliced &nbsp;|&nbsp; Orange – 1 &nbsp;|&nbsp; Water – keep the bottle with you
+  </div>
+
+  <div class="recipe">
+    <div class="recipe-head">Today&rsquo;s recipe &mdash; Catfish Pepper Soup</div>
+    <div class="recipe-body">
+      <div>
+        <span class="lbl">Ingredients</span>
+        <ul>
+        <li>Fresh catfish – 2 medium steaks, well washed</li>
+        <li>Uziza or scent leaf – 1 small handful</li>
+        <li>Fresh pepper – to taste</li>
+        <li>Onion – ½, sliced</li>
+        <li>Pepper soup spice – 1 tsp</li>
+        <li>Salt – a pinch (go light)</li>
+        <li>Water – 2 cups</li>
+        </ul>
+      </div>
+      <div>
+        <span class="lbl">Preparation</span>
+        <p>Bring the water to a boil with the onion, spice and pepper. Add the fish. Cover and simmer 10–12 minutes — do not stir hard or it breaks up. Add the leaves in the last 2 minutes. Take it off the heat.</p>
+        <p class="makes"><b>Makes:</b> 2 servings. Keeps 2 days covered in the fridge.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="chips">
+    <span class="chip">Protein at all three meals</span><span class="chip">No added sugar</span><span class="chip">Two vegetable servings</span>
+  </div>
+
+  <div class="box" style="margin-top:22px">
+    <p class="k">Today&rsquo;s habit</p>
+    <p style="font-weight:600;margin:0">Fill a water bottle this morning. Finish it before bed.</p>
+  </div>
+
+  <p class="week-quote" style="margin-top:22px">&ldquo;Day 1 is not about being perfect. It is about starting.&rdquo;</p>
+  <span class="folio">38</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Five &middot; The 14-day meal plan</p>
+  <div class="mealhead">
+    <span class="mn">Day 2</span>
+    <span class="mt">Protein at every single meal</span>
+  </div>
+
+  <div class="mealgrid">
+    <div class="mealcol">
+      <span class="lbl">Morning</span>
+      <ul>
+        <li>Pap – 1 cup, no sugar</li>
+        <li>Moi moi – 1 wrap</li>
+        <li>Water – 1 glass</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Afternoon</span>
+      <ul>
+        <li>Okra soup – 1 bowl, with tilapia – 1 medium piece</li>
+        <li>Oat swallow – 1 small ball, about the size of your fist</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Evening</span>
+      <ul>
+        <li>Beans (ewa) – ½ cup cooked, a little palm oil</li>
+        <li>Cucumber – ½ cup sliced</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="between">
+    <span class="lbl">Between meals</span>
+    Pawpaw – ½ cup &nbsp;|&nbsp; Groundnut – a small handful, inspected &nbsp;|&nbsp; Water
+  </div>
+
+  <div class="recipe">
+    <div class="recipe-head">Today&rsquo;s recipe &mdash; Moi Moi</div>
+    <div class="recipe-body">
+      <div>
+        <span class="lbl">Ingredients</span>
+        <ul>
+        <li>Peeled beans – 2 cups, soaked and blended</li>
+        <li>Red pepper – 2, blended in</li>
+        <li>Onion – 1, blended in</li>
+        <li>Vegetable oil – 2 tbsp (not more)</li>
+        <li>Boiled egg – 2, sliced</li>
+        <li>Sardine or crayfish – optional</li>
+        <li>Salt – a pinch</li>
+        </ul>
+      </div>
+      <div>
+        <span class="lbl">Preparation</span>
+        <p>Blend the beans smooth with pepper and onion. Stir in the oil and salt. Pour into wraps or a bowl, lay the egg on top, and steam 45–60 minutes until it sets firm. It is done when a knife comes out clean.</p>
+        <p class="makes"><b>Makes:</b> 4–5 wraps. Keeps 3 days refrigerated, and freezes well.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="chips">
+    <span class="chip">High protein, low fat</span><span class="chip">No fried food today</span><span class="chip">Swallow halved</span>
+  </div>
+
+  <div class="box" style="margin-top:22px">
+    <p class="k">Today&rsquo;s habit</p>
+    <p style="font-weight:600;margin:0">Walk 15 minutes after your biggest meal.</p>
+  </div>
+
+  <p class="week-quote" style="margin-top:22px">&ldquo;If a plate has no protein on it, it is not a meal yet.&rdquo;</p>
+  <span class="folio">39</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Five &middot; The 14-day meal plan</p>
+  <div class="mealhead">
+    <span class="mn">Day 3</span>
+    <span class="mt">Read what you are swallowing</span>
+  </div>
+
+  <div class="mealgrid">
+    <div class="mealcol">
+      <span class="lbl">Morning</span>
+      <ul>
+        <li>Sweet potato – 1 medium, boiled</li>
+        <li>Sardine – half a tin, drained</li>
+        <li>Tomato and onion – fresh, chopped over it</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Afternoon</span>
+      <ul>
+        <li>Vegetable soup – 1 bowl, with chicken – 1 piece, skin removed</li>
+        <li>Millet swallow – 1 small ball</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Evening</span>
+      <ul>
+        <li>Grilled fish – 1 medium piece</li>
+        <li>Cabbage and carrot – 1 cup, steamed</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="between">
+    <span class="lbl">Between meals</span>
+    Guava – 1 &nbsp;|&nbsp; Cucumber – ½ cup &nbsp;|&nbsp; Water
+  </div>
+
+  <div class="recipe">
+    <div class="recipe-head">Today&rsquo;s recipe &mdash; Steamed Cabbage and Carrot</div>
+    <div class="recipe-body">
+      <div>
+        <span class="lbl">Ingredients</span>
+        <ul>
+        <li>Cabbage – ¼ head, shredded</li>
+        <li>Carrot – 2, sliced thin</li>
+        <li>Onion – ½, sliced</li>
+        <li>Water – ¼ cup</li>
+        <li>Vegetable oil – 1 tsp</li>
+        <li>Salt and pepper – light</li>
+        </ul>
+      </div>
+      <div>
+        <span class="lbl">Preparation</span>
+        <p>Heat the oil, soften the onion for a minute. Add the carrot, then the cabbage and the water. Cover and steam 5–6 minutes only — it should still have bite. Season at the end.</p>
+        <p class="makes"><b>Makes:</b> 2 servings. Best eaten the same day.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="chips">
+    <span class="chip">Skin removed from the chicken</span><span class="chip">Nothing fried</span><span class="chip">Two vegetable servings</span>
+  </div>
+
+  <div class="box" style="margin-top:22px">
+    <p class="k">Today&rsquo;s habit</p>
+    <p style="font-weight:600;margin:0">Read the packet of every sachet and tablet in the house. Look for paracetamol.</p>
+  </div>
+
+  <p class="week-quote" style="margin-top:22px">&ldquo;The medicine drawer is part of your diet. Nobody tells you that.&rdquo;</p>
+  <span class="folio">40</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Five &middot; The 14-day meal plan</p>
+  <div class="mealhead">
+    <span class="mn">Day 4</span>
+    <span class="mt">Fix the store cupboard</span>
+  </div>
+
+  <div class="mealgrid">
+    <div class="mealcol">
+      <span class="lbl">Morning</span>
+      <ul>
+        <li>Oats – 1 cup cooked</li>
+        <li>Banana – ½, sliced in</li>
+        <li>Groundnut – a small handful you inspected yourself</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Afternoon</span>
+      <ul>
+        <li>Ewedu and gbegiri – 1 bowl each, with turkey – 1 piece, skin removed</li>
+        <li>Semo – 1 small ball</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Evening</span>
+      <ul>
+        <li>Egg sauce – 2 eggs, tomato, onion, 1 tsp oil</li>
+        <li>Unripe plantain – 1, boiled</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="between">
+    <span class="lbl">Between meals</span>
+    Orange – 1 &nbsp;|&nbsp; Cucumber – ½ cup &nbsp;|&nbsp; Water
+  </div>
+
+  <div class="recipe">
+    <div class="recipe-head">Today&rsquo;s recipe &mdash; Egg Sauce with Boiled Unripe Plantain</div>
+    <div class="recipe-body">
+      <div>
+        <span class="lbl">Ingredients</span>
+        <ul>
+        <li>Eggs – 2</li>
+        <li>Tomato – 2, chopped</li>
+        <li>Onion – ½, chopped</li>
+        <li>Fresh pepper – to taste</li>
+        <li>Vegetable oil – 1 tsp</li>
+        <li>Unripe plantain – 1, peeled and cut</li>
+        <li>Salt – a pinch</li>
+        </ul>
+      </div>
+      <div>
+        <span class="lbl">Preparation</span>
+        <p>Boil the plantain 15 minutes until a fork goes in easily. Meanwhile soften the onion and tomato in the oil, add pepper, then pour in the beaten egg and stir gently until just set. Do not overcook it.</p>
+        <p class="makes"><b>Makes:</b> 1–2 servings. Eat fresh.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="chips">
+    <span class="chip">Unripe plantain, not ripe</span><span class="chip">One teaspoon of oil in the whole dish</span><span class="chip">No added sugar</span>
+  </div>
+
+  <div class="box" style="margin-top:22px">
+    <p class="k">Today&rsquo;s habit</p>
+    <p style="font-weight:600;margin:0">Empty every bag of groundnut, maize and egusi. Bin anything shrivelled or musty.</p>
+  </div>
+
+  <p class="week-quote" style="margin-top:22px">&ldquo;You cannot taste the mould. That is exactly why you go and look.&rdquo;</p>
+  <span class="folio">41</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Five &middot; The 14-day meal plan</p>
+  <div class="mealhead">
+    <span class="mn">Day 5</span>
+    <span class="mt">No soft drinks, no exceptions</span>
+  </div>
+
+  <div class="mealgrid">
+    <div class="mealcol">
+      <span class="lbl">Morning</span>
+      <ul>
+        <li>Akara – 2 small balls only</li>
+        <li>Pap – 1 cup, no sugar</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Afternoon</span>
+      <ul>
+        <li>Egusi soup – 1 bowl, with ugu and beef – 2 small pieces</li>
+        <li>Oat swallow – 1 small ball</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Evening</span>
+      <ul>
+        <li>Catfish pepper soup – 1 bowl</li>
+        <li>Garden egg – 2, raw</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="between">
+    <span class="lbl">Between meals</span>
+    Watermelon – 1 cup &nbsp;|&nbsp; Water – and only water
+  </div>
+
+  <div class="recipe">
+    <div class="recipe-head">Today&rsquo;s recipe &mdash; Egusi Soup with Ugu</div>
+    <div class="recipe-body">
+      <div>
+        <span class="lbl">Ingredients</span>
+        <ul>
+        <li>Ground egusi – 1 cup (from seeds you stored dry and sealed)</li>
+        <li>Ugu leaves – 2 handfuls, washed and sliced</li>
+        <li>Beef or fish – 250g</li>
+        <li>Palm oil – 2 tbsp (not more)</li>
+        <li>Crayfish – 1 tbsp</li>
+        <li>Onion – 1</li>
+        <li>Pepper and salt – light</li>
+        <li>Stock or water – 2 cups</li>
+        </ul>
+      </div>
+      <div>
+        <span class="lbl">Preparation</span>
+        <p>Boil the meat with onion until tender and keep the stock. Heat the palm oil, stir in the egusi and let it cook 5 minutes. Add the stock a little at a time, then the crayfish and pepper. Simmer 10 minutes. Add the ugu last and take it off after 2 minutes so it stays green.</p>
+        <p class="makes"><b>Makes:</b> 4 servings. Keeps 3 days refrigerated.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="chips">
+    <span class="chip">Palm oil measured, not poured</span><span class="chip">Vegetables added last</span><span class="chip">Zero sugary drinks</span>
+  </div>
+
+  <div class="box" style="margin-top:22px">
+    <p class="k">Today&rsquo;s habit</p>
+    <p style="font-weight:600;margin:0">No soft drinks today. Not one. Water, or nothing.</p>
+  </div>
+
+  <p class="week-quote" style="margin-top:22px">&ldquo;One bottle of minerals a day is a bag of sugar a month.&rdquo;</p>
+  <span class="folio">42</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Five &middot; The 14-day meal plan</p>
+  <div class="mealhead">
+    <span class="mn">Day 6</span>
+    <span class="mt">Measure your middle</span>
+  </div>
+
+  <div class="mealgrid">
+    <div class="mealcol">
+      <span class="lbl">Morning</span>
+      <ul>
+        <li>Boiled yam – 3 small slices</li>
+        <li>Egg sauce – 1 egg, tomato, onion</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Afternoon</span>
+      <ul>
+        <li>Brown jollof rice – ½ cup, with grilled chicken – 1 piece</li>
+        <li>Fresh salad – 1 bowl, no salad cream</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Evening</span>
+      <ul>
+        <li>Bitter leaf soup – 1 bowl, with fish</li>
+        <li>Oat swallow – 1 small ball</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="between">
+    <span class="lbl">Between meals</span>
+    Apple – 1 &nbsp;|&nbsp; Cucumber – ½ cup &nbsp;|&nbsp; Water
+  </div>
+
+  <div class="recipe">
+    <div class="recipe-head">Today&rsquo;s recipe &mdash; Brown Jollof Rice</div>
+    <div class="recipe-body">
+      <div>
+        <span class="lbl">Ingredients</span>
+        <ul>
+        <li>Brown rice – 1 cup, rinsed</li>
+        <li>Tomato – 4, blended</li>
+        <li>Red pepper – 2, blended</li>
+        <li>Onion – 1</li>
+        <li>Vegetable oil – 2 tbsp</li>
+        <li>Curry and thyme – 1 tsp each</li>
+        <li>Stock or water – 2½ cups</li>
+        <li>Salt – light</li>
+        </ul>
+      </div>
+      <div>
+        <span class="lbl">Preparation</span>
+        <p>Fry the blended tomato and pepper in the oil until the water dries and it darkens — this is the step people rush, and it is the whole flavour. Add the spices, then the rice, then the stock. Cover tight and cook low 35–40 minutes. Brown rice takes longer than white; do not lift the lid.</p>
+        <p class="makes"><b>Makes:</b> 4 servings.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="chips">
+    <span class="chip">Brown rice, not white</span><span class="chip">Portion is half a cup</span><span class="chip">Salad with no cream</span>
+  </div>
+
+  <div class="box" style="margin-top:22px">
+    <p class="k">Today&rsquo;s habit</p>
+    <p style="font-weight:600;margin:0">Measure your waist at the navel, before breakfast. Write the number in the log.</p>
+  </div>
+
+  <p class="week-quote" style="margin-top:22px">&ldquo;The tape measure tells you things the bathroom scale hides.&rdquo;</p>
+  <span class="folio">43</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Five &middot; The 14-day meal plan</p>
+  <div class="mealhead">
+    <span class="mn">Day 7</span>
+    <span class="mt">Plan the week</span>
+  </div>
+
+  <div class="mealgrid">
+    <div class="mealcol">
+      <span class="lbl">Morning</span>
+      <ul>
+        <li>Moi moi – 1 wrap</li>
+        <li>Pap – 1 cup, no sugar</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Afternoon</span>
+      <ul>
+        <li>Okra soup – 1 bowl, with snail or fish</li>
+        <li>Unripe plantain – 1, boiled</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Evening</span>
+      <ul>
+        <li>Vegetable soup – 1 bowl</li>
+        <li>Boiled egg – 1</li>
+        <li>Cucumber – ½ cup</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="between">
+    <span class="lbl">Between meals</span>
+    Pawpaw – ½ cup &nbsp;|&nbsp; Orange – 1 &nbsp;|&nbsp; Water
+  </div>
+
+  <div class="recipe">
+    <div class="recipe-head">Today&rsquo;s recipe &mdash; Okra Soup</div>
+    <div class="recipe-body">
+      <div>
+        <span class="lbl">Ingredients</span>
+        <ul>
+        <li>Fresh okra – 10 fingers, chopped small</li>
+        <li>Fish or snail – 250g</li>
+        <li>Palm oil – 1 tbsp</li>
+        <li>Crayfish – 1 tbsp</li>
+        <li>Ugu or spinach – 1 handful</li>
+        <li>Pepper and salt – light</li>
+        <li>Stock – 1½ cups</li>
+        </ul>
+      </div>
+      <div>
+        <span class="lbl">Preparation</span>
+        <p>Bring the stock to a boil with the crayfish and pepper. Add the okra and cook only 4–5 minutes — long cooking kills the texture. Stir in the palm oil and the fish, then the leaves, and take it off.</p>
+        <p class="makes"><b>Makes:</b> 3 servings.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="chips">
+    <span class="chip">Light on oil</span><span class="chip">Vegetables in the soup itself</span><span class="chip">No fried food all day</span>
+  </div>
+
+  <div class="box" style="margin-top:22px">
+    <p class="k">Today&rsquo;s habit</p>
+    <p style="font-weight:600;margin:0">Write next week's market list. Put the storage containers on it.</p>
+  </div>
+
+  <p class="week-quote" style="margin-top:22px">&ldquo;A week that is planned on Sunday is a week you actually keep.&rdquo;</p>
+  <span class="folio">44</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Five &middot; The 14-day meal plan</p>
+  <div class="mealhead">
+    <span class="mn">Day 8</span>
+    <span class="mt">Walk like you mean it</span>
+  </div>
+
+  <div class="mealgrid">
+    <div class="mealcol">
+      <span class="lbl">Morning</span>
+      <ul>
+        <li>Oats – 1 cup cooked</li>
+        <li>Orange – 1</li>
+        <li>Boiled egg – 1</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Afternoon</span>
+      <ul>
+        <li>Efo tete – 1 full bowl, with mackerel – 1 piece</li>
+        <li>Brown rice – ½ cup</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Evening</span>
+      <ul>
+        <li>Chicken pepper soup – 1 bowl</li>
+        <li>Steamed vegetables – 1 cup</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="between">
+    <span class="lbl">Between meals</span>
+    Guava – 1 &nbsp;|&nbsp; Cucumber – ½ cup &nbsp;|&nbsp; Water
+  </div>
+
+  <div class="recipe">
+    <div class="recipe-head">Today&rsquo;s recipe &mdash; Chicken Pepper Soup</div>
+    <div class="recipe-body">
+      <div>
+        <span class="lbl">Ingredients</span>
+        <ul>
+        <li>Chicken – 4 pieces, skin removed</li>
+        <li>Pepper soup spice – 1½ tsp</li>
+        <li>Uziza or scent leaf – 1 handful</li>
+        <li>Onion – 1</li>
+        <li>Ginger – 1 tsp grated</li>
+        <li>Fresh pepper – to taste</li>
+        <li>Water – 3 cups</li>
+        <li>Salt – light</li>
+        </ul>
+      </div>
+      <div>
+        <span class="lbl">Preparation</span>
+        <p>Boil the chicken with onion, ginger and spice until tender, about 25 minutes. Add pepper and salt, simmer 5 more. Throw the leaves in at the very end. Skim any fat off the top before serving.</p>
+        <p class="makes"><b>Makes:</b> 3–4 servings.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="chips">
+    <span class="chip">Skin removed before cooking</span><span class="chip">Fat skimmed</span><span class="chip">Two vegetable servings</span>
+  </div>
+
+  <div class="box" style="margin-top:22px">
+    <p class="k">Today&rsquo;s habit</p>
+    <p style="font-weight:600;margin:0">Walk 20 minutes, brisk. Brisk means singing would be a struggle.</p>
+  </div>
+
+  <p class="week-quote" style="margin-top:22px">&ldquo;Your muscles are the cheapest medicine you own.&rdquo;</p>
+  <span class="folio">45</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Five &middot; The 14-day meal plan</p>
+  <div class="mealhead">
+    <span class="mn">Day 9</span>
+    <span class="mt">Tell one person</span>
+  </div>
+
+  <div class="mealgrid">
+    <div class="mealcol">
+      <span class="lbl">Morning</span>
+      <ul>
+        <li>Sweet potato porridge – 1 small bowl, with fish</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Afternoon</span>
+      <ul>
+        <li>Ogbono soup – 1 bowl, with ugu and turkey</li>
+        <li>Oat swallow – 1 small ball</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Evening</span>
+      <ul>
+        <li>Beans – ½ cup</li>
+        <li>Plantain – 1, boiled, never fried</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="between">
+    <span class="lbl">Between meals</span>
+    Pawpaw – ½ cup &nbsp;|&nbsp; Groundnut – small handful, inspected &nbsp;|&nbsp; Water
+  </div>
+
+  <div class="recipe">
+    <div class="recipe-head">Today&rsquo;s recipe &mdash; Sweet Potato Porridge</div>
+    <div class="recipe-body">
+      <div>
+        <span class="lbl">Ingredients</span>
+        <ul>
+        <li>Sweet potato – 2 medium, cubed</li>
+        <li>Fish – 1 medium piece</li>
+        <li>Tomato – 2</li>
+        <li>Onion – 1</li>
+        <li>Palm oil – 1 tbsp</li>
+        <li>Ugu – 1 handful</li>
+        <li>Crayfish – 1 tbsp</li>
+        <li>Water – 1½ cups</li>
+        </ul>
+      </div>
+      <div>
+        <span class="lbl">Preparation</span>
+        <p>Soften the onion and tomato in the oil. Add the water, crayfish and potato and cook 15 minutes until the potato is tender but not collapsing. Lay the fish on top for the last 5 minutes, then stir the ugu through and serve.</p>
+        <p class="makes"><b>Makes:</b> 2–3 servings.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="chips">
+    <span class="chip">Sweet potato, lower glycemic than yam</span><span class="chip">Boiled plantain, not fried</span><span class="chip">One tablespoon of oil</span>
+  </div>
+
+  <div class="box" style="margin-top:22px">
+    <p class="k">Today&rsquo;s habit</p>
+    <p style="font-weight:600;margin:0">Tell one steady person how the plan is going. You are not carrying this alone.</p>
+  </div>
+
+  <p class="week-quote" style="margin-top:22px">&ldquo;Secrecy is heavier than the virus, and nobody is monitoring it for you.&rdquo;</p>
+  <span class="folio">46</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Five &middot; The 14-day meal plan</p>
+  <div class="mealhead">
+    <span class="mn">Day 10</span>
+    <span class="mt">Clear out what has turned</span>
+  </div>
+
+  <div class="mealgrid">
+    <div class="mealcol">
+      <span class="lbl">Morning</span>
+      <ul>
+        <li>Pap – 1 cup with moi moi – 1 wrap</li>
+        <li>Pawpaw – ½ cup</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Afternoon</span>
+      <ul>
+        <li>Vegetable soup – 1 bowl, with catfish</li>
+        <li>Millet swallow – 1 small ball</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Evening</span>
+      <ul>
+        <li>Grilled tilapia – 1 medium</li>
+        <li>Garden egg sauce – ½ cup</li>
+        <li>Tomato – 1, sliced</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="between">
+    <span class="lbl">Between meals</span>
+    Orange – 1 &nbsp;|&nbsp; Cucumber – ½ cup &nbsp;|&nbsp; Water
+  </div>
+
+  <div class="recipe">
+    <div class="recipe-head">Today&rsquo;s recipe &mdash; Garden Egg Sauce</div>
+    <div class="recipe-body">
+      <div>
+        <span class="lbl">Ingredients</span>
+        <ul>
+        <li>Garden eggs – 6, boiled and mashed</li>
+        <li>Tomato – 2, chopped</li>
+        <li>Onion – 1</li>
+        <li>Fresh pepper – to taste</li>
+        <li>Palm oil – 1 tbsp</li>
+        <li>Crayfish – 1 tbsp</li>
+        <li>Salt – light</li>
+        </ul>
+      </div>
+      <div>
+        <span class="lbl">Preparation</span>
+        <p>Boil the garden eggs 10 minutes until soft, then mash them roughly. Soften onion, tomato and pepper in the palm oil, add the crayfish, then fold the mash in. Cook 5 more minutes on low.</p>
+        <p class="makes"><b>Makes:</b> 3 servings. Keeps 2 days.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="chips">
+    <span class="chip">Grilled, not fried</span><span class="chip">Vegetable-based sauce</span><span class="chip">No added sugar</span>
+  </div>
+
+  <div class="box" style="margin-top:22px">
+    <p class="k">Today&rsquo;s habit</p>
+    <p style="font-weight:600;margin:0">Go through the cupboard again. Anything that looks or smells off goes out.</p>
+  </div>
+
+  <p class="week-quote" style="margin-top:22px">&ldquo;Checking twice costs you nothing. Missing it once costs you years.&rdquo;</p>
+  <span class="folio">47</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Five &middot; The 14-day meal plan</p>
+  <div class="mealhead">
+    <span class="mn">Day 11</span>
+    <span class="mt">Protect your sleep</span>
+  </div>
+
+  <div class="mealgrid">
+    <div class="mealcol">
+      <span class="lbl">Morning</span>
+      <ul>
+        <li>Oats – 1 cup cooked</li>
+        <li>Guava – 1</li>
+        <li>Groundnut – small handful</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Afternoon</span>
+      <ul>
+        <li>Gbegiri and ewedu – 1 bowl each, with fish</li>
+        <li>Semo – 1 small ball</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Evening</span>
+      <ul>
+        <li>Egg sauce – 2 eggs</li>
+        <li>Unripe plantain – 1, boiled</li>
+        <li>Cucumber – ½ cup</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="between">
+    <span class="lbl">Between meals</span>
+    Apple – 1 &nbsp;|&nbsp; Water – finish by 7pm
+  </div>
+
+  <div class="recipe">
+    <div class="recipe-head">Today&rsquo;s recipe &mdash; Gbegiri</div>
+    <div class="recipe-body">
+      <div>
+        <span class="lbl">Ingredients</span>
+        <ul>
+        <li>Peeled brown beans – 1 cup, boiled very soft</li>
+        <li>Palm oil – 1 tbsp</li>
+        <li>Crayfish – 1 tbsp</li>
+        <li>Onion – ½</li>
+        <li>Pepper – to taste</li>
+        <li>Salt – light</li>
+        </ul>
+      </div>
+      <div>
+        <span class="lbl">Preparation</span>
+        <p>Boil the beans until they collapse, about 40 minutes, then mash or blend smooth with a little of the cooking water. Return to the pot with the oil, crayfish, onion and pepper and simmer 10 minutes, stirring so it does not catch.</p>
+        <p class="makes"><b>Makes:</b> 4 servings. Freezes well in portions.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="chips">
+    <span class="chip">Beans-based protein</span><span class="chip">Last food two hours before bed</span><span class="chip">No caffeine after noon</span>
+  </div>
+
+  <div class="box" style="margin-top:22px">
+    <p class="k">Today&rsquo;s habit</p>
+    <p style="font-weight:600;margin:0">In bed at your chosen time. Phone face down, across the room.</p>
+  </div>
+
+  <p class="week-quote" style="margin-top:22px">&ldquo;Sleep is the only repair work you never have to pay for.&rdquo;</p>
+  <span class="folio">48</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Five &middot; The 14-day meal plan</p>
+  <div class="mealhead">
+    <span class="mn">Day 12</span>
+    <span class="mt">Move without noticing</span>
+  </div>
+
+  <div class="mealgrid">
+    <div class="mealcol">
+      <span class="lbl">Morning</span>
+      <ul>
+        <li>Boiled yam – 3 small slices</li>
+        <li>Garden egg sauce – ¼ cup</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Afternoon</span>
+      <ul>
+        <li>Okra soup – 1 bowl, with beef – 2 small pieces</li>
+        <li>Oat swallow – 1 small ball</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Evening</span>
+      <ul>
+        <li>Pepper soup – 1 bowl</li>
+        <li>Cucumber – ½ cup</li>
+        <li>Watermelon – 1 cup</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="between">
+    <span class="lbl">Between meals</span>
+    Orange – 1 &nbsp;|&nbsp; Water
+  </div>
+
+  <div class="recipe">
+    <div class="recipe-head">Today&rsquo;s recipe &mdash; Oat Swallow</div>
+    <div class="recipe-body">
+      <div>
+        <span class="lbl">Ingredients</span>
+        <ul>
+        <li>Oats – 1 cup, blended to powder</li>
+        <li>Boiling water – about 1 cup</li>
+        </ul>
+      </div>
+      <div>
+        <span class="lbl">Preparation</span>
+        <p>Blend the oats dry until fine. Pour boiling water in a little at a time, stirring hard, until it pulls together into a smooth ball. Cover 2 minutes off the heat. Add water slowly — too much at once and it will not come together.</p>
+        <p class="makes"><b>Makes:</b> 1–2 balls. Make it fresh each time.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="chips">
+    <span class="chip">Oat swallow instead of eba</span><span class="chip">One fist-sized portion</span><span class="chip">Nothing fried</span>
+  </div>
+
+  <div class="box" style="margin-top:22px">
+    <p class="k">Today&rsquo;s habit</p>
+    <p style="font-weight:600;margin:0">Take the stairs every single time today. No exceptions, no lifts.</p>
+  </div>
+
+  <p class="week-quote" style="margin-top:22px">&ldquo;The exercise that works is the one you did not schedule.&rdquo;</p>
+  <span class="folio">49</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Five &middot; The 14-day meal plan</p>
+  <div class="mealhead">
+    <span class="mn">Day 13</span>
+    <span class="mt">Nothing to drink but water</span>
+  </div>
+
+  <div class="mealgrid">
+    <div class="mealcol">
+      <span class="lbl">Morning</span>
+      <ul>
+        <li>Akara – 2 small balls</li>
+        <li>Pap – 1 cup, no sugar</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Afternoon</span>
+      <ul>
+        <li>Efo riro – 1 full bowl, with titus</li>
+        <li>Brown rice – ½ cup</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Evening</span>
+      <ul>
+        <li>Beans – ½ cup, with vegetables</li>
+        <li>Boiled egg – 1</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="between">
+    <span class="lbl">Between meals</span>
+    Pawpaw – ½ cup &nbsp;|&nbsp; Cucumber – ½ cup &nbsp;|&nbsp; Water only
+  </div>
+
+  <div class="recipe">
+    <div class="recipe-head">Today&rsquo;s recipe &mdash; Efo Riro</div>
+    <div class="recipe-body">
+      <div>
+        <span class="lbl">Ingredients</span>
+        <ul>
+        <li>Spinach or efo tete – 4 handfuls, washed and sliced</li>
+        <li>Titus (mackerel) – 2 pieces</li>
+        <li>Palm oil – 2 tbsp</li>
+        <li>Locust bean (iru) – 1 tbsp</li>
+        <li>Crayfish – 1 tbsp</li>
+        <li>Red pepper and onion – blended, 1 cup</li>
+        <li>Salt – light</li>
+        </ul>
+      </div>
+      <div>
+        <span class="lbl">Preparation</span>
+        <p>Heat the palm oil and fry the blended pepper and onion until the raw smell goes, about 8 minutes. Add iru, crayfish and fish and simmer 5 minutes. Stir the greens in and take it off the heat after 2 minutes — the vegetable should not be limp.</p>
+        <p class="makes"><b>Makes:</b> 4 servings.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="chips">
+    <span class="chip">Greens as the main ingredient</span><span class="chip">Oil measured</span><span class="chip">No alcohol, no bitters, nothing</span>
+  </div>
+
+  <div class="box" style="margin-top:22px">
+    <p class="k">Today&rsquo;s habit</p>
+    <p style="font-weight:600;margin:0">No alcohol. Not a sip, not a bitters, not 'just one'.</p>
+  </div>
+
+  <p class="week-quote" style="margin-top:22px">&ldquo;Alcohol and this virus do not add up. They multiply.&rdquo;</p>
+  <span class="folio">50</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Five &middot; The 14-day meal plan</p>
+  <div class="mealhead">
+    <span class="mn">Day 14</span>
+    <span class="mt">Look back, then start again</span>
+  </div>
+
+  <div class="mealgrid">
+    <div class="mealcol">
+      <span class="lbl">Morning</span>
+      <ul>
+        <li>Oats – 1 cup cooked</li>
+        <li>Pawpaw – ½ cup</li>
+        <li>Boiled egg – 1</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Afternoon</span>
+      <ul>
+        <li>Vegetable soup – 1 bowl, with chicken</li>
+        <li>Millet swallow – 1 small ball</li>
+      </ul>
+    </div>
+    <div class="mealcol">
+      <span class="lbl">Evening</span>
+      <ul>
+        <li>Grilled fish – 1 medium</li>
+        <li>Steamed cabbage – 1 cup</li>
+        <li>Orange – 1</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="between">
+    <span class="lbl">Between meals</span>
+    Cucumber – ½ cup &nbsp;|&nbsp; Guava – 1 &nbsp;|&nbsp; Water
+  </div>
+
+  <div class="recipe">
+    <div class="recipe-head">Today&rsquo;s recipe &mdash; Vegetable Soup (Edikaikong style)</div>
+    <div class="recipe-body">
+      <div>
+        <span class="lbl">Ingredients</span>
+        <ul>
+        <li>Ugu – 3 handfuls</li>
+        <li>Waterleaf – 2 handfuls</li>
+        <li>Beef or fish – 250g</li>
+        <li>Palm oil – 2 tbsp</li>
+        <li>Crayfish – 2 tbsp</li>
+        <li>Onion – 1</li>
+        <li>Pepper and salt – light</li>
+        </ul>
+      </div>
+      <div>
+        <span class="lbl">Preparation</span>
+        <p>Cook the meat with onion until tender. Add the palm oil, crayfish and pepper and simmer 5 minutes. Put the waterleaf in first — it releases water — then the ugu, and take the pot off after 3 minutes. Do not add water; the waterleaf is the water.</p>
+        <p class="makes"><b>Makes:</b> 4 servings.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="chips">
+    <span class="chip">Vegetable-heavy by design</span><span class="chip">Two protein sources</span><span class="chip">No added sugar</span>
+  </div>
+
+  <div class="box" style="margin-top:22px">
+    <p class="k">Today&rsquo;s habit</p>
+    <p style="font-weight:600;margin:0">Measure your waist. Compare it to Day 6. Then turn back to Day 1.</p>
+  </div>
+
+  <p class="week-quote" style="margin-top:22px">&ldquo;Day 15 is Day 1. That is not a failure of imagination — it is the point.&rdquo;</p>
+  <span class="folio">51</span>
+</div>
+
+<!-- ============ CHAPTER 6 ============ -->
+<div class="page">
+  <div class="chap-band"><p class="kicker">Chapter six</p><h2 class="chapno">06</h2><h2 class="chaptitle">Weight, movement and the second disease</h2></div>
+  <p class="lead">There is a second liver disease in Nigeria that almost nobody has been told about, and a great many people have it without knowing: fat stored inside the liver itself.</p>
+  <p>On its own it is a slow problem. Sitting on top of hepatitis B, it is an accelerator. Two people with identical virus results can scar at very different speeds, and belly fat is one of the biggest reasons why.</p>
+  <p>This is also the chapter with the best news in the book, because this one is almost entirely in your hands. No prescription. No appointment. No money.</p>
+
+  <figure>{{IMG:walking}}<figcaption>Thirty minutes, five days a week. No gym, no equipment, no special clothes.</figcaption></figure>
+  <span class="folio">40</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Six &middot; Weight and movement</p>
+  <h3 class="first">Measure your waist, not your weight</h3>
+  <p>The scale is the wrong instrument. Two people can weigh the same and carry completely different amounts of the fat that matters, which is the fat around the organs in your middle.</p>
+  <p>Take a tape measure. Stand normally, breathe out, and measure around your waist at the level of your navel. Write the number in the log. Measure again once a month, on the same morning of the month, before breakfast.</p>
+  <p>If that number is going down, you are winning &mdash; even in a month when the scale has not moved at all.</p>
+
+  <h3>The movement that actually works</h3>
+  <ul class="marks">
+    <li><b>Brisk walking, thirty minutes, five days a week.</b> Brisk means you could still talk but would rather not sing. This alone reduces liver fat.</li>
+    <li><b>A short walk after your largest meal.</b> Ten minutes. Easiest habit in the book to keep.</li>
+    <li><b>Something that makes your big muscles work</b>, twice a week. Squats holding a chair, carrying water, climbing stairs. Muscle is where your body stores sugar it would otherwise store as fat.</li>
+  </ul>
+  <p>You do not need to enjoy it and you do not need to be good at it. You need to do it on days when you do not feel like it, which is the only part that is actually difficult.</p>
+
+  <div class="box cool">
+    <p class="k">If you are already slim</p>
+    <p>Do not skip this chapter. It is possible to be thin and still carry fat inside the liver, particularly if your diet is mostly swallow and rice with little protein. The waist measurement and the walking still apply to you.</p>
+  </div>
+  <span class="folio">41</span>
+</div>
+
+
+<div class="page">
+  <p class="runhead">Six &middot; Weight and movement</p>
+  <h3 class="first">The four-week movement plan</h3>
+  <p>
+    No gym, no equipment, no special clothes. One chair, one wall, and a flight of
+    stairs. The only thing this asks of you is that you do it on the days you do
+    not feel like it.
+  </p>
+  <p>
+    Measure your waist at the navel, before breakfast, on the same morning each
+    week, and write it in the log. That number is your scoreboard &mdash; not the
+    bathroom scale, which hides the fat that matters.
+  </p>
+
+  <div class="week">
+    <div class="week-head"><span class="n">Week 1</span><span class="t">Build the habit</span></div>
+    <div class="week-body">
+      <div class="exrow"><div class="ex">Walk</div><div><p class="dose">15 minutes, 5 days this week</p><p class="cue">Brisk enough that holding a conversation is easy but singing would be a struggle. Morning or evening, whichever you will actually do.</p></div></div>
+      <p class="week-quote">If 15 minutes is too much, do 8. Doing less is not failing. Stopping is.</p>
+    </div>
+  </div>
+
+  <div class="week">
+    <div class="week-head"><span class="n">Week 2</span><span class="t">Add a little load</span></div>
+    <div class="week-body">
+      <div class="exrow"><div class="ex">Walk</div><div><p class="dose">20 minutes, 5 days</p><p class="cue">Same pace. Add the 10-minute walk after your largest meal.</p></div></div>
+      <div class="exrow"><div class="ex">Chair squat</div><div><p class="dose">10 reps × 2 sets, twice this week</p><p class="cue">Stand in front of a chair, feet shoulder-width. Lower slowly as if to sit, touch the seat, stand back up. Rest 60 seconds between sets.</p></div></div>
+      <div class="exrow"><div class="ex">Wall press-up</div><div><p class="dose">10 reps × 2 sets</p><p class="cue">Hands flat on the wall at shoulder height, step your feet back. Bend the elbows, bring your chest to the wall, push away. Keep your body in one straight line.</p></div></div>
+      <div class="exrow"><div class="ex">Calf raise</div><div><p class="dose">15 reps × 2 sets</p><p class="cue">Hold the back of a chair. Rise onto your toes, hold for two seconds, lower slowly.</p></div></div>
+      <p class="week-quote">Muscle is where your body stores sugar it would otherwise store as fat around the liver.</p>
+    </div>
+  </div>
+
+  <div class="week">
+    <div class="week-head"><span class="n">Week 3</span><span class="t">Make it ordinary</span></div>
+    <div class="week-body">
+      <div class="exrow"><div class="ex">Walk</div><div><p class="dose">30 minutes, 5 days, plus 10 minutes after your largest meal every day</p></div></div>
+      <div class="exrow"><div class="ex">Chair squat</div><div><p class="dose">12 reps × 2 sets, three times this week</p><p class="cue">Slower on the way down than on the way up.</p></div></div>
+      <div class="exrow"><div class="ex">Wall press-up</div><div><p class="dose">12 reps × 2 sets</p><p class="cue">Step your feet further back to make it harder.</p></div></div>
+      <div class="exrow"><div class="ex">Stairs</div><div><p class="dose">One flight, twice, on strength days</p><p class="cue">Walk up at a steady pace, walk down. Hold the rail.</p></div></div>
+      <p class="week-quote">The after-meal walk is the easiest habit in this book to keep, and among the most useful.</p>
+    </div>
+  </div>
+
+  <div class="week">
+    <div class="week-head"><span class="n">Week 4</span><span class="t">This is now just your week</span></div>
+    <div class="week-body">
+      <div class="exrow"><div class="ex">Walk</div><div><p class="dose">30–40 minutes, 5 days, plus the after-meal walks</p></div></div>
+      <div class="exrow"><div class="ex">Full circuit</div><div><p class="dose">3 rounds, three times this week</p><p class="cue">12 chair squats, 12 wall press-ups, 15 calf raises. Rest 60 seconds between rounds.</p></div></div>
+      <div class="exrow"><div class="ex">Carry</div><div><p class="dose">1 minute, twice</p><p class="cue">Pick up a full jerry can in each hand and walk. Back straight, shoulders down. Put it down before your form goes.</p></div></div>
+      <p class="week-quote">Nothing changes in Week 5. That is the point — you have built the thing you keep.</p>
+    </div>
+  </div>
+
+  <div class="box warn">
+    <p class="k">Check with a doctor before you start if</p>
+    <ul class="marks" style="margin-bottom:0">
+      <li>You have been told you have cirrhosis or advanced scarring</li>
+      <li>You have swelling in your belly or your legs</li>
+      <li>You have ever vomited blood or passed black stool</li>
+      <li>You have heart trouble, or get chest pain on exertion</li>
+    </ul>
+    <p style="margin-top:14px">
+      Exercise is still usually good for you. The right <em>amount</em> is a
+      conversation, not a page in a book. And stop straight away if you feel dizzy,
+      unusually breathless, or unwell.
+    </p>
+  </div>
+  <span class="folio">53</span>
+</div>
+
+<!-- ============ CHAPTER 7 ============ -->
+<div class="page">
+  <div class="chap-band"><p class="kicker">Chapter seven</p><h2 class="chapno">07</h2><h2 class="chaptitle">Who to tell, and how to sleep again</h2></div>
+  <p class="lead">Ask anybody living with hepatitis B in Nigeria what the hardest part is, and almost none of them will say the virus.</p>
+  <p>They will say the silence. Carrying something you cannot mention. Watching a colleague talk about somebody who "has hepatitis" and saying nothing. Wondering whether the person you love will stay.</p>
+  <p>No blood test measures this, no doctor asks about it, and it does more damage to more days than the virus does. So it gets a chapter.</p>
+
+  <h3>You do not owe everybody the truth</h3>
+  <p>This is your private medical business. It belongs to you and nobody else. You are not obliged to tell your employer, your landlord, your church, your friends or your extended family. Your neighbour does not need to know. Your colleague does not need to know. And that aunty who carries news from house to house — she especially does not need to know.</p>
+  <p><b>Three groups genuinely need to know:</b> anyone you are sexually involved with, anyone you live with closely enough to share a razor or a toothbrush, and any doctor, dentist or nurse treating you. That is the list. Everyone else is your choice, and choosing no is not dishonesty.</p>
+  <span class="folio">44</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Seven &middot; Who to tell</p>
+  <h3 class="first">The conversation you are dreading</h3>
+  <figure>{{IMG:couple}}<figcaption>The fear is almost always bigger than the conversation turns out to be.</figcaption></figure>
+  <p>Telling a partner is the one that keeps people awake, so let us make it concrete. There are four things to say, in this order:</p>
+  <ol>
+    <li><b>What it is.</b> "I have hepatitis B. It is a virus in the liver. I have had it a long time, most likely since I was a child."</li>
+    <li><b>What is being done.</b> "I am under a doctor. I have my numbers. I am being monitored properly."</li>
+    <li><b>What it means for them.</b> "You need a test. If you are negative, there is a vaccine, and after it you are protected."</li>
+    <li><b>What you need.</b> "I needed you to know. I am not asking you to fix anything."</li>
+  </ol>
+  <p>That fourth point matters more than the other three. I know the fear — you are lying down at night thinking, <em>what if this person leaves me?</em> That fear is normal. But hear me well: most people panic because they think they are being handed a problem. Hand them a plan instead, and watch the whole conversation change in front of you.</p>
+
+  <div class="box good">
+    <p class="k">The sentence that changes the whole conversation</p>
+    <p><b>A vaccinated partner is a protected partner.</b> Once they complete the vaccine and it has worked, they cannot catch it from you. Couples live full lives with this, have children, and grow old together. This is ordinary, not exceptional.</p>
+  </div>
+
+  <h3>If they react badly</h3>
+  <p>Some do, at first. It is usually fear wearing the face of anger, and it usually passes once they understand that they can be protected. Give them a few days and the facts on this page. If somebody leaves over information you were brave enough to share, they were telling you something about themselves.</p>
+  <span class="folio">45</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Seven &middot; Who to tell</p>
+  <h3 class="first">The heavy weeks</h3>
+  <p>In the first months after a diagnosis, many people go through a stretch that looks like this: lying awake, searching the same thing on the phone at 2am, snapping at people, losing interest in things, feeling like a burden, imagining a future that is much worse than the likely one.</p>
+  <p>That is not weakness and it is not your liver. It is what happens to almost anybody handed news like this, and it lifts.</p>
+  <ul class="marks">
+    <li><b>Stop Googling at night.</b> Nothing you find at 2am is true, and the most frightening page is always the one that comes first.</li>
+    <li><b>Give worry a fixed time.</b> Fifteen minutes in the afternoon, written down. Outside that, it waits.</li>
+    <li><b>Tell your one person</b> when it is a bad week. That is what Week 8 was for.</li>
+    <li><b>If it lasts more than two weeks</b> &mdash; if you cannot sleep, cannot eat, or stop wanting to be here &mdash; tell a doctor. That is a medical problem with a medical answer, exactly like the virus.</li>
+  </ul>
+
+  <figure>{{IMG:night}}<figcaption>Phone face down, across the room. The searching does not end at an answer; it ends when you stop.</figcaption></figure>
+
+  <h3>Something to say in the morning</h3>
+  <p>Not affirmations about being healed &mdash; you already know this book does not trade in that. These are about the only thing that was ever in your control.</p>
+  <div class="box cool">
+    <p>"I found out early, and that is an advantage."</p>
+    <p>"I know my numbers. Most people do not."</p>
+    <p>"My household is protected because of what I did."</p>
+    <p>"I am doing the things that are mine to do."</p>
+  </div>
+  <span class="folio">46</span>
+</div>
+
+<!-- ============ CHAPTER 8 ============ -->
+<div class="page">
+  <div class="chap-band"><p class="kicker">Chapter eight</p><h2 class="chapno">08</h2><h2 class="chaptitle">Warning signs &mdash; when to go now</h2></div>
+  <p class="lead">Everything in this book so far has been about the quiet years. This chapter is about the small number of things that are not quiet, and that must never be waited on.</p>
+  <p>Read it once now. Then show it to whoever you live with, because some of these are easier for another person to notice than for you.</p>
+
+  <div class="t-wrap"><table>
+    <thead><tr><th>If you see this</th><th>It may mean</th><th>Do this</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Vomiting blood, or black tarry stool</td><td>Bleeding inside</td><td><b>Hospital immediately.</b> Do not wait for morning. This is the most dangerous item on this page.</td></tr>
+      <tr><td class="k">Yellow eyes or skin, dark urine, pale stool</td><td>The liver is struggling to do its work</td><td>See a doctor within days, not weeks.</td></tr>
+      <tr><td class="k">Swollen belly, or swelling in both legs</td><td>Fluid collecting</td><td>See a doctor this week.</td></tr>
+      <tr><td class="k">Confusion, unusual drowsiness, awake at night and sleeping by day</td><td>Waste the liver should clear is reaching the brain</td><td><b>Hospital.</b> Someone else usually notices this first.</td></tr>
+      <tr><td class="k">Bruising easily, or bleeding that will not stop</td><td>Clotting is affected</td><td>See a doctor promptly.</td></tr>
+      <tr><td class="k">Losing weight without trying, or pain under the right ribs</td><td>Needs investigating properly</td><td>Appointment, and mention hepatitis B in the first sentence.</td></tr>
+    </tbody>
+  </table></div>
+  <span class="folio">49</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Eight &middot; Warning signs</p>
+  <h3 class="first">The scan you keep having when nothing is wrong</h3>
+  <p>Every six months, for life: an ultrasound of your liver, usually with a blood test alongside it.</p>
+  <p>This will feel pointless. You will feel perfectly well. The scan will come back normal, again, and by the third or fourth time you will be asking yourself, <em>am I not just wasting money here?</em> Every single person asks that question. Ask it, then go and do the scan.</p>
+  <p>Here is why. The thing this scan looks for is treatable when it is small and found by accident, and very difficult when it is large and found because it started to hurt. The entire value of the scan is that it happens on a schedule rather than in response to a symptom &mdash; because by the time there is a symptom, the easy window has closed.</p>
+  <div class="pullquote">The scan you resent paying for is the one doing the actual work.</div>
+
+  <h3>The eight questions</h3>
+  <p>Copy these onto paper and take them in. Ask them out loud.</p>
+  <ol>
+    <li>What is my viral load, and has it changed since last time?</li>
+    <li>What is my ALT?</li>
+    <li>Do I have any scarring, and how was that measured?</li>
+    <li>Do I need treatment now? If not, what exactly would change that?</li>
+    <li>When is my next ultrasound due?</li>
+    <li>Is everything I am taking safe for my liver &mdash; including what I buy myself?</li>
+    <li>Has everyone in my household been tested and vaccinated?</li>
+    <li>What should make me come back before my next appointment?</li>
+  </ol>
+  <span class="folio">50</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Eight &middot; Warning signs</p>
+  <h3 class="first">When you cannot afford it this month</h3>
+  <p>This is real and pretending otherwise would be dishonest. Tests cost money, appointments cost transport, and the six-month scan arrives whether or not the month has been kind.</p>
+  <p>What not to do is disappear. What to do instead:</p>
+  <ul class="marks">
+    <li><b>Tell the doctor plainly.</b> "I can afford one test this month. Which one?" This is a normal question and they will answer it.</li>
+    <li><b>Ask about the free score.</b> A reasonable estimate of scarring can be worked out from ordinary blood results you may already have. It costs nothing extra.</li>
+    <li><b>Ask about teaching hospitals and government facilities</b>, which are usually cheaper than private laboratories for the same test.</li>
+    <li><b>Ask about the generic tablet.</b> If you are on treatment, generic versions are far cheaper and are the same medicine. Ask before you ration or stop.</li>
+    <li><b>Never stretch a tablet by taking it every other day.</b> That is worse than useless &mdash; it can make the virus harder to control later. Talk to the doctor instead.</li>
+    <li><b>Check whether health insurance covers it.</b> Many people are enrolled through work and have never checked what it includes.</li>
+  </ul>
+  <div class="box warn">
+    <p class="k">The thing that actually costs money</p>
+    <p>Everything on this page is cheaper than the hospital admission that follows five years of not looking. That is not a scare &mdash; it is arithmetic, and it is why the scan is worth arguing for.</p>
+  </div>
+  <span class="folio">51</span>
+</div>
+
+<!-- ============ CHAPTER 9 ============ -->
+<div class="page">
+  <div class="chap-band"><p class="kicker">Chapter nine</p><h2 class="chapno">09</h2><h2 class="chaptitle">Protecting everyone else</h2></div>
+  <p class="lead">This is the chapter to forward. If you do nothing else with this book, send this chapter to your brothers and sisters, because they are far more likely to be carrying this than the general population &mdash; and far more likely not to know.</p>
+
+  <div class="fig">
+    <p class="fig-title">Figure 4 &mdash; how it spreads, and how it does not</p>
+    <svg viewBox="0 0 700 262" role="img" aria-label="Ways hepatitis B spreads compared with ways it does not spread">
+      <g font-family="var(--body)" font-size="12.5">
+        <rect x="8" y="8" width="336" height="246" fill="var(--clay-soft)" stroke="var(--clay)"/>
+        <rect x="8" y="8" width="336" height="34" fill="var(--clay)"/>
+        <text x="176" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="var(--on-solid)">IT CAN SPREAD THIS WAY</text>
+        <text x="26" y="68" fill="var(--ink)">Mother to baby at birth</text>
+        <text x="26" y="94" fill="var(--ink)">Sex without protection</text>
+        <text x="26" y="120" fill="var(--ink)">Shared razors and clippers</text>
+        <text x="26" y="146" fill="var(--ink)">Shared toothbrush</text>
+        <text x="26" y="172" fill="var(--ink)">Unsterile needles or injections</text>
+        <text x="26" y="198" fill="var(--ink)">Manicure and pedicure tools</text>
+        <text x="26" y="224" fill="var(--ink)">Unscreened blood</text>
+
+        <rect x="356" y="8" width="336" height="246" fill="var(--moss-soft)" stroke="var(--moss)"/>
+        <rect x="356" y="8" width="336" height="34" fill="var(--moss)"/>
+        <text x="524" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="var(--on-solid)">IT CANNOT SPREAD THIS WAY</text>
+        <text x="374" y="68" fill="var(--ink)">Eating from the same bowl</text>
+        <text x="374" y="94" fill="var(--ink)">Sharing cups and cutlery</text>
+        <text x="374" y="120" fill="var(--ink)">Hugging, kissing, holding hands</text>
+        <text x="374" y="146" fill="var(--ink)">Coughing or sneezing</text>
+        <text x="374" y="172" fill="var(--ink)">Toilets and bathrooms</text>
+        <text x="374" y="198" fill="var(--ink)">Mosquito bites</text>
+        <text x="374" y="224" fill="var(--ink)">Cooking for your family</text>
+      </g>
+    </svg>
+  </div>
+
+  <p>Read that second column twice, and then read it out loud to anybody who starts behaving somehow. You cannot get hepatitis B from eating somebody's food. You cannot get it from greeting them. You cannot get it from mosquito. Almost all the wickedness people with this virus suffer in this country comes from people who believe that second column belongs in the first one.</p>
+  <span class="folio">55</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Nine &middot; Protecting everyone else</p>
+  <h3 class="first">The vaccine, which actually ends this</h3>
+  <p>Hepatitis B is one of the very few serious viruses in the world with a genuinely excellent vaccine. Three injections. That is all. Three injections, and your husband, your wife, your children are covered — for years, and for most people for life. Not expensive, and available in ordinary clinics.</p>
+
+  <div class="fig">
+    <p class="fig-title">Figure 5 &mdash; the schedule</p>
+    <svg viewBox="0 0 700 150" role="img" aria-label="Hepatitis B vaccine schedule: three doses at zero, one and six months, then a check">
+      <g font-family="var(--body)">
+        <line x1="60" y1="70" x2="640" y2="70" stroke="var(--rule)" stroke-width="3"/>
+        <circle cx="90" cy="70" r="15" fill="var(--indigo)"/>
+        <text x="90" y="75" text-anchor="middle" font-size="13" font-weight="700" fill="var(--on-solid)">1</text>
+        <text x="90" y="108" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--ink)">Today</text>
+
+        <circle cx="270" cy="70" r="15" fill="var(--indigo)"/>
+        <text x="270" y="75" text-anchor="middle" font-size="13" font-weight="700" fill="var(--on-solid)">2</text>
+        <text x="270" y="108" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--ink)">1 month later</text>
+
+        <circle cx="460" cy="70" r="15" fill="var(--indigo)"/>
+        <text x="460" y="75" text-anchor="middle" font-size="13" font-weight="700" fill="var(--on-solid)">3</text>
+        <text x="460" y="108" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--ink)">6 months after the first</text>
+
+        <circle cx="620" cy="70" r="15" fill="var(--moss)"/>
+        <text x="620" y="108" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--moss)">Check it worked</text>
+        <text x="620" y="126" text-anchor="middle" font-size="11" fill="var(--ink-2)">a blood test after</text>
+      </g>
+    </svg>
+  </div>
+
+  <figure>{{IMG:vaccine}}<figcaption>Three injections over six months. This is what ending it in a family actually looks like.</figcaption></figure>
+  <p>Do not assume the series worked &mdash; ask for the blood test afterwards that confirms it. A small number of people need a repeat course, and it is better to know.</p>
+  <span class="folio">56</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Nine &middot; Protecting everyone else</p>
+  <h3 class="first">If you are pregnant, or may become pregnant</h3>
+  <p>This is the most urgent page in the book for anyone it applies to, because the window is measured in hours.</p>
+  <ul class="marks">
+    <li><b>Tell the clinic you are hepatitis B positive at your first antenatal visit.</b> Not later. This changes the plan for the birth.</li>
+    <li><b>The baby needs the first vaccine dose within 24 hours of being born.</b> Say this out loud in the delivery room. Say it more than once.</li>
+    <li>Ask whether the additional injection that gives immediate protection is available where you will deliver, and arrange it in advance if it is not.</li>
+    <li>Ask about having your viral load checked during pregnancy. If it is high, a tablet in the last months of pregnancy substantially lowers the risk of passing it on.</li>
+    <li>Breastfeeding is generally considered safe once the baby has been vaccinated. Ask your own doctor about your own situation.</li>
+  </ul>
+  <div class="box good">
+    <p class="k">Why this page matters more than any other</p>
+    <p>Most Nigerians carrying this virus got it as newborns. Everything on this page exists to stop that happening one more time. A birth handled properly is a chain broken permanently.</p>
+  </div>
+
+  <figure>{{IMG:family_v2}}<figcaption>Tested, vaccinated, and no longer carrying it forward. This is what the end of it looks like in one household.</figcaption></figure>
+  <span class="folio">57</span>
+</div>
+
+<div class="page">
+  <p class="runhead">Nine &middot; Protecting everyone else</p>
+  <h3 class="first">Ordinary things, handled well</h3>
+  <ul class="marks">
+    <li><b>Your own clipper.</b> Buy a set and take it to the barber, or find a barber who sterilises properly. This applies to your sons too.</li>
+    <li><b>Your own manicure set</b> at the salon.</li>
+    <li><b>Your own razor and toothbrush</b>, kept separately at home.</li>
+    <li><b>Cover any cut</b> with a plaster until it has healed, and clean up your own blood with bleach and water.</li>
+    <li><b>Never take an injection from anybody who is not a health worker</b>, and never let a needle be reused.</li>
+    <li><b>Tell every dentist and doctor</b> before they treat you. Not because they will refuse &mdash; because it changes what they watch for.</li>
+  </ul>
+
+  <h3>What you do not have to do</h3>
+  <p>You do not need separate plates. You do not need to stop cooking for your family. You do not need to eat alone, avoid hugging your children, or sit apart at gatherings. None of that protects anybody, and all of it hurts.</p>
+  <div class="pullquote">You are not a danger to the people you love. You are the person who found out in time to protect them.</div>
+  <span class="folio">58</span>
+</div>
+
+<!-- ============ TRACKER ============ -->
+<div class="page">
+  <p class="runhead">Your 90-day tracker</p>
+  <h3 class="first">Tick it as you go</h3>
+  <p>Print this page, or mark it on your phone. Twelve weeks, one job each. A week missed is a week done late, not a plan abandoned.</p>
+  <div class="tracker">
+    <div class="tcell"><span class="w">Week 1</span><span class="t">Get the full picture</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 2</span><span class="t">Protect the house</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 3</span><span class="t">Empty the danger shelf</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 4</span><span class="t">Fix the store cupboard</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 5</span><span class="t">Build the plate</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 6</span><span class="t">Move, measure waist</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 7</span><span class="t">Sleep</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 8</span><span class="t">Tell one person</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 9</span><span class="t">Prepare the review</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 10</span><span class="t">Go and ask</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 11</span><span class="t">Set the calendar</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 12</span><span class="t">The new ordinary</span><span class="box-tick"></span></div>
+  </div>
+
+  <h3>Your log</h3>
+  <p>Take this to every appointment. A patient with a written record gets a different consultation.</p>
+  <div class="t-wrap"><table>
+    <thead><tr><th>Date</th><th>ALT</th><th>Viral load</th><th>Scarring</th><th>Waist</th><th>Next due</th></tr></thead>
+    <tbody>
+      <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    </tbody>
+  </table></div>
+  <span class="folio">61</span>
+</div>
+
+<!-- ============ CLOSING ============ -->
+<div class="page">
+  <p class="runhead">Before you close this book</p>
+  <p class="lead">You started this with a piece of paper and a silence.</p>
+  <p>You now know what the word on it means. You know which numbers decide your treatment and how to ask for them. You know what to take out of your house, what to stop buying, and which bottle to refuse no matter who is offering it.</p>
+  <p>You know the people in your home can be protected, and roughly what that takes.</p>
+  <p>Nothing in these pages cured anything. That was never available, and this book would not have been worth your money if it had pretended otherwise. What was available was this: the difference between the people who find out early and use it, and the people who find out early and wait.</p>
+  <p>You are in the first group now. That was the whole point.</p>
+  <div class="pullquote">Start Week 1. Not on Monday. Not next month when things calm down &mdash; because things never calm down. This week.</div>
+
+  <div class="box good">
+    <p style="font-family:var(--display);font-style:italic;font-size:1.06rem;line-height:1.5">Lord, thank You for the warning I was given in time.</p>
+    <p style="font-family:var(--display);font-style:italic;font-size:1.06rem;line-height:1.5">Steady me in the ordinary things &mdash; the appointments, the walking, the waiting. Keep my household safe. And where there is fear in me, put usefulness in its place.</p>
+    <p style="font-size:0.88rem;color:var(--ink-2)">In Jesus' name, Amen. &middot; <em>Ameen.</em></p>
+  </div>
+
+  <div class="signoff">
+    <p class="who">Dr. David Akinyode</p>
+    <p class="what">Author, The First 90 Days</p>
+    <p style="font-size:0.85rem;color:var(--ink-2);margin-top:10px">Share this book freely with anybody who needs it &mdash; particularly Chapter 9. Please encourage everyone you send it to to get tested and to see a qualified doctor.</p>
+  </div>
+  <span class="folio">63</span>
+</div>
+
+</div>
+
+<footer class="meta">
+  The First 90 Days &mdash; Living Well With Hepatitis B &middot; draft manuscript, 20 September 2026 &middot;
+  photography generated with Gemini on Vertex AI &middot; figures drawn as vector &middot;
+  every clinical statement pending review and sign-off by Dr.&nbsp;Akinyode before publication.
+</footer>
