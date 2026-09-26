@@ -160,6 +160,15 @@
   .exrow .ex { font-weight: 700; font-size: 1.02rem; color: var(--indigo); }
   .exrow .dose { font-size: 1.01rem; font-weight: 600; margin: 0 0 6px; max-width: none; }
   .exrow .cue { font-size: 0.97rem; line-height: 1.65; color: var(--ink-2); margin: 0; max-width: none; }
+  /* Prayers, set the way the Diabetes Fix sets them: no container, centred,
+     bold italic, one line of verse per line, a rule top and bottom, and the
+     two faiths as separate blocks rather than one run-on sentence. */
+  .prayer { text-align: center; padding-block: 18px 6px; }
+  .prayer h2 { font-size: clamp(1.3rem, 3.8vw, 1.72rem); font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--clay); margin: 0 0 20px; }
+  .prayer hr { border: 0; border-top: 1px solid var(--rule-soft, #D9CDBA); max-width: 76%; margin: 0 auto; }
+  .prayer .verse { font-weight: 700; font-style: italic; color: var(--indigo); font-size: clamp(1rem, 2.4vw, 1.14rem); line-height: 1.95; margin: 30px auto; max-width: 46ch; }
+  .prayer .verse.second { margin-top: 26px; }
+  .prayer .amen { font-weight: 700; font-style: italic; color: var(--indigo); font-size: clamp(1rem, 2.4vw, 1.14rem); margin: 0 auto 30px; max-width: none; }
   .tracker { display: grid; grid-template-columns: repeat(auto-fit, minmax(146px, 1fr)); gap: 12px; margin: 28px 0; }
   .tcell { border-radius: var(--r-sm); background: var(--paper-2); border: 1.5px solid var(--rule); padding: 15px 16px 16px; min-height: 104px; display: flex; flex-direction: column; gap: 9px; }
   .tcell .w { font-size: 0.71rem; letter-spacing: 0.11em; text-transform: uppercase; font-weight: 700; color: var(--ochre); }
@@ -189,13 +198,28 @@
 
 <!-- ============ PRAYER ============ -->
 <div class="page">
-  <p class="kicker">Before you begin</p>
-  <div class="box good">
-    <p style="font-family:var(--display);font-style:italic;font-size:1.06rem;line-height:1.5">Father, I did not choose this, but I am not without help.</p>
-    <p style="font-family:var(--display);font-style:italic;font-size:1.06rem;line-height:1.5">Steady my hands as I do what must be done. Give me the sense to seek good counsel, the patience to keep going when nothing feels different, and peace in the waiting.</p>
-    <p style="font-family:var(--display);font-style:italic;font-size:1.06rem;line-height:1.5">Guard the people who live under my roof.</p>
-    <p style="font-size:0.88rem;color:var(--ink-2)">In Jesus' name, Amen. &middot; <em>Bismillahir Rahmanir Raheem. Ya Allah, You are Ash-Shafi. Grant us strength, protection and understanding. Ameen.</em></p>
+  <div class="prayer">
+    <h2>Opening Prayer</h2>
+    <hr>
+    <p class="verse">
+      Heavenly Father,<br>
+      I did not choose this, but I am not without help.<br>
+      Steady my hands as I do what must be done.<br>
+      Give me the sense to seek good counsel,<br>
+      the patience to keep going when nothing feels different,<br>
+      and peace in the waiting.<br>
+      Guard the people who live under my roof,<br>
+      and let none of them carry what I carry.
+    </p>
+    <p class="verse second">
+      For my Muslim brothers and sisters:<br>
+      Bismillahir Rahmanir Raheem. Ya Allah, You are Ash-Shafi &mdash;<br>
+      the One who heals. Grant us strength, protection and understanding.
+    </p>
+    <p class="amen">In Jesus&rsquo; Name, Amen.</p>
+    <hr>
   </div>
+
   <div class="box warn">
     <p class="k">Please read this first</p>
     <p>This book is education, not treatment. It does not diagnose you, it does not prescribe for you, and it cannot replace a doctor who has seen your results. Nothing in these pages should be used as a reason to delay, change or stop any medicine you have been given. If you are unwell, go to hospital. Everything here is written to make you better at working <em>with</em> your doctor, not instead of one.</p>
@@ -2242,10 +2266,23 @@
   <p>You are in the first group now. That was the whole point.</p>
   <div class="pullquote">Start Week 1. Not on Monday. Not next month when things calm down &mdash; because things never calm down. This week.</div>
 
-  <div class="box good">
-    <p style="font-family:var(--display);font-style:italic;font-size:1.06rem;line-height:1.5">Lord, thank You for the warning I was given in time.</p>
-    <p style="font-family:var(--display);font-style:italic;font-size:1.06rem;line-height:1.5">Steady me in the ordinary things &mdash; the appointments, the walking, the waiting. Keep my household safe. And where there is fear in me, put usefulness in its place.</p>
-    <p style="font-size:0.88rem;color:var(--ink-2)">In Jesus' name, Amen. &middot; <em>Ameen.</em></p>
+  <div class="prayer">
+    <h2>A Closing Prayer</h2>
+    <hr>
+    <p class="verse">
+      Lord, thank You for the warning I was given in time.<br>
+      Steady me in the ordinary things &mdash;<br>
+      the appointments, the walking, the waiting.<br>
+      Keep my household safe.<br>
+      And where there is fear in me, put usefulness in its place.
+    </p>
+    <p class="verse second">
+      For my Muslim brothers and sisters:<br>
+      Bismillahir Rahmanir Raheem. Ya Allah, You are Ash-Shafi &mdash;<br>
+      the One who heals. Keep us, and keep those we love.
+    </p>
+    <p class="amen">In Jesus&rsquo; Name, Amen.</p>
+    <hr>
   </div>
 
   <div class="signoff">
