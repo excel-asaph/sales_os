@@ -270,7 +270,7 @@ doctor's specific instructions.
 
     python hepatitis-b-book/build.py && python hepatitis-b-book/topdf.py
 
-Output is `Hepatitis Clear.pdf`, **84 pages, A4, ~2.7MB**, gitignored like
+Output is `Hepatitis Clear.pdf`, **105 pages, A4, ~2.8MB**, gitignored like
 `book.html`. Rendered through headless Chrome rather than WeasyPrint or
 wkhtmltopdf, because it is the same Blink engine the book is authored and
 previewed in — `clamp()`, grid, `break-inside` and `object-fit` behave
@@ -295,7 +295,7 @@ showing up as half-empty pages.
 **Print now flows.** Breaks are forced only where a book would take one —
 the cover, every chapter opener, and the standalone front and back sections
 — and `break-inside: avoid` keeps each unit whole. Chrome paginates the
-rest: 93 → 75 → 73 → 79 → 84 pages, no content clipped, nothing running past the trim.
+rest: 93 → 75 → 73 → 79 → 84 → 105 pages, no content clipped, nothing running past the trim.
 
 ### Why A4
 
@@ -370,9 +370,18 @@ not have fixed either:
 
 Costs 79 → 84 pages.
 
+### The final type size
+
+Body went to **12pt** and the spacing up by roughly a quarter again,
+which lands the measure at a **median 67 characters a line, 90th
+percentile 76** — the middle of the comfortable band rather than the top
+of it. The type got bigger and the lines got easier at the same time,
+which only worked because the 160mm column had headroom left. 84 → 105
+pages; page count costs nothing in a PDF.
+
 ### Where it stands
 
-Average page fill **73%**, nothing clipped, nothing past the trim. The loose
+Average page fill **68%**, nothing clipped, nothing past the trim. The loose
 pages are chapter openers and section ends, which are meant to be airy.
 Tightening further would mean redesigning the structured components rather
 than paginating them.
