@@ -91,7 +91,7 @@
 
   .t-wrap { overflow-x: auto; margin: 30px 0; border-radius: var(--r); border: 1.5px solid var(--rule); background: var(--paper-2); }
   table { border-collapse: collapse; width: 100%; }
-  th, td { text-align: left; padding: 16px 18px; border-bottom: 1px solid var(--rule); font-size: 1rem; line-height: 1.62; vertical-align: top; }
+  th, td { text-align: left; padding: 16px 18px; border-bottom: 1px solid var(--rule); font-size: 1.05rem; line-height: 1.62; vertical-align: top; }
   thead th { background: var(--indigo); color: var(--on-solid); font-size: 0.76rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border-bottom: 0; }
   tbody tr:nth-child(even) td { background: rgba(224,212,196,0.24); }
   tbody tr:last-child td { border-bottom: 0; }
@@ -143,6 +143,27 @@
   .truth-line { font-size: 1.12rem; font-weight: 700; color: var(--moss); line-height: 1.5; margin: 0 0 13px; max-width: 54ch; }
   .myth p.expl { font-size: 1.04rem; line-height: 1.75; margin: 0; }
   .myth-ref { display: block; margin-top: 14px; font-size: 0.93rem; font-weight: 600; color: var(--indigo); }
+  /* Figures 3 and 4 were SVG; see cols.py. Colour never carries the meaning
+     alone here -- every column has a worded header and every row a mark. */
+  .cols { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(212px, 1fr)); }
+  .col { border-radius: var(--r-sm); overflow: hidden; border: 1.5px solid; }
+  .col > p.h { margin: 0; padding: 13px 14px; text-align: center; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--on-solid); max-width: none; line-height: 1.3; }
+  .col ul { list-style: none; display: block; margin: 0; padding: 2px 16px 8px; max-width: none; }
+  .col li { position: relative; padding: 13px 0 13px 30px; font-size: 1.05rem; line-height: 1.5; border-top: 1px solid rgba(90, 83, 71, 0.16); }
+  .col li:first-child { border-top: 0; }
+  .col li::before { position: absolute; left: 2px; top: 12px; width: 18px; font-weight: 700; line-height: 1.5; }
+  .col.go { border-color: var(--moss); background: var(--moss-soft); }
+  .col.go > p.h { background: var(--moss); }
+  .col.go li::before { content: "✓"; color: var(--moss); }
+  .col.care { border-color: var(--ochre); background: var(--ochre-soft); }
+  .col.care > p.h { background: var(--ochre); }
+  .col.care li::before { content: "●"; color: var(--ochre); font-size: 0.62rem; top: 15px; }
+  .col.stop { border-color: var(--clay); background: var(--clay-soft); }
+  .col.stop > p.h { background: var(--clay); }
+  .col.stop li::before { content: "✕"; color: var(--clay); }
+  .col.risk { border-color: var(--clay); background: var(--clay-soft); }
+  .col.risk > p.h { background: var(--clay); }
+  .col.risk li::before { content: "!"; color: var(--clay); font-size: 1.1rem; }
   .cover { position: relative; background: #FFFFFF; }
   .cover img { width: 100%; }
   .cover-top { position: absolute; top: 9.5%; left: 0; right: 0; padding-inline: clamp(30px, 9vw, 92px); text-align: center; }
@@ -946,50 +967,52 @@
 
   <div class="fig">
     <p class="fig-title">Figure 3 &mdash; the traffic light</p>
-    <svg viewBox="0 0 700 330" role="img" aria-label="Nigerian foods grouped as eat freely, eat in moderation, and stop">
-      <g font-family="var(--body)" font-size="12.5">
-        <rect x="8" y="8" width="220" height="314" fill="var(--moss-soft)" stroke="var(--moss)"/>
-        <rect x="8" y="8" width="220" height="34" fill="var(--moss)"/>
-        <text x="118" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="var(--on-solid)">EAT FREELY</text>
-        <text x="24" y="66" fill="var(--ink)">Ugu, spinach, waterleaf</text>
-        <text x="24" y="90" fill="var(--ink)">Okra, garden egg, cucumber</text>
-        <text x="24" y="114" fill="var(--ink)">Fish &mdash; grilled or boiled</text>
-        <text x="24" y="138" fill="var(--ink)">Eggs</text>
-        <text x="24" y="162" fill="var(--ink)">Beans, well cooked</text>
-        <text x="24" y="186" fill="var(--ink)">Chicken without the skin</text>
-        <text x="24" y="210" fill="var(--ink)">Tomato, pepper, onion</text>
-        <text x="24" y="234" fill="var(--ink)">Pawpaw, orange, guava</text>
-        <text x="24" y="258" fill="var(--ink)">Water</text>
-        <text x="24" y="282" fill="var(--ink)">Black coffee, 1&ndash;2 cups</text>
-
-        <rect x="240" y="8" width="220" height="314" fill="var(--ochre-soft)" stroke="var(--ochre)"/>
-        <rect x="240" y="8" width="220" height="34" fill="var(--ochre)"/>
-        <text x="350" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="var(--on-solid)">SMALLER PORTIONS</text>
-        <text x="256" y="66" fill="var(--ink)">Eba, fufu, amala</text>
-        <text x="256" y="90" fill="var(--ink)">White rice</text>
-        <text x="256" y="114" fill="var(--ink)">Yam, potato</text>
-        <text x="256" y="138" fill="var(--ink)">Ripe plantain</text>
-        <text x="256" y="162" fill="var(--ink)">Bread</text>
-        <text x="256" y="186" fill="var(--ink)">Red meat</text>
-        <text x="256" y="210" fill="var(--ink)">Palm oil in cooking</text>
-        <text x="256" y="234" fill="var(--ink)">Groundnut &mdash; inspected</text>
-        <text x="256" y="258" fill="var(--ink)">Salt</text>
-
-        <rect x="472" y="8" width="220" height="314" fill="var(--clay-soft)" stroke="var(--clay)"/>
-        <rect x="472" y="8" width="220" height="34" fill="var(--clay)"/>
-        <text x="582" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="var(--on-solid)">STOP</text>
-        <text x="488" y="66" fill="var(--ink)">All alcohol</text>
-        <text x="488" y="90" fill="var(--ink)">Palm wine, bitters</text>
-        <text x="488" y="114" fill="var(--ink)">Herbal mixtures, agbo</text>
-        <text x="488" y="138" fill="var(--ink)">"Liver cleanse" products</text>
-        <text x="488" y="162" fill="var(--ink)">Mouldy or musty grain</text>
-        <text x="488" y="186" fill="var(--ink)">Roadside ground mixes</text>
-        <text x="488" y="210" fill="var(--ink)">Soft drinks, malt</text>
-        <text x="488" y="234" fill="var(--ink)">Fried food, most days</text>
-        <text x="488" y="258" fill="var(--ink)">Suya, daily</text>
-        <text x="488" y="282" fill="var(--ink)">Cigarettes</text>
-      </g>
-    </svg>
+    <div class="cols">
+      <div class="col go">
+        <p class="h">Eat freely</p>
+        <ul>
+          <li>Ugu, spinach, waterleaf</li>
+          <li>Okra, garden egg, cucumber</li>
+          <li>Fish &mdash; grilled or boiled</li>
+          <li>Eggs</li>
+          <li>Beans, well cooked</li>
+          <li>Chicken without the skin</li>
+          <li>Tomato, pepper, onion</li>
+          <li>Pawpaw, orange, guava</li>
+          <li>Water</li>
+          <li>Black coffee, 1&ndash;2 cups</li>
+        </ul>
+      </div>
+      <div class="col care">
+        <p class="h">Smaller portions</p>
+        <ul>
+          <li>Eba, fufu, amala</li>
+          <li>White rice</li>
+          <li>Yam, potato</li>
+          <li>Ripe plantain</li>
+          <li>Bread</li>
+          <li>Red meat</li>
+          <li>Palm oil in cooking</li>
+          <li>Groundnut &mdash; inspected</li>
+          <li>Salt</li>
+        </ul>
+      </div>
+      <div class="col stop">
+        <p class="h">Stop</p>
+        <ul>
+          <li>All alcohol</li>
+          <li>Palm wine, bitters</li>
+          <li>Herbal mixtures, agbo</li>
+          <li>&ldquo;Liver cleanse&rdquo; products</li>
+          <li>Mouldy or musty grain</li>
+          <li>Roadside ground mixes</li>
+          <li>Soft drinks, malt</li>
+          <li>Fried food, most days</li>
+          <li>Suya, daily</li>
+          <li>Cigarettes</li>
+        </ul>
+      </div>
+    </div>
   </div>
   <span class="folio">35</span>
 </div>
@@ -2272,31 +2295,32 @@
 
   <div class="fig">
     <p class="fig-title">Figure 4 &mdash; how it spreads, and how it does not</p>
-    <svg viewBox="0 0 700 262" role="img" aria-label="Ways hepatitis B spreads compared with ways it does not spread">
-      <g font-family="var(--body)" font-size="12.5">
-        <rect x="8" y="8" width="336" height="246" fill="var(--clay-soft)" stroke="var(--clay)"/>
-        <rect x="8" y="8" width="336" height="34" fill="var(--clay)"/>
-        <text x="176" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="var(--on-solid)">IT CAN SPREAD THIS WAY</text>
-        <text x="26" y="68" fill="var(--ink)">Mother to baby at birth</text>
-        <text x="26" y="94" fill="var(--ink)">Sex without protection</text>
-        <text x="26" y="120" fill="var(--ink)">Shared razors and clippers</text>
-        <text x="26" y="146" fill="var(--ink)">Shared toothbrush</text>
-        <text x="26" y="172" fill="var(--ink)">Unsterile needles or injections</text>
-        <text x="26" y="198" fill="var(--ink)">Manicure and pedicure tools</text>
-        <text x="26" y="224" fill="var(--ink)">Unscreened blood</text>
-
-        <rect x="356" y="8" width="336" height="246" fill="var(--moss-soft)" stroke="var(--moss)"/>
-        <rect x="356" y="8" width="336" height="34" fill="var(--moss)"/>
-        <text x="524" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="var(--on-solid)">IT CANNOT SPREAD THIS WAY</text>
-        <text x="374" y="68" fill="var(--ink)">Eating from the same bowl</text>
-        <text x="374" y="94" fill="var(--ink)">Sharing cups and cutlery</text>
-        <text x="374" y="120" fill="var(--ink)">Hugging, kissing, holding hands</text>
-        <text x="374" y="146" fill="var(--ink)">Coughing or sneezing</text>
-        <text x="374" y="172" fill="var(--ink)">Toilets and bathrooms</text>
-        <text x="374" y="198" fill="var(--ink)">Mosquito bites</text>
-        <text x="374" y="224" fill="var(--ink)">Cooking for your family</text>
-      </g>
-    </svg>
+    <div class="cols">
+      <div class="col risk">
+        <p class="h">It can spread this way</p>
+        <ul>
+          <li>Mother to baby at birth</li>
+          <li>Sex without protection</li>
+          <li>Shared razors and clippers</li>
+          <li>Shared toothbrush</li>
+          <li>Unsterile needles or injections</li>
+          <li>Manicure and pedicure tools</li>
+          <li>Unscreened blood</li>
+        </ul>
+      </div>
+      <div class="col go">
+        <p class="h">It cannot spread this way</p>
+        <ul>
+          <li>Eating from the same bowl</li>
+          <li>Sharing cups and cutlery</li>
+          <li>Hugging, kissing, holding hands</li>
+          <li>Coughing or sneezing</li>
+          <li>Toilets and bathrooms</li>
+          <li>Mosquito bites</li>
+          <li>Cooking for your family</li>
+        </ul>
+      </div>
+    </div>
   </div>
 
   <p>Read that second column twice, and then read it out loud to anybody who starts behaving somehow. You cannot get hepatitis B from eating somebody's food. You cannot get it from greeting them. You cannot get it from mosquito. Almost all the wickedness people with this virus suffer in this country comes from people who believe that second column belongs in the first one.</p>
