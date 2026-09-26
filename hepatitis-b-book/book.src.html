@@ -69,18 +69,19 @@
   ul.marks li { position: relative; padding-left: 28px; }
   ul.marks li::before { content: ""; position: absolute; left: 0; top: 0.62em; width: 10px; height: 10px; border-radius: 50%; background: var(--ochre); }
 
-  .box { padding: 2px 0 2px 22px; margin: 32px 0; border: 0; border-left: 3px solid var(--ochre); border-radius: 0; background: none; }
-  .box.good { border-left-color: var(--moss); }
-  .box.cool { border-left-color: var(--indigo); }
-  /* The warning is the only one that keeps a box, so that a box means danger
-     again rather than meaning "an aside follows". */
-  .box.warn { padding: 26px 28px; border: 1.5px solid var(--clay); border-radius: var(--r); background: var(--clay-soft); }
+  .box { padding: 16px 20px; margin: 28px 0; border-radius: var(--r-sm); background: var(--ochre-soft); border: 1px solid var(--ochre); }
+  .box.good { background: var(--moss-soft); border-color: var(--moss); }
+  .box.cool { background: var(--indigo-soft); border-color: var(--indigo); }
+  /* Clay is the only alarm colour in the book, and this is the box that
+     carries the sentence about never stopping the tablet, so it keeps the
+     one slightly heavier edge. */
+  .box.warn { background: var(--clay-soft); border-color: var(--clay); border-width: 1.5px; }
   .box h4 { margin-top: 0; color: var(--ochre); }
   .box.warn h4 { color: var(--clay); }
   .box.good h4 { color: var(--moss); }
   .box.cool h4 { color: var(--indigo); }
   .box p, .box li { font-size: 1.05rem; line-height: 1.72; }
-  .box .k { font-size: 0.73rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: var(--ochre); margin: 0 0 11px; }
+  .box .k { font-size: 0.73rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: var(--ochre); margin: 0 0 7px; }
   .box.warn .k { color: var(--clay); }
   .box.good .k { color: var(--moss); }
   .box.cool .k { color: var(--indigo); }
