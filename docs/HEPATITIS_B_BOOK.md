@@ -270,7 +270,7 @@ doctor's specific instructions.
 
     python hepatitis-b-book/build.py && python hepatitis-b-book/topdf.py
 
-Output is `Hepatitis Clear.pdf`, **73 pages, A4, 2.6MB**, gitignored like
+Output is `Hepatitis Clear.pdf`, **79 pages, A4, ~2.7MB**, gitignored like
 `book.html`. Rendered through headless Chrome rather than WeasyPrint or
 wkhtmltopdf, because it is the same Blink engine the book is authored and
 previewed in — `clamp()`, grid, `break-inside` and `object-fit` behave
@@ -295,7 +295,7 @@ showing up as half-empty pages.
 **Print now flows.** Breaks are forced only where a book would take one —
 the cover, every chapter opener, and the standalone front and back sections
 — and `break-inside: avoid` keeps each unit whole. Chrome paginates the
-rest: 93 → 75 → 73 pages, no content clipped, nothing running past the trim.
+rest: 93 → 75 → 73 → 79 pages, no content clipped, nothing running past the trim.
 
 ### Why A4
 
@@ -325,9 +325,32 @@ content again. The cover and the two front-matter pages go unnumbered.
 - **`max-width: 100%` on the base image rule capped the cover's bleed** at
   the text column and left an 18mm white strip down the right edge.
 
+### The measure, which is what made the first PDF look amateur
+
+The first pass was legible and still looked wrong, and measuring the output
+said why: **median 76 characters a line, 90th percentile 95, maximum 101**,
+at 10.5pt across a 172mm column. Comfortable is 65-75 and the practical
+ceiling is about 80. Small type stretched across a wide page is the specific
+thing that makes a document look typeset by accident.
+
+Fixed with both levers, because neither alone is enough. Side margins to
+25mm brings the column to 160mm, and the body up to 11pt takes fewer
+characters into it: **median 72, 90th percentile 83.** Cost is 73 -> 79
+pages, which is the right trade.
+
+Two things the same pass caught:
+
+- **The prayer pages were stranded in the top third.** They are short and
+  forced onto a sheet of their own, so they now get a fixed height and
+  centre on it. Only safe where the content is known to be under a page.
+- **The prayer's `clamp()` sizes resolve against the viewport**, which in
+  print is the sheet, so they came out small and had to be set explicitly.
+  Widening the verse to a 64ch measure also mattered: at 46ch the longest
+  authored line re-wrapped and left an em dash alone on a line.
+
 ### Where it stands
 
-Average page fill **71%**, nothing clipped, nothing past the trim. The loose
+Average page fill **73%**, nothing clipped, nothing past the trim. The loose
 pages are chapter openers and section ends, which are meant to be airy.
 Tightening further would mean redesigning the structured components rather
 than paginating them.

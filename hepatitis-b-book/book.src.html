@@ -249,7 +249,7 @@
 
      Screen reading is completely unaffected by any of this. */
   @media print {
-    @page { size: A4; margin: 17mm 18mm 18mm; }
+    @page { size: A4; margin: 20mm 25mm 20mm; }
     html, body { background: #FFFFFF !important; }
     .stack { display: block !important; max-width: none !important; margin: 0 !important; padding: 0 !important; gap: 0 !important; }
     footer.meta { display: none !important; }
@@ -268,6 +268,19 @@
     .page:has(.tracker), .page:has(.qa), .page:has(.signoff) { break-before: page; }
     .page:first-child { break-before: auto; }
     .folio { display: none !important; }
+    /* Short pages that are forced onto a sheet of their own get centred on
+       it, rather than sitting in the top third with a void underneath.
+       Safe only where the content is known to be under a page tall. */
+    .prayer { padding-block: 0 !important; }
+    .prayer h2 { font-size: 19pt !important; margin-bottom: 20pt !important; }
+    .prayer .verse { font-size: 12.5pt !important; line-height: 1.95 !important;
+                     margin: 22pt auto !important; max-width: 64ch !important; }
+    .prayer .verse.second { margin-top: 20pt !important; }
+    .prayer .amen { font-size: 12.5pt !important; margin: 0 auto 22pt !important; }
+    .prayer hr { max-width: 72% !important; }
+    .page:has(.prayer) { height: 257mm !important; display: flex !important;
+                         flex-direction: column !important; justify-content: center !important; }
+
     @page :first { margin: 0; }
     /* max-width:100% from the base image rule was capping the bleed at the
        text column and leaving an 18mm white strip down the right edge. */
@@ -275,12 +288,13 @@
                  height: 297mm !important; object-fit: cover !important;
                  display: block !important; margin: 0 !important; }
 
-    p, li, .box p, .box li, td, th { font-size: 10.5pt !important; line-height: 1.5 !important; }
-    p { margin: 0 0 7pt !important; max-width: none !important; }
+    p, li, .box p, .box li { font-size: 11pt !important; line-height: 1.56 !important; }
+    td, th { font-size: 10pt !important; line-height: 1.45 !important; }
+    p { margin: 0 0 8pt !important; max-width: none !important; }
     ul, ol { margin: 0 0 9pt !important; gap: 3pt !important; padding-left: 16pt !important; max-width: none !important; }
-    p.lead { font-size: 12pt !important; line-height: 1.42 !important; margin-bottom: 9pt !important; }
+    p.lead { font-size: 12.5pt !important; line-height: 1.45 !important; margin-bottom: 10pt !important; }
     h2.chaptitle { font-size: 21pt !important; }
-    h3 { font-size: 13pt !important; margin: 14pt 0 5pt !important; }
+    h3 { font-size: 13.5pt !important; margin: 15pt 0 6pt !important; }
     h3.first { margin-top: 0 !important; }
     h4 { font-size: 11pt !important; margin: 9pt 0 4pt !important; }
     .kicker, .runhead, .fig-title, .box .k, .lbl, .col > p.h { font-size: 7.5pt !important; }
@@ -290,9 +304,9 @@
     thead th { font-size: 8pt !important; }
     .box { padding: 9pt 12pt !important; margin: 11pt 0 !important; }
     figure { margin: 12pt 0 16pt !important; }
-    figcaption { font-size: 9pt !important; line-height: 1.42 !important; margin-top: 6pt !important; }
+    figcaption { font-size: 9.5pt !important; line-height: 1.45 !important; margin-top: 7pt !important; }
     .fig { margin: 12pt 0 !important; }
-    .col li { font-size: 9.5pt !important; padding: 5pt 0 5pt 20pt !important; }
+    .col li { font-size: 10pt !important; padding: 5pt 0 5pt 20pt !important; }
     .pullquote { font-size: 12pt !important; line-height: 1.42 !important; margin: 12pt 0 !important; }
     .folio { font-size: 8pt !important; bottom: 10mm !important; right: 18mm !important; }
     .qa { gap: 12pt !important; }
@@ -309,7 +323,7 @@
     .week-sec { margin-top: 9pt !important; }
     .week-sec .lbl { margin-bottom: 4pt !important; }
     .week-sec ul { gap: 3pt !important; }
-    .week-sec li, .week-sec p { font-size: 10pt !important; line-height: 1.45 !important; }
+    .week-sec li, .week-sec p { font-size: 10.5pt !important; line-height: 1.5 !important; }
     .week-quote { padding: 8pt 11pt !important; font-size: 10pt !important; line-height: 1.45 !important; margin-top: 9pt !important; }
     .chip { font-size: 8pt !important; padding: 3pt 9pt !important; }
     .chips { gap: 5pt !important; margin-top: 9pt !important; }

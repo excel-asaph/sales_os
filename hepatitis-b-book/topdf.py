@@ -51,10 +51,18 @@ def number(path):
             pymupdf.Point(pg.rect.width / 2 - 8, pg.rect.height - 28),
             str(i + 1 - FRONT_MATTER), fontname="helv", fontsize=9,
             color=(0.42, 0.40, 0.36))
-    d.saveIncr() if d.can_save_incrementally() else d.save(path + ".tmp")
+    tmp = path + ".tmp"
+    d.save(tmp)
     d.close()
-    if os.path.exists(path + ".tmp"):
-        os.replace(path + ".tmp", path)
+    # Renaming over the target fails while a PDF viewer holds it open, which
+    # is easy to do when you are checking the last build. Say so plainly
+    # rather than leaving a .tmp behind and a stale PDF in place.
+    try:
+        os.replace(tmp, path)
+    except PermissionError:
+        os.remove(tmp)
+        sys.exit(f"cannot write {os.path.basename(path)} - close it in your PDF "
+                 f"viewer and run this again")
 
 
 def main():
@@ -63,6 +71,13 @@ def main():
     exe = next((c for c in CHROME if os.path.exists(c)), None)
     if not exe:
         sys.exit("no Chrome or Edge found")
+
+    if os.path.exists(OUT):
+        try:
+            open(OUT, "r+b").close()
+        except PermissionError:
+            sys.exit(f"{os.path.basename(OUT)} is open in another program - "
+                     f"close it and run this again")
 
     url = "file:///" + SRC.replace("\\", "/").replace(" ", "%20")
     # --no-pdf-header-footer keeps Chrome from stamping the file path and a
