@@ -186,76 +186,17 @@ external image host silently.
 | **Two cover/content gaps, reviewed and accepted** | The cover says *"5 things that are killing your liver"* where Chapter 3 has eight, and *"the 90-days CLEAR plan"*, a phrase that appears nowhere in the book. Both were raised and the owner chose to leave them. Not open items — do not re-raise. |
 | **Meal day titles** | Retitled after their food. They had been naming each day's habit, and nine of fourteen restated a week from the ninety-day plan, two word for word. |
 | **The answers worksheet** | "What my doctor said" — the eight questions printed with ruled space. Added because the book told the reader to copy them out by hand in three separate places and never supplied the page. Chose this over the Diabetes Fix's blank `YOUR NOTES:` page, which suits a ten-day protocol but not a monitoring book. |
-| **Hepatitis C** | Deliberately not covered. It is curable and has no vaccine — the inverse of this book's two central messages. A short Chapter 1 sidebar was proposed, telling a reader whose result says C that this is not their book. **Not written.** Revisit before publication; the "curable" claim needs Akinyode specifically. |
+| **Hepatitis C** | Raised and **dropped on the owner's instruction, 2026-09-27.** Not an open item. |
 
 ## Still open
 
 | | |
 |---|---|
-| **Clinical review** | Every clinical statement needs Dr. David Akinyode's sign-off before publication. This is not a formality — the book carries his name. |
-| **The reference tables** | Chapter 1 and 2 use *Normal / Raised* and *Low / High* rather than numbers, deliberately: real thresholds vary by guideline, pregnancy and co-infection. He sets those. |
-| **Day 5's egusi** | The highest aflatoxin-risk item on the meal plan. It is included with a sourcing note; he should decide whether that is strong enough. |
-| **Portion sizes** | Throughout the 14-day plan. Reasonable, but not clinically set. |
+| **Clinical review** | Every clinical statement needs Dr. David Akinyode's sign-off before publication. This is not a formality — the book carries his name. The three specific decisions only he can make are below. |
+| **The reference tables** | Chapter 2 opens *"What separates them is numbers, and you probably have not been given them"* — and then does not print them either. ALT's upper limit and the viral-load level that triggers treatment are both left as *Raised* / *High*. That is deliberate: the numbers differ by guideline, by HBeAg status, in pregnancy and with co-infection, and printing the wrong one tells a reader they are fine when they are not. Choosing which guideline the book follows is a clinical act, so it is his. |
+| **Day 5's egusi** | Chapter 3 names egusi as an aflatoxin risk and Day 4's habit says to bin any that is musty — then Day 5 serves egusi soup. The recipe hedges it (*"from seeds you stored dry and sealed"*). Defensible, since banning a staple would make the plan unusable, but he decides whether the sourcing note carries it. |
+| **Portion sizes** | *1 cup cooked oats, 1 small ball of semo, 2 small pieces of beef.* Set as reasonable, not clinically. Matters most for a reader who also has fatty liver or diabetes. |
 | **A second opinion** | A Nigerian gastroenterologist or hepatologist paid for an independent read. "Reviewed by" converts harder than any claim we would have written instead. |
-
-## Parked content — the medical disclaimer
-
-Lifted off the prayer page on 2026-09-26: a red warning box straight after
-the amen broke the tone the page exists to set. **It still has to appear
-somewhere before publication.** The back matter facing the signoff is the
-usual home; Chapter 8's warning-signs page is the alternative.
-
-It is kept here rather than as an HTML comment in `book.src.html` because
-the artifact renderer kept painting the commented-out block anyway. Paste
-this back where it belongs:
-
-```html
-<div class="box warn">
-  <p class="k">Please read this first</p>
-  <p>This book is education, not treatment. It does not diagnose you, it does
-  not prescribe for you, and it cannot replace a doctor who has seen your
-  results. Nothing in these pages should be used as a reason to delay, change
-  or stop any medicine you have been given. If you are unwell, go to hospital.
-  Everything here is written to make you better at working <em>with</em> your
-  doctor, not instead of one.</p>
-</div>
-```
-
----
-
-## Print pagination — deliberately deferred, must not be skipped
-
-**Agreed 2026-09-26: hold this until the content is frozen, then do it.**
-Doing it before the title is set and before Dr. Akinyode's review would mean
-doing it twice, because any clinical edit reflows everything after it.
-
-The `.page` divs are **not pages**. They are cards with a shadow. There is no
-`@page` rule, no `@media print`, no fixed height and no `page-break-after`
-anywhere in `book.src.html` or the built `book.html`. Nothing tells a PDF
-renderer where a page ends, so printing today paginates purely by paper
-height: cards sliced mid-figure, folios landing halfway down a sheet, and the
-drop shadows and rounded corners printing as artifacts.
-
-Measured on 2026-09-26: 54 cards, 27 to 515 words, median 210, 12,535 words
-total. The variation itself is fine — there is no word-count standard, only a
-fixed trim and a consistent type area — but at a fixed height roughly a dozen
-of the heavy cards will overflow.
-
-What it takes:
-
-1. Pick a trim. **6x9in** is the standard print-on-demand size; **A5** if it
-   will ever be printed locally in Nigeria.
-2. `@page { size: <trim>; margin: 0 }`, a fixed height on `.page` in `mm`,
-   `page-break-after: always`, and shadow/radius stripped under print.
-3. **Reflow.** This is the real work — moving text between pages so nothing
-   overflows, and deciding whether each light page is deliberate breathing
-   space or should merge.
-
-### Duplicate folios, blocking the same pass
-
-Nine numbers appear twice, from the fourteen meal pages being added without
-renumbering: **iii, 40, 41, 44, 45, 46, 49, 50, 51.** Renumber as part of
-step 3, not before — the reflow may change which content lands where.
 
 ## The title shortlist
 
