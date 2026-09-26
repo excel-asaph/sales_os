@@ -198,6 +198,73 @@ external image host silently.
 | **Portion sizes** | *1 cup cooked oats, 1 small ball of semo, 2 small pieces of beef.* Set as reasonable, not clinically. Matters most for a reader who also has fatty liver or diabetes. |
 | **A second opinion** | A Nigerian gastroenterologist or hepatologist paid for an independent read. "Reviewed by" converts harder than any claim we would have written instead. |
 
+---
+
+## The clinical numbers, and where each one comes from
+
+Researched and written on 2026-09-27 because Dr. Akinyode was not available.
+**This sourced the numbers; it did not replace his sign-off.** The book still
+carries his name, and a threshold printed under a doctor's name is his to
+approve. What changed is that reviewing this is now a reading job rather than
+a research project.
+
+The safety device in the book is **attribution**. Chapter 2 says "the levels
+the World Health Organization set in 2024", names that American guidelines
+use different ones, and says a result near a line is a conversation rather
+than a verdict. A reader who carries an attributed number to a doctor can be
+corrected. One who carries an unattributed number cannot.
+
+### What went in
+
+| Number | Value | Source |
+|---|---|---|
+| ALT upper limit of normal | **30 U/L** male, **19 U/L** female | WHO 2024 |
+| ALT ULN, stated as the differing alternative | 35 U/L male, 25 U/L female | AASLD 2025 |
+| HBV DNA treatment threshold | **>2,000 IU/mL** | WHO 2024 (was >20,000 in WHO 2015) |
+| APRI | **>0.5** significant fibrosis, **>1.0** cirrhosis | WHO 2024 (Nigeria 2016 still says >2.0) |
+| Transient elastography | **>7 kPa** significant fibrosis, **>12.5 kPa** cirrhosis | WHO 2024 |
+| Treatment age | **>=12 years** | WHO 2024 |
+| Pregnancy prophylaxis | **>=200,000 IU/mL** in the third trimester, TDF or TAF | WHO 2024 |
+| "Persistently abnormal ALT" | two values above ULN over 6-12 months | WHO 2024 |
+| Aflatoxin + HBV liver-cancer risk | ~8x for the virus alone, **~60x for both** | Cohort studies, Kew 2003 and the Shanghai/Taiwan cohorts |
+| Aflatoxin B1 in egusi-derived foods | 2.3-15.4 ppb measured, under Nigeria's 20 ppb limit | Nigerian market surveys |
+| Protein in liver disease | restriction "now considered **detrimental**"; target **1.2-1.5 g/kg/day**, 35 kcal/kg/day | EASL 2018 nutrition CPG |
+
+### The three decisions taken
+
+**Print the thresholds, attributed.** Chapter 2 opened by promising numbers
+the reader had not been given and then did not give them either. It now
+prints them with a "Yours" column to write in, plus three caveats: scarring
+alone is enough to need treatment whatever the ALT says, lab slips saying
+"normal up to 40" are using a general range and not a hepatitis B one, and
+ALT is judged on two readings, not one.
+
+**Keep Day 5's egusi, and strengthen the case instead.** Measured aflatoxin
+in egusi-derived foods sits below Nigeria's limit, and groundnut and maize
+are the larger exposure. Banning a staple would have made the plan unusable.
+The recipe now says to buy whole seed and grind it rather than buy it
+pre-ground and open in a tray, with the reason. Chapter 3 gained the
+strongest true sentence available on the subject, which the book did not
+have: the two risks **multiply rather than add**.
+
+**Say what the portions are.** They were set as reasonable, not clinically,
+and nothing said so. A new box calls them a pattern rather than a
+prescription, keeps protein as the non-negotiable, and gives way to a
+doctor's specific instructions.
+
+### Still needing a clinician
+
+- **Nigeria's own published guideline is out of date.** The 2016 national
+  guideline still uses APRI >2.0 and no sex-specific ALT. A 2023 guideline
+  and a 2024 Rapid Advice exist on nascp.gov.ng but could not be retrieved
+  here. If they have adopted WHO 2024 the book is aligned; if not, a Nigerian
+  doctor may be working to different numbers than the book prints.
+- **The EASL protein targets are for cirrhosis**, not for uncomplicated
+  chronic hepatitis B. The book is careful about this, but he should confirm
+  the framing.
+- Whether to print the WHO numbers at all is ultimately an editorial-clinical
+  call, and it is his.
+
 ## The title shortlist
 
 Subtitle direction is settled: **name the enemy** — "...and What the Herb
