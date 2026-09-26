@@ -180,19 +180,17 @@ export async function runAIEmployeeTurn(
       // cache into two full copies instead of sharing the prefix.
       system: [
         { type: "text" as const, text: system, cache_control: { type: "ephemeral" as const } },
-        // 1h, not the default 5m, and deliberately only on this block.
-        // Measured 2026-09-26 over 287 production turns: the base prefix
-        // above is small and hit by every conversation, so it stays warm on
-        // five minutes (2.8% cold). This block is ~13,000 tokens and only
-        // ~43% of turns touch it, so its window lapses between hits — 18.5%
-        // of ebook turns started cold, and a cold turn costs $0.050 against
-        // a warm turn's $0.018. A 1h write costs 2x instead of 1.25x, which
-        // is worth paying exactly here and nowhere else (docs/AI_COST.md).
+        // Stays at the default 5m. A 1h ttl was tried here on 2026-09-26 and
+        // broke every post-delivery conversation with a 400: a ttl='1h'
+        // block may not come *after* a ttl='5m' one, and blocks render in
+        // the order tools, system, messages — so this block, which has to
+        // sit after the stable prompt to share its cache prefix, can only
+        // be 1h if everything before it is too. See docs/AI_COST.md.
         ...(productContent
           ? [{
               type: "text" as const,
               text: buildProductContentBlock(productContent),
-              cache_control: { type: "ephemeral" as const, ttl: "1h" as const },
+              cache_control: { type: "ephemeral" as const },
             }]
           : []),
       ],
