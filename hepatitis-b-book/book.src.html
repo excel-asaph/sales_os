@@ -167,6 +167,15 @@
   .col.risk { border-color: var(--clay); background: var(--clay-soft); }
   .col.risk > p.h { background: var(--clay); }
   .col.risk li::before { content: "!"; color: var(--clay); font-size: 1.1rem; }
+  /* The answers worksheet. The rule is what the reader writes on, so it has
+     to survive both printing and a screenshot: a real border-bottom rather
+     than an underscore run, which would break differently in every font. */
+  .qa { counter-reset: qa; display: flex; flex-direction: column; gap: 22px; margin: 26px 0 8px; }
+  .qa-item { position: relative; padding-left: 34px; }
+  .qa-item::before { counter-increment: qa; content: counter(qa); position: absolute; left: 0; top: 1px; width: 24px; height: 24px; border-radius: 50%; background: var(--indigo); color: var(--on-solid); font-size: 0.8rem; font-weight: 700; display: grid; place-items: center; }
+  .qa-q { font-size: 1.02rem; font-weight: 600; line-height: 1.5; margin: 0 0 6px; max-width: none; color: var(--ink); }
+  .qa-line { height: 27px; border-bottom: 1px solid var(--rule); }
+  .qa-line.second { height: 30px; }
   .cover { position: relative; background: #FFFFFF; }
   .cover img { width: 100%; }
   .cover-top { position: absolute; top: 9.5%; left: 0; right: 0; padding-inline: clamp(30px, 9vw, 92px); text-align: center; }
@@ -384,6 +393,7 @@
       <ul>
         <li>Twelve Weeks to Tick Off</li>
         <li>The Log to Take to Every Appointment</li>
+        <li>What My Doctor Said &mdash; the Eight Questions, With Room to Answer</li>
       </ul>
     </div>
   </div>
@@ -884,7 +894,7 @@
       <p class="job">Turn twelve weeks of effort into something a doctor can read in one minute.</p>
       <div class="week-sec"><span class="lbl">Do this</span><ul>
         <li>Fill in the log at the back of this book properly.</li>
-        <li>Write down the eight questions from Chapter 8 on a sheet of paper.</li>
+        <li>Find <b>What my doctor said</b> at the back of this book. Print it, or keep it open on your phone.</li>
         <li>List everything you are taking, including anything herbal, with nothing left out.</li>
         <li>Book the appointment now, not when you feel ready.</li>
       </ul></div>
@@ -898,7 +908,7 @@
     <div class="week-body">
       <p class="job">Ask all eight questions, and leave with the answers written down.</p>
       <div class="week-sec"><span class="lbl">Do this</span><ul>
-        <li>Take the log, the questions and the list of what you are taking.</li>
+        <li>Take the log, the answers page and the list of what you are taking.</li>
         <li>Ask every question. If you are rushed, say: "There are three more, they are short."</li>
         <li>Write the answers in the room, not from memory afterwards.</li>
         <li>Before you leave, ask when the next appointment should be and book it.</li>
@@ -2259,7 +2269,7 @@
   <div class="pullquote">The scan you resent paying for is the one doing the actual work.</div>
 
   <h3>The eight questions</h3>
-  <p>Copy these onto paper and take them in. Ask them out loud.</p>
+  <p>Ask them out loud. You do not need to copy them &mdash; they are printed again at the back of this book, under <b>What my doctor said</b>, with room to write the answer under each one.</p>
   <ol>
     <li>What is my viral load, and has it changed since last time?</li>
     <li>What is my ALT?</li>
@@ -2429,9 +2439,71 @@
       <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
       <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
       <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
     </tbody>
   </table></div>
   <span class="folio">61</span>
+</div>
+
+<!-- ============ ANSWERS WORKSHEET ============ -->
+<div class="page">
+  <p class="runhead">What my doctor said</p>
+  <h3 class="first">Take this page in with you</h3>
+  <p>These are the eight questions from Chapter 8, already written out, so you do not have to copy them. Print the page, or keep it open on your phone and show the screen. Write the answer under each one before you stand up &mdash; not afterwards in the car, when half of it has already gone.</p>
+
+  <div class="qa">
+    <div class="qa-item">
+      <p class="qa-q">What is my viral load, and has it changed since last time?</p>
+      <div class="qa-line"></div>
+      <div class="qa-line second"></div>
+    </div>
+    <div class="qa-item">
+      <p class="qa-q">What is my ALT?</p>
+      <div class="qa-line"></div>
+      <div class="qa-line second"></div>
+    </div>
+    <div class="qa-item">
+      <p class="qa-q">Do I have any scarring, and how was that measured?</p>
+      <div class="qa-line"></div>
+      <div class="qa-line second"></div>
+    </div>
+    <div class="qa-item">
+      <p class="qa-q">Do I need treatment now? If not, what exactly would change that?</p>
+      <div class="qa-line"></div>
+      <div class="qa-line second"></div>
+    </div>
+    <div class="qa-item">
+      <p class="qa-q">When is my next ultrasound due?</p>
+      <div class="qa-line"></div>
+      <div class="qa-line second"></div>
+    </div>
+    <div class="qa-item">
+      <p class="qa-q">Is everything I am taking safe for my liver &mdash; including what I buy myself?</p>
+      <div class="qa-line"></div>
+      <div class="qa-line second"></div>
+    </div>
+    <div class="qa-item">
+      <p class="qa-q">Has everyone in my household been tested and vaccinated?</p>
+      <div class="qa-line"></div>
+      <div class="qa-line second"></div>
+    </div>
+    <div class="qa-item">
+      <p class="qa-q">What should make me come back before my next appointment?</p>
+      <div class="qa-line"></div>
+      <div class="qa-line second"></div>
+    </div>
+  </div>
+
+  <div class="box cool">
+    <p class="k">If you are being rushed</p>
+    <p style="margin:0">Say this, out loud: <b>&ldquo;There are three more and they are short.&rdquo;</b> It works, and you are entitled to the answers. Anything you do not get today, write the question down again and take it back next time.</p>
+  </div>
+  <span class="folio">62</span>
 </div>
 
 <!-- ============ CLOSING ============ -->
