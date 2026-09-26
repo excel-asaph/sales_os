@@ -264,7 +264,7 @@
     /* A break is forced only where a book would take one: the cover, every
        chapter opener, and the standalone front and back sections. */
     .page:has(.chap-band), .page:has(.cover-shell), .page.flush,
-    .page:has(.prayer), .page:has(.toc-banner), .page:has(.myth),
+    .page.prayer-page, .page.closing, .page:has(.toc-banner), .page:has(.myth),
     .page:has(.tracker), .page:has(.qa) { break-before: page; }
     .page:first-child { break-before: auto; }
     .folio { display: none !important; }
@@ -278,8 +278,8 @@
     .prayer .verse.second { margin-top: 20pt !important; }
     .prayer .amen { font-size: 12.5pt !important; margin: 0 auto 22pt !important; }
     .prayer hr { max-width: 72% !important; }
-    .page:has(.prayer) { height: 257mm !important; display: flex !important;
-                         flex-direction: column !important; justify-content: center !important; }
+    .page.prayer-page { height: 257mm !important; display: flex !important;
+                        flex-direction: column !important; justify-content: center !important; }
 
     @page :first { margin: 0; }
     /* max-width:100% from the base image rule was capping the bleed at the
@@ -336,6 +336,16 @@
        still see which column is which on the continuation. Keeping them
        whole was leaving half-empty pages behind them. */
     .t-wrap { break-inside: auto; margin: 21pt 0 !important; }
+    /* Chrome defaults orphans and widows to 2, which at a 1.7 line-height
+       is loose enough that it will slice a line box in half across the
+       sheet edge. Three keeps whole lines together. */
+    p, li, td, th, blockquote { orphans: 3; widows: 3; }
+    /* A section must not begin in the last few lines of a page: these
+       carry the break down to the first paragraph of their own section. */
+    .runhead, p.lead, .kicker, .fig-title, .box .k { break-after: avoid; }
+    /* A long reference table splits well. A short blank form does not -- */
+    /* nobody wants to write across a page break. */
+    .t-wrap.keep { break-inside: avoid; }
     thead { display: table-header-group; }
     tr { break-inside: avoid; }
     h2, h3, h4, .fig-title, .mealhead, .chap-band { break-after: avoid; }
@@ -351,7 +361,7 @@
 </div>
 
 <!-- ============ PRAYER ============ -->
-<div class="page">
+<div class="page prayer-page">
   <div class="prayer">
     <h2>Opening Prayer</h2>
     <hr>
@@ -2563,7 +2573,7 @@
 
   <h3>Your log</h3>
   <p>Take this to every appointment. A patient with a written record gets a different consultation.</p>
-  <div class="t-wrap"><table>
+  <div class="t-wrap keep"><table>
     <thead><tr><th>Date</th><th>ALT</th><th>Viral load</th><th>Scarring</th><th>Waist</th><th>Next due</th></tr></thead>
     <tbody>
       <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
@@ -2638,7 +2648,7 @@
 </div>
 
 <!-- ============ CLOSING ============ -->
-<div class="page">
+<div class="page closing">
   <p class="runhead">Before you close this book</p>
   <p class="lead">You started this with a piece of paper and a silence.</p>
   <p>You now know what the word on it means. You know which numbers decide your treatment and how to ask for them. You know what to take out of your house, what to stop buying, and which bottle to refuse no matter who is offering it.</p>

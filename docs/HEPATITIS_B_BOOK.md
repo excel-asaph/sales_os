@@ -379,6 +379,32 @@ of it. The type got bigger and the lines got easier at the same time,
 which only worked because the 160mm column had headroom left. 84 → 105
 pages; page count costs nothing in a PDF.
 
+### What the page break was allowed to cut through
+
+Three faults that all looked like one:
+
+- **A line of text was being sliced horizontally at the sheet edge** — the
+  same sentence half-printed at the foot of one page and half at the head
+  of the next. Chrome defaults `orphans`/`widows` to 2, which at a 1.7
+  line-height is loose enough that it will split a line box. Set to 3.
+- **A section was starting four lines from the bottom.** The heading rules
+  said `break-after: avoid`, but the closing section leads with `.runhead`
+  and `p.lead`, which were not in that list, so the break landed between
+  them and their first paragraph. Both are in it now, along with `.kicker`
+  and `.box .k`.
+- **`.page:has(.prayer)` was matching the wrong page.** It was written for
+  the opening prayer — short, alone on its sheet, centred — but the closing
+  card also contains a prayer, plus four paragraphs, a pullquote and the
+  signoff, and is far taller than a page. Giving *that* a fixed 257mm
+  height and centring it is what made the closing start three quarters of
+  the way down a sheet and run over. The opening prayer is now marked
+  `.prayer-page` in the source rather than inferred from its contents.
+
+The blank log also stopped splitting. Splitting is right for a long
+reference table and wrong for a short form somebody writes on, so the form
+opts out by name (`.t-wrap.keep`) rather than turning splitting off
+everywhere and bringing back the voids it fixed.
+
 ### Where it stands
 
 Average page fill **68%**, nothing clipped, nothing past the trim. The loose
