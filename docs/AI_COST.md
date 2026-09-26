@@ -23,7 +23,7 @@ linked (`celebrated-determination`, production). Both services log
 |---|---|
 | Cost per customer turn | **$0.0176** (~28 naira) |
 | API calls per turn | **mean 3.10**, median 3, max 7 |
-| Cache hit rate | **95.3%** of input tokens |
+| Cache hit rate | 95.3% of input tokens — **misleading, see the TTL section** |
 | Uncached input per call | **2 tokens** |
 | Output per turn | mean 426, median 318 |
 
@@ -46,9 +46,11 @@ Where the money goes:
 
 ## The finding
 
-Nearly half the bill is re-reading the same prompt. Not because caching is
-broken — it is close to perfect — but because **two thirds of turns take
-three API calls**, and each call re-reads the whole ~9,000-token prefix.
+Nearly half the bill is re-reading the same prompt, because **two thirds of
+turns take three API calls** and each call re-reads the whole ~9,000-token
+prefix. (The original text here also called the caching "close to perfect".
+It is well built, but that judgement rested on a metric that cannot see cache
+misses — see the TTL section.)
 
 The arithmetic is structural. One tool call per response means:
 
@@ -80,21 +82,66 @@ if a send fails, the fact was already recorded.
 
 **To revert:** delete the "Doing several things at once" section.
 
+## Did the batching change work? (measured 2026-09-26)
+
+Yes, but at about a quarter of the projected size. Segmented so the two
+samples are comparable:
+
+| Segment | Calls/turn before | after | Turns in <=2 calls |
+|---|---|---|---|
+| No ebook | 3.07 | **2.93** (-4.6%) | 14% -> 20% |
+| With ebook | 3.15 | **3.02** (-4.1%) | 24% -> 30% |
+
+The instruction lands consistently in both segments, but the median turn
+still takes three calls, so the saving is ~4.5% rather than the ~20%
+projected. Worth keeping — it costs nothing — but it was oversold.
+
+**Raw cost per turn rose 30% over the same period, and none of it was this
+change.** Two things moved underneath it: ebook traffic grew from 31.7% to
+43.2% of turns as more customers passed delivery, and cold cache starts
+tripled from 5.0% to 15.0%. Comparing raw cost across two windows without
+segmenting on those would have produced exactly the wrong conclusion.
+
 ## What we ruled out, and why
 
 Three of the four original candidates died on contact with the data. Each was
 plausible from reading the code and wrong once measured.
 
-### 1-hour cache TTL — would have cost money
+### 1-hour cache TTL — RULED OUT, THEN REINSTATED
 
-The idea was that WhatsApp is human-paced, so the 5-minute cache must be
-expiring between messages.
+**This section was wrong on 2026-09-23 and is kept as written plus its
+correction, because the mistake is more instructive than the conclusion.**
 
-It isn't. **95.3% hit rate, 2 uncached tokens per call.** The cache is shared
-across the whole business, and inbound volume keeps it continuously warm.
+*What it said:* the cache is at 95.3% hit rate with 2 uncached tokens per
+call, so it is continuously warm; a 1-hour cache writes at 2x instead of
+1.25x, so on an already-warm cache it is a pure surcharge and would raise
+the bill.
 
-A 1-hour cache writes at 2x instead of 1.25x. On an already-warm cache that
-is a pure surcharge. **This change would have increased the bill.**
+*Why that was wrong:* **`input_tokens` cannot detect a cache miss.** When the
+cache misses, the prefix is billed as `cache_write`, not as `input`. So
+`input_tokens` reads 2 whether the call hit cache or missed it entirely. The
+"95.3% hit rate" was computed from a number that is blind to the thing it
+was being used to measure.
+
+**The right signal is a large `cache_write` on `iter=0`.** By that measure,
+on 2026-09-26: **15.0% of turns started cold** (43 of 287), and a cold turn
+costs **$0.050 against a warm turn's $0.018 — 2.75x.**
+
+The refinement that matters is *which* block. Measured by segment:
+
+| Block | Size | Share of turns | Cold starts |
+|---|---|---|---|
+| Base prefix (system + tools) | ~9,000 tok | 100% | 2.8% |
+| Product text (the ebook) | ~13,000 tok | 43% | **18.5%** |
+
+The base prefix is touched by every conversation and stays warm on five
+minutes. The ebook block is larger, touched by under half of traffic, and
+runs at roughly five turns an hour — so its five-minute window lapses
+between hits, and each miss rewrites 13,000 tokens.
+
+**Shipped: `ttl: "1h"` on the product block only.** The 2x write premium is
+paid exactly where a miss is expensive and nowhere else. Expected 10-15%,
+growing as more customers pass delivery.
 
 ### Setting `effort` — not where the money is
 
@@ -156,9 +203,10 @@ turn**, baseline **3.10**.
 
 Worth recording so nobody "optimizes" them later:
 
-- **Prompt caching is correctly built.** Two explicit breakpoints (stable
-  prompt, product text) plus automatic caching on the growing tail. 95.3% hit
-  rate is the proof.
+- **Prompt caching is correctly *structured*.** Two explicit breakpoints
+  (stable prompt, product text) plus automatic caching on the growing tail.
+  The structure was right; only the TTL on the product block was wrong, and
+  that is now fixed. Judge it by cold-start rate, never by `input_tokens`.
 - **The two blocks are deliberately separate.** Appending the ebook to the
   system string would fork the cache into two full copies instead of sharing
   a prefix.
