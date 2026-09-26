@@ -282,6 +282,11 @@ export async function returnToAI(formData: FormData) {
 // it was for (there's no existing Order to read that from), and the
 // platform links whatever receipt the customer most recently sent, same
 // "latest attachment" convention requestPaymentVerification itself uses.
+// How close together two "Record payment" clicks have to be before the second
+// is treated as an accident rather than a second sale. See the guard inside
+// createAndVerifyOrder for why this exists and why it is a no-op.
+const DUPLICATE_ORDER_WINDOW_MS = 10 * 60 * 1000;
+
 export async function createAndVerifyOrder(formData: FormData) {
   const session = await requireSession();
   const conversationId = String(formData.get("conversationId"));
@@ -296,6 +301,53 @@ export async function createAndVerifyOrder(formData: FormData) {
   const product = await prisma.product.findUniqueOrThrow({ where: { id: productId } });
   if (product.businessId !== session.businessId) {
     throw new Error("Product does not belong to this business");
+  }
+
+  // Two clicks must not become two sales. Not hypothetical: on 2026-09-26 a
+  // bad cache_control ttl made the AI turn behind this action fail, so
+  // runAIAfterHumanAction escalated instead of replying. The order itself had
+  // been written and the dialog honestly said "Payment recorded" — but the AI
+  // visibly did nothing, so the button was pressed four times. Four VERIFIED
+  // orders, forty thousand naira of revenue on a ten thousand naira sale.
+  //
+  // A silent no-op rather than a thrown error, the same shape as
+  // createFollowup's "already active, so this is a no-op": the dialog has no
+  // error surface at all (submit-button.tsx shows its successMessage and
+  // CloseOnSuccess closes the dialog the moment pending goes false), so
+  // throwing here would close the dialog and still report success.
+  //
+  // Ten minutes, deliberately short. A genuine second purchase days later is
+  // real and has happened on this business; a genuine second purchase ten
+  // minutes later has not.
+  const duplicate = await prisma.order.findFirst({
+    where: {
+      conversationId,
+      productId,
+      status: "VERIFIED",
+      createdAt: { gte: new Date(Date.now() - DUPLICATE_ORDER_WINDOW_MS) },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+  if (duplicate) {
+    console.warn(
+      `createAndVerifyOrder: ignoring duplicate on conversation ${conversationId} ` +
+        `— order ${duplicate.id} for this product was recorded ` +
+        `${Math.round((Date.now() - duplicate.createdAt.getTime()) / 1000)}s ago`
+    );
+    await prisma.event.create({
+      data: {
+        conversationId,
+        type: "DUPLICATE_ORDER_IGNORED",
+        payload: {
+          existingOrderId: duplicate.id,
+          productId,
+          expectedAmount,
+          humanAgentId: session.agentId,
+        },
+      },
+    });
+    revalidatePath(`/dashboard/${conversationId}`);
+    return;
   }
 
   const agent = await prisma.humanAgent.findUniqueOrThrow({ where: { id: session.agentId } });
