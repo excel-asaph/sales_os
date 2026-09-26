@@ -132,18 +132,17 @@
   .toc2 ul { list-style: none; margin: 0; padding: 0 0 0 16px; gap: 8px; max-width: none; }
   .toc2 li { position: relative; padding-left: 16px; font-size: 1rem; line-height: 1.55; color: var(--ink); }
   .toc2 li::before { content: "\2022"; position: absolute; left: 0; color: var(--ink-3); }
-  /* Five myths, before the reader has committed to anything. Clay for the
-     thing they believe, moss for the correction — the same danger/safe pair
-     the traffic light and the warning boxes use, so the colour is already
-     doing the same job everywhere in the book. */
-  .myth { border-radius: var(--r); overflow: hidden; border: 1.5px solid var(--rule); background: var(--paper-2); margin-bottom: 20px; }
-  .myth-head { background: var(--clay); color: var(--on-solid); padding: 11px 20px; font-size: 0.76rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
-  .myth-body { padding: 22px 24px 24px; }
-  .myth-claim { font-size: clamp(1.08rem, 2.7vw, 1.24rem); font-weight: 700; font-style: italic; color: var(--clay); line-height: 1.4; margin: 0 0 20px; max-width: none; }
-  .truth-tag { display: inline-block; background: var(--moss); color: var(--on-solid); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 4px 11px; border-radius: 999px; margin-bottom: 11px; }
-  .truth-line { font-size: 1.1rem; font-weight: 700; color: var(--moss); line-height: 1.45; margin: 0 0 12px; max-width: none; }
-  .myth-body p.expl { font-size: 1.03rem; line-height: 1.72; margin: 0; max-width: none; }
-  .myth-ref { display: block; margin-top: 16px; padding-top: 13px; border-top: 1px solid var(--rule); font-size: 0.92rem; font-weight: 600; color: var(--indigo); }
+  /* Five myths. No card, no border, no fill — the numeral and the colour do
+     the separating, and a hairline between entries does the rest. Boxes made
+     the page look like a form to fill in rather than something to read. */
+  .myth { padding-block: 26px; border-top: 1px solid var(--rule); }
+  .myth:first-of-type { border-top: 0; padding-top: 14px; }
+  .myth-n { font-size: 0.74rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ochre); margin: 0 0 10px; }
+  .myth-claim { font-size: clamp(1.12rem, 2.9vw, 1.32rem); font-weight: 700; font-style: italic; color: var(--clay); line-height: 1.4; margin: 0 0 18px; max-width: 46ch; }
+  .truth-tag { display: inline-block; background: var(--moss); color: var(--on-solid); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 4px 11px; border-radius: 999px; margin-bottom: 12px; }
+  .truth-line { font-size: 1.12rem; font-weight: 700; color: var(--moss); line-height: 1.5; margin: 0 0 13px; max-width: 54ch; }
+  .myth p.expl { font-size: 1.04rem; line-height: 1.75; margin: 0; }
+  .myth-ref { display: block; margin-top: 14px; font-size: 0.93rem; font-weight: 600; color: var(--indigo); }
   .cover { position: relative; background: #FFFFFF; }
   .cover img { width: 100%; }
   .cover-top { position: absolute; top: 9.5%; left: 0; right: 0; padding-inline: clamp(30px, 9vw, 92px); text-align: center; }
@@ -370,7 +369,7 @@
 <div class="page">
   <p class="kicker">Before anything else</p>
   <h2 class="chaptitle" style="color:var(--clay);font-style:normal;font-weight:800;font-size:clamp(1.5rem,4.4vw,2.1rem);margin-bottom:10px">
-    Five things you have probably been told that are not true
+    5 things you have probably been told that are not true
   </h2>
   <p class="lead">
     Almost everybody handed this diagnosis in Nigeria is handed these five
@@ -379,67 +378,54 @@
   </p>
 
   <div class="myth">
-    <div class="myth-head">Myth 1</div>
-    <div class="myth-body">
-      <p class="myth-claim">&ldquo;If I feel fine, it cannot be serious.&rdquo;</p>
-      <span class="truth-tag">The truth</span>
-      <p class="truth-line">Feeling fine <em>is</em> the symptom.</p>
-      <p class="expl">Your liver has no pain nerves inside it. It can lose a great deal of its working tissue and say absolutely nothing. By the time somebody&rsquo;s eyes turn yellow, years have already gone. Almost everybody who ends up in real trouble with this virus felt perfectly well for most of the journey there.</p>
-      <span class="myth-ref">Dealt with properly in Chapter 1.</span>
-    </div>
+    <p class="myth-n">Myth 1</p>
+    <p class="myth-claim">&ldquo;If I feel fine, it cannot be serious.&rdquo;</p>
+    <span class="truth-tag">The truth</span>
+    <p class="truth-line">Feeling fine <em>is</em> the symptom.</p>
+    <p class="expl">Your liver has no pain nerves inside it. It can lose a great deal of its working tissue and say absolutely nothing. By the time somebody&rsquo;s eyes turn yellow, years have already gone. Almost everybody who ends up in real trouble with this virus felt perfectly well for most of the journey there.</p>
+    <span class="myth-ref">Dealt with properly in Chapter 1.</span>
   </div>
 
   <div class="myth">
-    <div class="myth-head">Myth 2</div>
-    <div class="myth-body">
-      <p class="myth-claim">&ldquo;Somebody&rsquo;s herbs can flush it out.&rdquo;</p>
-      <span class="truth-tag">The truth</span>
-      <p class="truth-line">Nothing flushes it out &mdash; and some of those bottles are doing the damage themselves.</p>
-      <p class="expl">No herb, no tea, no root has ever been shown to clear hepatitis B from a human body. Think about it small: if one of them worked, would it still be in an unlabelled bottle on a table by the roadside? And it is worse than useless. Herbal preparations are a recognised cause of liver injury, and the organ that has to process that mixture is the one already carrying a virus.</p>
-      <span class="myth-ref">Dealt with properly in Chapter 3.</span>
-    </div>
+    <p class="myth-n">Myth 2</p>
+    <p class="myth-claim">&ldquo;Somebody&rsquo;s herbs can flush it out.&rdquo;</p>
+    <span class="truth-tag">The truth</span>
+    <p class="truth-line">Nothing flushes it out &mdash; and some of those bottles are doing the damage themselves.</p>
+    <p class="expl">No herb, no tea, no root has ever been shown to clear hepatitis B from a human body. Think about it small: if one of them worked, would it still be in an unlabelled bottle on a table by the roadside? And it is worse than useless. Herbal preparations are a recognised cause of liver injury, and the organ that has to process that mixture is the one already carrying a virus.</p>
+    <span class="myth-ref">Dealt with properly in Chapter 3.</span>
   </div>
 
   <div class="myth">
-    <div class="myth-head">Myth 3</div>
-    <div class="myth-body">
-      <p class="myth-claim">&ldquo;This means I am going to die soon.&rdquo;</p>
-      <span class="truth-tag">The truth</span>
-      <p class="truth-line">Most people living with hepatitis B die of something else entirely, decades later.</p>
-      <p class="expl">What decides your outcome is not the virus. It is whether anybody is watching it. Checked properly, and treated in the years when treatment is actually needed, most people carry this for a full lifetime and it never becomes the thing that ends it.</p>
-      <span class="myth-ref">Dealt with properly in Chapter 2.</span>
-    </div>
+    <p class="myth-n">Myth 3</p>
+    <p class="myth-claim">&ldquo;This means I am going to die soon.&rdquo;</p>
+    <span class="truth-tag">The truth</span>
+    <p class="truth-line">Most people living with hepatitis B die of something else entirely, decades later.</p>
+    <p class="expl">What decides your outcome is not the virus. It is whether anybody is watching it. Checked properly, and treated in the years when treatment is actually needed, most people carry this for a full lifetime and it never becomes the thing that ends it.</p>
+    <span class="myth-ref">Dealt with properly in Chapter 2.</span>
   </div>
 
   <div class="myth">
-    <div class="myth-head">Myth 4</div>
-    <div class="myth-body">
-      <p class="myth-claim">&ldquo;People can catch it from my food, my cup, my greeting.&rdquo;</p>
-      <span class="truth-tag">The truth</span>
-      <p class="truth-line">They cannot. Not from food, not from cups, not from hugging, not from mosquito.</p>
-      <p class="expl">It travels through blood, and from mother to baby at birth. It does not travel through a shared plate of rice. Almost all of the wickedness people with this virus suffer in this country comes from neighbours who believe otherwise. You do not need separate plates. You do not need to eat alone. You do not need to stop cooking for your own family.</p>
-      <span class="myth-ref">Dealt with properly in Chapter 9.</span>
-    </div>
+    <p class="myth-n">Myth 4</p>
+    <p class="myth-claim">&ldquo;People can catch it from my food, my cup, my greeting.&rdquo;</p>
+    <span class="truth-tag">The truth</span>
+    <p class="truth-line">They cannot. Not from food, not from cups, not from hugging, not from mosquito.</p>
+    <p class="expl">It travels through blood, and from mother to baby at birth. It does not travel through a shared plate of rice. Almost all of the wickedness people with this virus suffer in this country comes from neighbours who believe otherwise. You do not need separate plates. You do not need to eat alone. You do not need to stop cooking for your own family.</p>
+    <span class="myth-ref">Dealt with properly in Chapter 9.</span>
   </div>
 
   <div class="myth">
-    <div class="myth-head">Myth 5</div>
-    <div class="myth-body">
-      <p class="myth-claim">&ldquo;There is nothing anybody can do anyway.&rdquo;</p>
-      <span class="truth-tag">The truth</span>
-      <p class="truth-line">There is a great deal, and most of it is cheap.</p>
-      <p class="expl">Three injections protect everyone living in your house, for life. Taking alcohol out does more to slow the damage than any food ever will. A scan every six months finds trouble while it is still small and still treatable. None of that is exotic, none of it is expensive, and all of it is yours to do.</p>
-      <span class="myth-ref">Dealt with properly in Chapters 4 and 9.</span>
-    </div>
+    <p class="myth-n">Myth 5</p>
+    <p class="myth-claim">&ldquo;There is nothing anybody can do anyway.&rdquo;</p>
+    <span class="truth-tag">The truth</span>
+    <p class="truth-line">There is a great deal, and most of it is cheap.</p>
+    <p class="expl">Three injections protect everyone living in your house, for life. Taking alcohol out does more to slow the damage than any food ever will. A scan every six months finds trouble while it is still small and still treatable. None of that is exotic, none of it is expensive, and all of it is yours to do.</p>
+    <span class="myth-ref">Dealt with properly in Chapters 4 and 9.</span>
   </div>
 
-  <div class="box good">
-    <p class="k">If you recognised even one of them</p>
-    <p style="font-weight:600;margin:0">
-      You are in exactly the right place, and you have not lost anything yet.
-      Keep reading.
-    </p>
-  </div>
+  <p style="border-top:1px solid var(--rule);padding-top:26px;margin-top:26px;font-weight:600;font-size:1.1rem;color:var(--moss)">
+    If you recognised even one of them, you are in exactly the right place &mdash;
+    and you have not lost anything yet. Keep reading.
+  </p>
   <span class="folio">iii</span>
 </div>
 
