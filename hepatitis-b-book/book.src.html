@@ -177,6 +177,7 @@
   .qa-q { font-size: 1.02rem; font-weight: 600; line-height: 1.5; margin: 0 0 6px; max-width: none; color: var(--ink); }
   .qa-line { height: 27px; border-bottom: 1px solid var(--rule); }
   .qa-line.second { height: 30px; }
+
   .cover { position: relative; background: #FFFFFF; }
   .cover img { width: 100%; }
 
@@ -234,6 +235,92 @@
   .signoff .share { font-size: 0.98rem; line-height: 1.68; margin-top: 14px; opacity: 0.93; }
 
   footer.meta { max-width: 820px; margin: 0 auto; padding: 20px 14px 0; font-size: 0.7rem; color: var(--ink-2); line-height: 1.7; }
+
+  /* ======================= PRINT =======================
+     Last in the stylesheet and !important throughout, because a screen rule
+     like p.lead is more specific than anything a print rule can reasonably
+     say, and print is the last word about its own medium.
+
+     A4 rather than A5 or 6x9in, decided by measurement: the cards render
+     ~2.4x their page box at A5 and ~1.8x at A4 under the screen type scale,
+     so no trim alone fixes it. The type was composed for an 860px card; A4's
+     174mm column is the closest paged equivalent, and 10.5pt at 1.5 is
+     ordinary book setting rather than the generous screen setting.
+
+     Screen reading is completely unaffected by any of this. */
+  @media print {
+    @page { size: A4; margin: 17mm 18mm 18mm; }
+    html, body { background: #FFFFFF !important; }
+    .stack { display: block !important; max-width: none !important; margin: 0 !important; padding: 0 !important; gap: 0 !important; }
+    footer.meta { display: none !important; }
+
+    /* The page margin now belongs to @page, not to the cards, because the
+       cards are no longer sheets. */
+    .page { box-shadow: none !important; border-radius: 0 !important;
+            margin: 0 !important; padding: 0 !important;
+            width: auto !important; min-height: 0 !important;
+            background: #FFFFFF !important; }
+    .page.flush { padding: 0 !important; }
+    /* A break is forced only where a book would take one: the cover, every
+       chapter opener, and the standalone front and back sections. */
+    .page:has(.chap-band), .page:has(.cover-shell), .page.flush,
+    .page:has(.prayer), .page:has(.toc-banner), .page:has(.myth),
+    .page:has(.tracker), .page:has(.qa), .page:has(.signoff) { break-before: page; }
+    .page:first-child { break-before: auto; }
+    .folio { display: none !important; }
+    @page :first { margin: 0; }
+    /* max-width:100% from the base image rule was capping the bleed at the
+       text column and leaving an 18mm white strip down the right edge. */
+    .cover img { width: 210mm !important; max-width: none !important;
+                 height: 297mm !important; object-fit: cover !important;
+                 display: block !important; margin: 0 !important; }
+
+    p, li, .box p, .box li, td, th { font-size: 10.5pt !important; line-height: 1.5 !important; }
+    p { margin: 0 0 7pt !important; max-width: none !important; }
+    ul, ol { margin: 0 0 9pt !important; gap: 3pt !important; padding-left: 16pt !important; max-width: none !important; }
+    p.lead { font-size: 12pt !important; line-height: 1.42 !important; margin-bottom: 9pt !important; }
+    h2.chaptitle { font-size: 21pt !important; }
+    h3 { font-size: 13pt !important; margin: 14pt 0 5pt !important; }
+    h3.first { margin-top: 0 !important; }
+    h4 { font-size: 11pt !important; margin: 9pt 0 4pt !important; }
+    .kicker, .runhead, .fig-title, .box .k, .lbl, .col > p.h { font-size: 7.5pt !important; }
+    .box .k { margin-bottom: 4pt !important; }
+    .chap-band { padding: 14pt 16pt 16pt !important; margin-bottom: 14pt !important; }
+    th, td { padding: 6pt 8pt !important; }
+    thead th { font-size: 8pt !important; }
+    .box { padding: 9pt 12pt !important; margin: 11pt 0 !important; }
+    figure { margin: 12pt 0 16pt !important; }
+    figcaption { font-size: 9pt !important; line-height: 1.42 !important; margin-top: 6pt !important; }
+    .fig { margin: 12pt 0 !important; }
+    .col li { font-size: 9.5pt !important; padding: 5pt 0 5pt 20pt !important; }
+    .pullquote { font-size: 12pt !important; line-height: 1.42 !important; margin: 12pt 0 !important; }
+    .folio { font-size: 8pt !important; bottom: 10mm !important; right: 18mm !important; }
+    .qa { gap: 12pt !important; }
+    .qa-line { height: 18pt !important; }
+    .qa-line.second { height: 20pt !important; }
+    .myth { margin-bottom: 11pt !important; }
+    .week, .day-body, .recipe-body, .mealgrid { gap: 8pt !important; }
+    .week { margin: 0 0 10pt !important; }
+    .week-head { padding: 9pt 13pt !important; }
+    .week-head .t { font-size: 13pt !important; }
+    .week-head .n { font-size: 7.5pt !important; }
+    .week-body { padding: 11pt 13pt 12pt !important; }
+    .week-body .job { font-size: 10.5pt !important; margin-bottom: 9pt !important; line-height: 1.45 !important; }
+    .week-sec { margin-top: 9pt !important; }
+    .week-sec .lbl { margin-bottom: 4pt !important; }
+    .week-sec ul { gap: 3pt !important; }
+    .week-sec li, .week-sec p { font-size: 10pt !important; line-height: 1.45 !important; }
+    .week-quote { padding: 8pt 11pt !important; font-size: 10pt !important; line-height: 1.45 !important; margin-top: 9pt !important; }
+    .chip { font-size: 8pt !important; padding: 3pt 9pt !important; }
+    .chips { gap: 5pt !important; margin-top: 9pt !important; }
+
+
+    /* Nothing that reads as one unit may split across a sheet. */
+    .box, .fig, figure, .t-wrap, .week, .mealgrid, .recipe, .col, .prayer,
+    .myth, .qa-item, .tracker, .signoff, .pullquote { break-inside: avoid; }
+    h2, h3, h4, .fig-title, .mealhead, .chap-band { break-after: avoid; }
+  }
+
 </style>
 
 <div class="stack">

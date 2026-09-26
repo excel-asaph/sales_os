@@ -192,6 +192,7 @@ external image host silently.
 
 | | |
 |---|---|
+| **Print pagination** | **Done 2026-09-27** — see below. Not an open item. |
 | **Clinical review** | Every clinical statement needs Dr. David Akinyode's sign-off before publication. This is not a formality — the book carries his name. The three specific decisions only he can make are below. |
 | **The reference tables** | Chapter 2 opens *"What separates them is numbers, and you probably have not been given them"* — and then does not print them either. ALT's upper limit and the viral-load level that triggers treatment are both left as *Raised* / *High*. That is deliberate: the numbers differ by guideline, by HBeAg status, in pregnancy and with co-infection, and printing the wrong one tells a reader they are fine when they are not. Choosing which guideline the book follows is a clinical act, so it is his. |
 | **Day 5's egusi** | Chapter 3 names egusi as an aflatoxin risk and Day 4's habit says to bin any that is musty — then Day 5 serves egusi soup. The recipe hedges it (*"from seeds you stored dry and sealed"*). Defensible, since banning a staple would make the plan unusable, but he decides whether the sourcing note carries it. |
@@ -264,6 +265,72 @@ doctor's specific instructions.
   the framing.
 - Whether to print the WHO numbers at all is ultimately an editorial-clinical
   call, and it is his.
+
+## Print pagination — done 2026-09-27
+
+    python hepatitis-b-book/build.py && python hepatitis-b-book/topdf.py
+
+Output is `Hepatitis Clear.pdf`, **73 pages, A4, 2.6MB**, gitignored like
+`book.html`. Rendered through headless Chrome rather than WeasyPrint or
+wkhtmltopdf, because it is the same Blink engine the book is authored and
+previewed in — `clamp()`, grid, `break-inside` and `object-fit` behave
+identically, so the PDF matches the page instead of approximating it.
+
+### The decision that mattered: a card is not a sheet
+
+The first A5 render came back at **162 pages from 55 cards**. Measuring each
+card with Chrome's own layout (`--dump-dom` returns the DOM after scripts
+run, so an injected script can report `scrollHeight`) showed why:
+
+| | |
+|---|---|
+| Ordinary prose card | **1123px — exactly one A4 sheet, to the pixel** |
+| Card 53, four `.week` blocks | 305 + 664 + 549 + 479px = **2.65 sheets** |
+
+So prose was never the problem, and no trim or type scale could fix it: the
+card boundaries were composed for a scrolling page, where a long card costs
+nothing. Forcing card == sheet produced 93 sheets from 53 cards, the excess
+showing up as half-empty pages.
+
+**Print now flows.** Breaks are forced only where a book would take one —
+the cover, every chapter opener, and the standalone front and back sections
+— and `break-inside: avoid` keeps each unit whole. Chrome paginates the
+rest: 93 → 75 → 73 pages, no content clipped, nothing running past the trim.
+
+### Why A4
+
+Measured, not assumed. Cards run ~2.4x their page box at A5 and ~1.8x at A4
+under the screen type scale. A4's 174mm column is the closest paged
+equivalent to the 860px card the type was composed against, and it is the
+size Nigerian print shops and home printers stock. Print gets its own type
+scale — 10.5pt at 1.5 — which is ordinary book setting rather than the
+generous screen setting. **Screen reading is completely unaffected.**
+
+### The folio problem is retired, not solved
+
+The hand-written folios are `display: none` in print, and `topdf.py` stamps
+the number on after rendering, derived from where each page actually lands.
+The nine duplicates no longer matter and the numbering cannot drift from the
+content again. The cover and the two front-matter pages go unnumbered.
+
+### Three traps, all of which cost time
+
+- **Print rules must come last and be `!important`.** The block sat
+  mid-stylesheet with fifty rules after it, and `p.lead` (0,1,1) outranks any
+  print `.lead` (0,1,0) whatever the order. Paragraphs kept rendering at 18px
+  and two different stylesheets produced byte-identical page counts.
+- **`@page :first { margin: 0 }` does work in Chrome.** Having assumed it
+  did not, the negative margins meant to bleed the cover pulled it a second
+  18mm left and 17mm up, cropping it.
+- **`max-width: 100%` on the base image rule capped the cover's bleed** at
+  the text column and left an 18mm white strip down the right edge.
+
+### Where it stands
+
+Average page fill **71%**, nothing clipped, nothing past the trim. The loose
+pages are chapter openers and section ends, which are meant to be airy.
+Tightening further would mean redesigning the structured components rather
+than paginating them.
 
 ## The title shortlist
 
