@@ -185,6 +185,29 @@ external image host silently.
 | **Portion sizes** | Throughout the 14-day plan. Reasonable, but not clinically set. |
 | **A second opinion** | A Nigerian gastroenterologist or hepatologist paid for an independent read. "Reviewed by" converts harder than any claim we would have written instead. |
 
+## Parked content — the medical disclaimer
+
+Lifted off the prayer page on 2026-09-26: a red warning box straight after
+the amen broke the tone the page exists to set. **It still has to appear
+somewhere before publication.** The back matter facing the signoff is the
+usual home; Chapter 8's warning-signs page is the alternative.
+
+It is kept here rather than as an HTML comment in `book.src.html` because
+the artifact renderer kept painting the commented-out block anyway. Paste
+this back where it belongs:
+
+```html
+<div class="box warn">
+  <p class="k">Please read this first</p>
+  <p>This book is education, not treatment. It does not diagnose you, it does
+  not prescribe for you, and it cannot replace a doctor who has seen your
+  results. Nothing in these pages should be used as a reason to delay, change
+  or stop any medicine you have been given. If you are unwell, go to hospital.
+  Everything here is written to make you better at working <em>with</em> your
+  doctor, not instead of one.</p>
+</div>
+```
+
 ## The title shortlist
 
 Subtitle direction is settled: **name the enemy** — "...and What the Herb
