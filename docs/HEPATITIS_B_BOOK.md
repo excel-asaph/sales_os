@@ -4,8 +4,10 @@ A second product for a second business, built to the same formula as the
 Diabetes Fix but for a condition that behaves nothing like diabetes. The book
 itself lives in `hepatitis-b-book/`; this is the reasoning behind it.
 
-**Status at 2026-09-26:** 52 pages, nine chapters, complete draft. Blocked on
-one decision (the title) and one person (Dr. Akinyode's clinical review).
+**Status at 2026-09-26:** 55 pages, nine chapters, complete draft, title and
+cover settled. **Parked** here to start the app revamp. The only thing between
+this and publication is Dr. Akinyode's clinical review and the print
+pagination pass below.
 
 ---
 
@@ -174,11 +176,22 @@ external image host silently.
 
 ---
 
+## Settled on 2026-09-26
+
+| | |
+|---|---|
+| **Title** | **Hepatitis Clear.** Chosen by the owner over the *Outlive Hepatitis B* recommendation. The concern raised and overruled: *HBsAg clearance* is the clinical term for functional cure, so the title reads as the one claim the book spends nine chapters refuting. Nothing on the cover or inside the book claims clearance, which is what defused it. Worth watching in ad copy, where `src/lib/claim-filter.ts` may flag it. |
+| **Cover** | Supplied by the owner, generated externally, text baked into the artwork. `img/cover_v5.jpg`, from `Hepatits Clear ebook cover01.jfif` (gitignored). The old HTML overlay — eyebrow, title, subtitle, author band — was removed with it, along with the `.cover-top` / `.cover-band` rules. |
+| **An earlier cover was declined** | It promised *"Clear Hepatitis B for Good and Regrow Your Liver in Just 10 Days"* over herb imagery, with two fabricated blood results reading "HBV: UNDETECTED". Every claim on it was false, all of them contradicted by this book, and the specific harm is the one the book's own warning box names: people stop their antiviral because somebody told them they were healed. Do not revive it. |
+| **Two cover/content gaps, reviewed and accepted** | The cover says *"5 things that are killing your liver"* where Chapter 3 has eight, and *"the 90-days CLEAR plan"*, a phrase that appears nowhere in the book. Both were raised and the owner chose to leave them. Not open items — do not re-raise. |
+| **Meal day titles** | Retitled after their food. They had been naming each day's habit, and nine of fourteen restated a week from the ninety-day plan, two word for word. |
+| **The answers worksheet** | "What my doctor said" — the eight questions printed with ruled space. Added because the book told the reader to copy them out by hand in three separate places and never supplied the page. Chose this over the Diabetes Fix's blank `YOUR NOTES:` page, which suits a ten-day protocol but not a monitoring book. |
+| **Hepatitis C** | Deliberately not covered. It is curable and has no vaccine — the inverse of this book's two central messages. A short Chapter 1 sidebar was proposed, telling a reader whose result says C that this is not their book. **Not written.** Revisit before publication; the "curable" claim needs Akinyode specifically. |
+
 ## Still open
 
 | | |
 |---|---|
-| **The title** | Ten options were drafted; the subtitle direction is chosen ("name the enemy"). The cover currently reads **HEPATITIS B** as a placeholder. |
 | **Clinical review** | Every clinical statement needs Dr. David Akinyode's sign-off before publication. This is not a formality — the book carries his name. |
 | **The reference tables** | Chapter 1 and 2 use *Normal / Raised* and *Low / High* rather than numbers, deliberately: real thresholds vary by guideline, pregnancy and co-infection. He sets those. |
 | **Day 5's egusi** | The highest aflatoxin-risk item on the meal plan. It is included with a sourcing note; he should decide whether that is strong enough. |
