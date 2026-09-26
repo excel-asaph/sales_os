@@ -119,6 +119,19 @@
   .toc-row .s { font-size: 0.95rem; line-height: 1.5; margin-top: 4px; color: var(--ink-2); display: block; font-weight: 400; }
   .toc-row .p { font-size: 0.88rem; font-weight: 700; color: var(--ochre); text-align: right; }
 
+  /* Contents, set the way the Diabetes Fix sets it: a small "Table of" over
+     a solid CONTENTS banner, a rule, then every chapter with its actual
+     sections listed beneath. Page numbers are deliberately absent — theirs
+     has none either, and ours would be wrong until the folios are renumbered
+     for the fourteen meal pages. */
+  .toc-pre { font-weight: 700; font-size: 1.02rem; margin: 0 0 12px; }
+  .toc-banner { background: var(--indigo); color: var(--on-solid); border-radius: var(--r); padding: clamp(16px, 3vw, 24px); text-align: center; font-size: clamp(1.7rem, 6vw, 2.7rem); font-weight: 800; letter-spacing: 0.07em; line-height: 1.1; }
+  .toc-rule { border: 0; border-top: 1px solid var(--rule); margin: 26px 0 34px; }
+  .toc2 { display: flex; flex-direction: column; gap: 28px; }
+  .toc2 .ch-line { color: var(--clay); font-weight: 700; font-size: 1.08rem; line-height: 1.4; margin: 0 0 10px; max-width: none; }
+  .toc2 ul { list-style: none; margin: 0; padding: 0 0 0 16px; gap: 8px; max-width: none; }
+  .toc2 li { position: relative; padding-left: 16px; font-size: 1rem; line-height: 1.55; color: var(--ink); }
+  .toc2 li::before { content: "\2022"; position: absolute; left: 0; color: var(--ink-3); }
   .cover { position: relative; background: #FFFFFF; }
   .cover img { width: 100%; }
   .cover-top { position: absolute; top: 9.5%; left: 0; right: 0; padding-inline: clamp(30px, 9vw, 92px); text-align: center; }
@@ -225,18 +238,110 @@
 
 <!-- ============ CONTENTS ============ -->
 <div class="page">
-  <p class="runhead">Contents</p>
-  <div class="toc">
-    <div class="toc-row"><span class="n">1</span><span class="t">What Just Happened<span class="s">Your result, your liver, and why you feel perfectly fine</span></span><span class="p">1</span></div>
-    <div class="toc-row"><span class="n">2</span><span class="t">The Two Questions That Decide Everything<span class="s">Is it active, and has it caused damage yet</span></span><span class="p">7</span></div>
-    <div class="toc-row"><span class="n">3</span><span class="t">The Silent Enemies<span class="s">What is quietly making it worse, starting with what you were sold</span></span><span class="p">14</span></div>
-    <div class="toc-row"><span class="n">4</span><span class="t">The First 90 Days, Week by Week<span class="s">Twelve weeks, one job each</span></span><span class="p">22</span></div>
-    <div class="toc-row"><span class="n">5</span><span class="t">Nigerian Foods for a Working Liver<span class="s">The traffic light, the protein mistake, and a 14-day meal plan</span></span><span class="p">34</span></div>
-    <div class="toc-row"><span class="n">6</span><span class="t">Weight, Movement and the Second Disease<span class="s">Your waist, and a four-week movement plan</span></span><span class="p">40</span></div>
-    <div class="toc-row"><span class="n">7</span><span class="t">Who to Tell, and How to Sleep Again<span class="s">Stigma, marriage, secrecy and the weeks that feel heavy</span></span><span class="p">44</span></div>
-    <div class="toc-row"><span class="n">8</span><span class="t">Warning Signs &mdash; When to Go Now<span class="s">The emergencies, the six-month scan, and the eight questions</span></span><span class="p">49</span></div>
-    <div class="toc-row"><span class="n">9</span><span class="t">Protecting Everyone Else<span class="s">How it spreads, how it does not, and how to end it in your family</span></span><span class="p">55</span></div>
-    <div class="toc-row"><span class="n">&mdash;</span><span class="t">Your 90-Day Tracker<span class="s">One page to tick, and a log to take to your doctor</span></span><span class="p">61</span></div>
+  <p class="toc-pre">Table of</p>
+  <div class="toc-banner">CONTENTS</div>
+  <hr class="toc-rule">
+  <div class="toc2">
+    <div>
+      <p class="ch-line">CHAPTER 1:&nbsp; What Just Happened</p>
+      <ul>
+        <li>What “Reactive” Actually Means — and What It Does Not</li>
+        <li>Why You Feel Perfectly Fine, and Why That Is the Danger</li>
+        <li>Your Liver, Explained in One Paragraph</li>
+        <li>The Long Road, and Where You Are Standing On It</li>
+        <li>The Numbers Nobody Has Given You Yet</li>
+      </ul>
+    </div>
+    <div>
+      <p class="ch-line">CHAPTER 2:&nbsp; The Two Questions That Decide Everything</p>
+      <ul>
+        <li>Is the Virus Active Right Now?</li>
+        <li>Has It Already Caused Scarring?</li>
+        <li>The Four Situations — and Which One You Are In</li>
+        <li>If You Are Told You Need Medicine</li>
+        <li>Why Scarring Often Eases Once the Virus Is Controlled</li>
+      </ul>
+    </div>
+    <div>
+      <p class="ch-line">CHAPTER 3:&nbsp; The Silent Enemies of a Hepatitis B Liver</p>
+      <ul>
+        <li>Alcohol — Why the Honest Number Is Zero</li>
+        <li>The Mixtures Sold to “Flush” It Out of You</li>
+        <li>Paracetamol, and the Trap Hiding Inside It</li>
+        <li>The Mould on Groundnut and Maize You Cannot Taste</li>
+        <li>Blades, Clippers and Shared Razors</li>
+      </ul>
+    </div>
+    <div>
+      <p class="ch-line">CHAPTER 4:&nbsp; The First 90 Days, Week by Week</p>
+      <ul>
+        <li>Week 1 – Get the Full Picture</li>
+        <li>Week 2 – Protect the House</li>
+        <li>Week 3 – Empty the Danger Shelf</li>
+        <li>Week 4 – Fix the Store Cupboard</li>
+        <li>Week 5 – Build the Plate</li>
+        <li>Week 6 – Move, and Measure Your Middle</li>
+        <li>Week 7 – Sleep</li>
+        <li>Week 8 – Tell One Person</li>
+        <li>Week 9 – Prepare the Review</li>
+        <li>Week 10 – Go, and Ask Out Loud</li>
+        <li>Week 11 – Set the Calendar</li>
+        <li>Week 12 – The New Ordinary</li>
+      </ul>
+    </div>
+    <div>
+      <p class="ch-line">CHAPTER 5:&nbsp; Nigerian Foods for a Working Liver</p>
+      <ul>
+        <li>The Protein Mistake Almost Every Nigerian Makes</li>
+        <li>The Traffic Light — Eat Freely, Moderate, Stop</li>
+        <li>What a Balanced Plate Actually Looks Like</li>
+        <li>The 14-Day Meal Plan, With Recipes and Quantities</li>
+        <li>Coffee, and What the Evidence Really Says</li>
+      </ul>
+    </div>
+    <div>
+      <p class="ch-line">CHAPTER 6:&nbsp; Weight, Movement and the Second Disease</p>
+      <ul>
+        <li>The Liver Disease Nobody Warned You About</li>
+        <li>Measure Your Waist, Not Your Weight</li>
+        <li>The Four-Week Movement Plan — No Gym, No Equipment</li>
+      </ul>
+    </div>
+    <div>
+      <p class="ch-line">CHAPTER 7:&nbsp; Who to Tell, and How to Sleep Again</p>
+      <ul>
+        <li>You Do Not Owe Everybody the Truth</li>
+        <li>The Conversation You Are Dreading</li>
+        <li>A Vaccinated Partner Is a Protected Partner</li>
+        <li>The Heavy Weeks, and What Helps</li>
+        <li>Something to Say in the Morning</li>
+      </ul>
+    </div>
+    <div>
+      <p class="ch-line">CHAPTER 8:&nbsp; Warning Signs — When to Go Now</p>
+      <ul>
+        <li>The Signs That Must Never Wait</li>
+        <li>The Six-Month Scan, and Why It Matters When You Feel Well</li>
+        <li>Eight Questions to Ask Your Doctor</li>
+        <li>What to Do When You Cannot Afford the Tests This Month</li>
+      </ul>
+    </div>
+    <div>
+      <p class="ch-line">CHAPTER 9:&nbsp; Protecting Everyone Else</p>
+      <ul>
+        <li>How It Spreads — and the Longer List of How It Does Not</li>
+        <li>Testing and Vaccinating Your Household</li>
+        <li>Pregnancy, and the First 24 Hours</li>
+        <li>Barbers, Salons and Shared Razors</li>
+      </ul>
+    </div>
+    <div>
+      <p class="ch-line">Your 90-Day Tracker</p>
+      <ul>
+        <li>Twelve Weeks to Tick Off</li>
+        <li>The Log to Take to Every Appointment</li>
+      </ul>
+    </div>
   </div>
   <span class="folio">ii</span>
 </div>
