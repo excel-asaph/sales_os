@@ -64,3 +64,5 @@ __pycache__/
 /hepatitis-b-book/img/*.png
 /hepatitis-b-book/img/*.jfif
 /hepatitis-b-book/*.pdf
+/bp-book/book.html
+/bp-book/*.pdf
