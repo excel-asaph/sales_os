@@ -100,7 +100,7 @@ assume.
 | | |
 |---|---|
 | **Interior artwork** | The cover is in (`img/cover_v1.jpg`, from a supplied `.jfif`, gitignored). There is still no interior photography &mdash; generating it needs a fresh gcloud token, and the Vertex pipeline in `hepatitis-b-book/generate-images.py` works unchanged. |
-| **One cover claim** | The cover says *"reverse stubborn BP"*, while the closing page says pressure is *controlled, not cured*. Defensible &mdash; a reading genuinely does come back down, unlike hepatitis B clearance &mdash; but the two should not contradict each other in the same file. Raised; owner's call. |
+| **One cover claim, resolved** | The cover says *"reverse stubborn BP"*. The closing page used to answer it with *"blood pressure is not cured &mdash; it is controlled"*, which contradicted the cover inside one file. That paragraph was removed on 2026-09-27, so the marketing line now stands. The honest framing survives where it matters clinically: Chapter 6 still opens with *"what they do <b>not</b> do is cure anything"* and carries the never-stop-the-tablet box. |
 | **Clinical review** | Dr. Akinyode. The potassium advice carries a kidney-disease exception that he should confirm, and the zobo claim needs his sign-off since it is the boldest thing in the book. |
 
 | **Prostate book** | Requested in the same breath and deferred to focus here. |

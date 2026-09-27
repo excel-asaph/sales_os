@@ -259,8 +259,6 @@ CLOSING = """<div class="page closing">
   <p class="lead">You started this with a number somebody read off a machine and did not explain.</p>
   <p>You now know what the two numbers mean and which one you were ignoring. You know what was actually in your pot. You know the four things that hold pressure down and roughly what each one is worth. You know which painkiller to refuse at the chemist, and what to say when somebody offers you a mixture.</p>
   <p>And you have two readings, ten days apart, in your own handwriting.</p>
-  <p>Nothing in these pages cured anything, because blood pressure is not cured &mdash; it is controlled, which is a smaller word and a far more reliable one. What was available was the difference between a man who is measured and treated, and a man who finds out on the morning he cannot lift his left arm.</p>
-  <p>You are the first one now. That was the whole point.</p>
 
   <div class="pullquote">Start today. Not on Monday, not next month when things calm down &mdash; because things never calm down. Today.</div>
 
