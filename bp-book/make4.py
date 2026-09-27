@@ -286,7 +286,7 @@ CLOSING = """<div class="page closing">
 
   <div class="signoff">
     <p class="who">Dr. David Akinyode</p>
-    <p class="what">Author, Pressure Down</p>
+    <p class="what">Author, Hypertension Clear</p>
     <p class="share">Share this book freely with anybody who needs it &mdash; particularly Chapter 3 and Chapter 6. Please encourage everyone you send it to to have their blood pressure checked, and to see a qualified doctor.</p>
   </div>
 </div>
@@ -294,7 +294,7 @@ CLOSING = """<div class="page closing">
 </div>
 
 <footer class="meta">
-  <b>Pressure Down</b> &middot; a 10-day plan for high blood pressure, written for Nigeria.<br>
+  <b>Hypertension Clear</b> &middot; a 10-day plan for high blood pressure, written for Nigeria.<br>
   Sodium figures from published testing of Nigerian bouillon cubes; blood pressure
   thresholds from the World Health Organization 2021 guideline; exercise figures from
   the 2023 pooled analysis of 270 randomised trials; hibiscus figures from pooled

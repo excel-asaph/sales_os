@@ -17,7 +17,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "book.html")
-OUT = os.path.join(HERE, "Pressure Down.pdf")
+OUT = os.path.join(HERE, "Hypertension Clear.pdf")
 # Cover plus the prayer and contents spread go unnumbered.
 FRONT_MATTER = 3
 

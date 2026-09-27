@@ -20,51 +20,8 @@ import io
 
 HEAD = io.open("_head.html", encoding="utf-8").read()
 
-COVER_CSS = """  /* A typographic cover, until artwork is generated. Deep clay ground so
-     it reads as urgent on a phone thumbnail, which is where it is sold. */
-  .tcover { background: var(--clay); color: #FFFFFF; min-height: 118vw; display: flex;
-            flex-direction: column; justify-content: space-between; padding: clamp(28px,7vw,64px); }
-  .tcover .eyebrow { font-size: clamp(0.62rem,2vw,0.86rem); letter-spacing: 0.18em; text-transform: uppercase;
-                     font-weight: 700; color: #FFD9A0; margin: 0 0 clamp(14px,3vw,26px); max-width: none; }
-  .tcover h1 { font-size: clamp(2.6rem,12vw,5.4rem); font-weight: 800; line-height: 0.88;
-               letter-spacing: -0.04em; margin: 0 0 clamp(14px,3vw,24px); color: #FFFFFF; }
-  .tcover .sub { font-size: clamp(1rem,3.4vw,1.5rem); font-weight: 600; line-height: 1.35;
-                 color: #FFE7C4; margin: 0; max-width: 30ch; }
-  .tcover ul { list-style: none; padding: 0; margin: clamp(22px,5vw,40px) 0 0; gap: clamp(8px,1.8vw,13px); max-width: none; }
-  .tcover li { position: relative; padding-left: 26px; font-size: clamp(0.88rem,2.7vw,1.1rem);
-               font-weight: 600; line-height: 1.4; color: #FFFFFF; }
-  .tcover li::before { content: "\\2713"; position: absolute; left: 0; color: #9BD49B; font-weight: 800; }
-  .tcover .by { font-size: clamp(0.86rem,2.8vw,1.15rem); font-weight: 700; color: #FFFFFF;
-                border-top: 2px solid rgba(255,255,255,0.35); padding-top: clamp(14px,3vw,22px); margin: 0; }
-  @media print {
-    .tcover { min-height: 0 !important; height: 297mm !important; padding: 34mm 24mm 30mm !important;
-              background: var(--clay) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .tcover h1 { font-size: 54pt !important; }
-    .tcover .sub { font-size: 16pt !important; }
-    .tcover li { font-size: 12pt !important; }
-    .tcover .eyebrow { font-size: 9pt !important; }
-    .tcover .by { font-size: 13pt !important; }
-  }
-"""
-
-COVER = """<div class="page flush">
-  <div class="tcover">
-    <div>
-      <p class="eyebrow">Before your next check-up</p>
-      <h1>PRESSURE<br>DOWN</h1>
-      <p class="sub">The 10-day reset that brings your BP down &mdash;
-      starting with the 2 things in your pot nobody warned you about</p>
-    </div>
-    <div>
-      <ul>
-        <li>A full 10-day plan &mdash; every meal, every day</li>
-        <li>10 recipes from your own market, with quantities</li>
-        <li>The 4-minute exercise that beats walking for BP</li>
-        <li>10 hidden helps nobody has told you about</li>
-      </ul>
-      <p class="by" style="margin-top:clamp(20px,4vw,34px)">Published by Dr David Akinyode</p>
-    </div>
-  </div>
+COVER = """<div class="page flush cover">
+  {{IMG:cover_v1}}
 </div>
 
 """
@@ -367,7 +324,7 @@ CH2 = """<div class="page">
 
 def main():
     body = COVER + PRAYER + toc() + myths() + ABOUT + CH1 + CH2
-    head = HEAD.replace("  .cover {", COVER_CSS + "  .cover {", 1)
+    head = HEAD
     io.open("book.src.html", "w", encoding="utf-8", newline="\n").write(
         head + '\n<div class="stack">\n\n' + body)
     n = body.count('<div class="page')

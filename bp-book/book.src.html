@@ -1,4 +1,4 @@
-<title>Pressure Down</title>
+<title>Hypertension Clear</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap">
@@ -178,31 +178,6 @@
   .qa-line { height: 27px; border-bottom: 1px solid var(--rule); }
   .qa-line.second { height: 30px; }
 
-  /* A typographic cover, until artwork is generated. Deep clay ground so
-     it reads as urgent on a phone thumbnail, which is where it is sold. */
-  .tcover { background: var(--clay); color: #FFFFFF; min-height: 118vw; display: flex;
-            flex-direction: column; justify-content: space-between; padding: clamp(28px,7vw,64px); }
-  .tcover .eyebrow { font-size: clamp(0.62rem,2vw,0.86rem); letter-spacing: 0.18em; text-transform: uppercase;
-                     font-weight: 700; color: #FFD9A0; margin: 0 0 clamp(14px,3vw,26px); max-width: none; }
-  .tcover h1 { font-size: clamp(2.6rem,12vw,5.4rem); font-weight: 800; line-height: 0.88;
-               letter-spacing: -0.04em; margin: 0 0 clamp(14px,3vw,24px); color: #FFFFFF; }
-  .tcover .sub { font-size: clamp(1rem,3.4vw,1.5rem); font-weight: 600; line-height: 1.35;
-                 color: #FFE7C4; margin: 0; max-width: 30ch; }
-  .tcover ul { list-style: none; padding: 0; margin: clamp(22px,5vw,40px) 0 0; gap: clamp(8px,1.8vw,13px); max-width: none; }
-  .tcover li { position: relative; padding-left: 26px; font-size: clamp(0.88rem,2.7vw,1.1rem);
-               font-weight: 600; line-height: 1.4; color: #FFFFFF; }
-  .tcover li::before { content: "\2713"; position: absolute; left: 0; color: #9BD49B; font-weight: 800; }
-  .tcover .by { font-size: clamp(0.86rem,2.8vw,1.15rem); font-weight: 700; color: #FFFFFF;
-                border-top: 2px solid rgba(255,255,255,0.35); padding-top: clamp(14px,3vw,22px); margin: 0; }
-  @media print {
-    .tcover { min-height: 0 !important; height: 297mm !important; padding: 34mm 24mm 30mm !important;
-              background: var(--clay) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .tcover h1 { font-size: 54pt !important; }
-    .tcover .sub { font-size: 16pt !important; }
-    .tcover li { font-size: 12pt !important; }
-    .tcover .eyebrow { font-size: 9pt !important; }
-    .tcover .by { font-size: 13pt !important; }
-  }
   /* The 10-day block. Its own component, not the hepatitis day card: this
      book's spine is a countable protocol, so each day has to read as a
      self-contained set of instructions rather than as a page of a plan. */
@@ -436,24 +411,8 @@
 
 <div class="stack">
 
-<div class="page flush">
-  <div class="tcover">
-    <div>
-      <p class="eyebrow">Before your next check-up</p>
-      <h1>PRESSURE<br>DOWN</h1>
-      <p class="sub">The 10-day reset that brings your BP down &mdash;
-      starting with the 2 things in your pot nobody warned you about</p>
-    </div>
-    <div>
-      <ul>
-        <li>A full 10-day plan &mdash; every meal, every day</li>
-        <li>10 recipes from your own market, with quantities</li>
-        <li>The 4-minute exercise that beats walking for BP</li>
-        <li>10 hidden helps nobody has told you about</li>
-      </ul>
-      <p class="by" style="margin-top:clamp(20px,4vw,34px)">Published by Dr David Akinyode</p>
-    </div>
-  </div>
+<div class="page flush cover">
+  {{IMG:cover_v1}}
 </div>
 
 <div class="page prayer-page">
@@ -1648,7 +1607,7 @@
 
   <div class="signoff">
     <p class="who">Dr. David Akinyode</p>
-    <p class="what">Author, Pressure Down</p>
+    <p class="what">Author, Hypertension Clear</p>
     <p class="share">Share this book freely with anybody who needs it &mdash; particularly Chapter 3 and Chapter 6. Please encourage everyone you send it to to have their blood pressure checked, and to see a qualified doctor.</p>
   </div>
 </div>
@@ -1656,7 +1615,7 @@
 </div>
 
 <footer class="meta">
-  <b>Pressure Down</b> &middot; a 10-day plan for high blood pressure, written for Nigeria.<br>
+  <b>Hypertension Clear</b> &middot; a 10-day plan for high blood pressure, written for Nigeria.<br>
   Sodium figures from published testing of Nigerian bouillon cubes; blood pressure
   thresholds from the World Health Organization 2021 guideline; exercise figures from
   the 2023 pooled analysis of 270 randomised trials; hibiscus figures from pooled

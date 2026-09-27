@@ -1,10 +1,13 @@
-# Pressure Down — the high blood pressure book
+# Hypertension Clear — the high blood pressure book
 
 Third product, built on the pipeline the Hepatitis book proved. The
 manuscript lives in `bp-book/`; this is the reasoning.
 
-**Status at 2026-09-27:** complete draft. 9,800 words, 63 A4 pages, no
-artwork yet. Pending Dr. Akinyode's clinical review.
+**Status at 2026-09-27:** complete draft. 9,800 words, 63 A4 pages, cover
+in place. Pending Dr. Akinyode's clinical review.
+
+Titled **Hypertension Clear**, to match the supplied cover and to sit in the
+same series as *Hepatitis Clear*. The working title was *Pressure Down*.
 
 ## Where everything is
 
@@ -96,7 +99,8 @@ assume.
 
 | | |
 |---|---|
-| **Artwork** | No images. The cover is typographic and the book has no photography, because generating it needs a fresh gcloud token. The Vertex pipeline in `hepatitis-b-book/generate-images.py` works unchanged. |
+| **Interior artwork** | The cover is in (`img/cover_v1.jpg`, from a supplied `.jfif`, gitignored). There is still no interior photography &mdash; generating it needs a fresh gcloud token, and the Vertex pipeline in `hepatitis-b-book/generate-images.py` works unchanged. |
+| **One cover claim** | The cover says *"reverse stubborn BP"*, while the closing page says pressure is *controlled, not cured*. Defensible &mdash; a reading genuinely does come back down, unlike hepatitis B clearance &mdash; but the two should not contradict each other in the same file. Raised; owner's call. |
 | **Clinical review** | Dr. Akinyode. The potassium advice carries a kidney-disease exception that he should confirm, and the zobo claim needs his sign-off since it is the boldest thing in the book. |
-| **The title** | *Pressure Down* is mine, not chosen. |
+
 | **Prostate book** | Requested in the same breath and deferred to focus here. |

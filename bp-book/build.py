@@ -27,25 +27,13 @@ IMGDIR = os.path.join(HERE, "img")
 
 # The cover is the one image a reader looks at closely, so it gets more pixels
 # and less compression than the in-body figures.
-WIDTH = {"cover_v5": 1240}
-QUALITY = {"cover_v5": 92}
+WIDTH = {"cover_v1": 1240}
+QUALITY = {"cover_v1": 92}
 
 # Alt text is not decoration here: this is a health book and the figures carry
 # meaning for anyone using a screen reader.
 ALT = {
-    "cover_v5": "Book cover: Hepatitis Clear, published by Dr David Akinyode. A Nigerian couple behind fresh vegetables and fruit, framed by green leaves, above the promises the book makes.",
-    "result_paper": "Hands holding a folded medical result slip in a clinic corridor",
-    "clinic": "A doctor explaining results to a patient in a consulting room",
-    "agbo": "Unlabelled bottles of homemade herbal liquid on a roadside table",
-    "groundnut": "Raw groundnuts on a tray, half plump and pale, half shrivelled and discoloured",
-    "storage": "Sealed containers of grain stored dry and off the floor",
-    "market": "A woman choosing ugu, okra and garden egg at an open-air market stall",
-    "plate": "A balanced Nigerian meal of grilled mackerel, dark greens and a small portion of brown rice",
-    "walking": "A woman walking briskly along a quiet street at dawn",
-    "couple": "A couple sitting together in conversation at home in the evening",
-    "family_v2": "A Nigerian family of five in colourful clothing, smiling together outdoors",
-    "vaccine": "A nurse giving a vaccination to a teenager in a clinic",
-    "night": "A quiet bedroom at night with the phone face down on the table",
+    "cover_v1": "Book cover: Hypertension Clear, published by Dr David Akinyode. A Nigerian couple behind fresh vegetables and a blood pressure monitor, framed by green leaves, above the promises the book makes.",
 }
 
 
