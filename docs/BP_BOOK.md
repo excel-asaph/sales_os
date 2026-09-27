@@ -95,7 +95,45 @@ assume.
 | Isometric 8.24/4 mmHg, 270 trials | 2023 BJSM network meta-analysis |
 | Hibiscus ~7/4 mmHg | Pooled randomised trials, 13 RCTs / 1,205 participants |
 
+
+## Print
+
+    cd bp-book && python build.py && python topdf.py
+
+`Hypertension Clear.pdf` — **63 pages, A4, 1.1MB**, gitignored like
+`book.html`.
+
+**It inherits the hepatitis print stylesheet whole.** `_head.html` was lifted
+after that book's print work was finished, so all 87 print rules are
+byte-identical between the two — A4 with 25mm side margins, the 12pt print
+type scale, continuous flow rather than one card per sheet, cream paper,
+splitting tables with repeating headers, `orphans`/`widows` at 3, and
+`break-after: avoid` on the section openers. Verified by diffing the two
+blocks rather than assumed.
+
+Three hooks those rules depend on are set in this book's own markup:
+`.page.prayer-page` on the opening prayer (fixed height, centred),
+`.page.closing` on the closing section, and `.t-wrap.keep` on the five
+tables that are short forms rather than long reference tables.
+
+One value differs deliberately. `topdf.py` sets **`FRONT_MATTER = 5`** where
+the hepatitis book uses 3: the cover, the prayer and *three* pages of
+contents go unnumbered, so page 1 is the first page of real content.
+
+### Measured on the final build
+
+| | |
+|---|---|
+| Running prose | median **64** characters a line, 90th percentile 74 |
+| Day pages | median 52 — the three-column meal lists, narrow by design |
+| Average page fill | 68% |
+| Text past the trim | none |
+| Lines sliced across a page break | none |
+| Paper | #F5EFE6 confirmed at the pixel |
+| Cover bleed | −5.8mm to 215.9mm across a 209.9mm sheet |
+
 ## Still open
+
 
 | | |
 |---|---|
