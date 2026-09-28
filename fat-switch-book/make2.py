@@ -15,6 +15,7 @@ repeatedly found since in slimming products sold as herbal.
 import io
 from switches import SWITCHES
 from profile import swallow
+from figures import il, ORDER, BOTTLE
 
 CH2_HEAD = """<div class="page">
   <div class="chap-band"><p class="kicker">Chapter two</p><h2 class="chapno">02</h2><h2 class="chaptitle">The ten switches, explained</h2></div>
@@ -70,6 +71,8 @@ def ch2():
   <p>Switch 2 is the one people dismiss, and it is the most interesting thing in this book.</p>
   <p>Eat a big plate of white rice on an empty stomach and your blood sugar climbs steeply, your body releases a large amount of insulin to bring it down, and insulin&rsquo;s other job is storing fat. Eat the same rice <em>after</em> the fish and the vegetables, and the climb is far gentler &mdash; the protein and fibre slow everything leaving your stomach.</p>
   <p>Same plate. Same quantity. Same day. Different result, because of the order.</p>
+
+{il('The only three steps in switch 2', ORDER)}
   <p>And there is a second effect you will feel before you believe the first: by the time you reach the swallow, you are already partly full, so you eat less of it without having decided to eat less of anything.</p>
 
   <div class="box good">
@@ -82,7 +85,7 @@ def ch2():
     return "".join(out)
 
 
-CH3 = """<div class="page">
+CH3 = f"""<div class="page">
   <div class="chap-band"><p class="kicker">Chapter three</p><h2 class="chapno">03</h2><h2 class="chaptitle">Flat tummy tea, slimming pills and the waist trainer</h2></div>
 
   <p class="lead">You have almost certainly bought one of them. Nearly everybody reading this has, and there is no shame in it &mdash; they are sold by people who look exactly like the result you want.</p>
@@ -114,6 +117,8 @@ CH3 = """<div class="page">
     <li><b>Fat-burner injections and drips.</b> Whatever is in the syringe, nobody has told you, and nobody is watching what it does to you afterwards.</li>
     <li><b>Slimming coffee.</b> Same story as the capsules, with caffeine on top to make you feel something is happening.</li>
   </ul>
+
+{il('What you are actually drinking', BOTTLE)}
 
   <div class="box good">
     <p class="k">The honest comparison</p>

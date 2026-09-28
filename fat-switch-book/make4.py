@@ -16,6 +16,7 @@ a hormone.
 """
 import io
 from profile import swallow
+from figures import il, ARC, CLOCK, OIL
 
 sw = swallow(0)
 
@@ -86,12 +87,14 @@ MARCH = """      <svg viewBox="0 0 200 150" role="img" aria-label="Marching on t
         <text x="16" y="82" font-size="10" font-weight="700" fill="var(--clay)" font-family="var(--body)">hip height</text>
       </svg>"""
 
-CH5 = '''<div class="page">
+CH5 = f'''<div class="page">
   <div class="chap-band"><p class="kicker">Chapter five</p><h2 class="chapno">05</h2><h2 class="chaptitle">Days 11 to 90 &mdash; where your body actually changes</h2></div>
 
   <p class="lead">The ten days were not the programme. The ten days were how you switched everything on without being overwhelmed.</p>
   <p>Here is the honest arithmetic. Real fat loss runs at about half a kilogram to one kilogram a week. Over ten days that is one to two kilograms &mdash; genuinely good, and not something anybody photographs. Over ninety days the same rate is <b>seven to thirteen kilograms</b>, which is a different body.</p>
   <p>Nothing changes about what you are doing. The ten switches simply keep running, and this chapter tells you what each stretch of the next eighty days is going to feel like &mdash; including the part where it stops working, which it will, around week six.</p>
+
+{il('Ninety days, including the part nobody warns you about', ARC)}
 
   <h3>The three phases</h3>
 

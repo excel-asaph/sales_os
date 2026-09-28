@@ -17,6 +17,7 @@ anything the customer said they will not eat without any of this changing.
 import io
 from switches import SWITCHES
 from profile import meal, swallow, proteins, PROFILE, disliked
+from figures import il, HANDS, OIL, CLOCK
 
 CSS = """  /* The day. Built on the switch card, which opens it. */
   .dfirst { background: var(--ochre-soft); border-left: 4px solid var(--ochre); border-radius: var(--r-sm);
@@ -429,7 +430,7 @@ def day_html(i):
     return "\n".join(out) + "\n"
 
 
-INTRO = """<div class="page">
+INTRO = f"""<div class="page">
   <div class="chap-band"><p class="kicker">Chapter four</p><h2 class="chapno">04</h2><h2 class="chaptitle">The 10-day fat switch</h2></div>
 
   <p class="lead">One switch a day. You never turn one off.</p>
@@ -445,6 +446,8 @@ INTRO = """<div class="page">
     <li><b>Today&rsquo;s secret.</b> The thing nobody told you, and the reason the switch works.</li>
     <li><b>Your waist.</b> A box to write it in. Day 1 and Day 10 are the two that matter.</li>
   </ul>
+
+{il('Portions, measured with the only tool you always have', HANDS)}
 
   <div class="box warn">
     <h4>Three rules before you start</h4>

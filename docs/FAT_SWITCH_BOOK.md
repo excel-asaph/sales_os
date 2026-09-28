@@ -118,6 +118,69 @@ two caution boxes inserted, Day 3's recipe swapped to ewedu, and the only
 remaining mentions of the vetoed foods are the letter legitimately listing
 them and the word "liver" as an organ in the detox debunk.
 
+
+## The illustration system
+
+Built after measuring the three inspiration books in `book-inspo/`, because
+the gap was larger than it looked:
+
+| Book | Pages | Images/page | Words/page |
+|---|---|---|---|
+| PhD Nutrition Fat Loss | 14 | 2.4 | 274 |
+| MH-VIP Weight Loss | 25 | **4.4** | 395 |
+| Helpful Guidelines | 8 | 1.0 | 276 |
+| Evolution 12-Week Challenge | 60 | 0.8 | 222 |
+| **The 10X Fat Switch (before)** | 73 | **0.0** | ~140 |
+
+Two things in their design language were worth taking. **PhD Nutrition**
+splits the page down the middle and gives half of it to a full-bleed colour
+panel or photograph, which carries a spread even where the prose is
+ordinary — that is the `.split` component. **MH-VIP** turns its food lists
+into one large traffic-light graphic rather than three paragraphs, which is
+the difference between a list a reader skims and one they remember.
+
+What was **not** worth taking: the Evolution 12-week book, at 0.8 images a
+page, is mostly stock photographs of strangers celebrating. It is the
+least useful of the four despite being the longest.
+
+### What was built
+
+`figures.py` — seven diagrams, placed where their argument already lives
+rather than scattered as decoration, so a reader who only looks at the
+pictures still gets the five load-bearing ideas:
+
+| Figure | Where | The idea it carries |
+|---|---|---|
+| Two plates, side by side | Ch 1 | Your plate is not wrong, it is upside down |
+| The waist tape | Ch 1 | At the navel, standing, breathing out |
+| The 1-2-3 order strip | Ch 2 | Same plate, different order, different result |
+| The bottle in sugar cubes | Ch 3 | Sugar is drunk, not eaten |
+| Four hands | Ch 4 | Portions, with the only tool you always have |
+| The oil spoon vs the cup | available | 120 against 900 |
+| The 90-day arc | Ch 5 | The week-six dip is not failure |
+
+Plus the four exercise moves already in Chapter 6. **Eleven SVG figures.**
+
+These are drawings rather than photographs by choice, not as placeholders.
+The ideas in this book are quantities, orders and comparisons, which are
+diagrams by nature — a drawn portion teaches better than a photograph of
+somebody else's plate, and it re-colours with the book's tokens and prints
+sharp at any size.
+
+Two details worth keeping: the four hands were originally one shape in four
+colours, which throws the whole lesson away, so a palm, a fist, a cupped
+hand and a thumb are now genuinely different shapes. And the "before" plate
+initially rendered with the wrong arc flags and showed a gap instead of
+three quarters.
+
+### Photography, still outstanding
+
+`prompts.json` holds **11 prompts** ready for `generate-images.py`, which is
+the Vertex pipeline copied unchanged from the hepatitis book. It needs a
+gcloud token. The two that matter most are `plate_real` and `plate_before`,
+shot on the same plate, table and light so they can sit side by side the way
+the diagrams do.
+
 ## Print
 
     cd fat-switch-book
@@ -132,7 +195,7 @@ line sliced across a break.
 
 | | |
 |---|---|
-| **Photography** | None. The cover is typographic, and the four exercise moves are SVG diagrams rather than photographs. The owner asked for "a lot of images" — that needs a gcloud token and the Vertex pipeline in `hepatitis-b-book/generate-images.py`. |
+| **Photography** | 11 SVG figures are in. Photography is not — `prompts.json` and `generate-images.py` are ready and need a gcloud token. |
 | **The intake form** | The ₦20,000 tier needs a form whose fields map onto `profile.STANDARD`. Not built. |
 | **Sales-OS integration** | The two-tier flow (ad → message → tier choice → form → generated PDF) is meant for the app revamp. |
 | **Clinical review** | Dr. Akinyode. Chapter 8 and the diabetes caution most of all. |

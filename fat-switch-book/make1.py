@@ -15,6 +15,7 @@ withdrawn worldwide in 2010 after it caused heart attacks and strokes.
 """
 import io
 from profile import PROFILE, is_personal, swallow, you, warns
+from figures import FIGCSS, il, PLATE, PLATE_NOW, WAIST
 
 HEAD = io.open("_head.html", encoding="utf-8").read()
 
@@ -365,6 +366,13 @@ CH1 = f"""<div class="page">
   <h3>One &mdash; the portion grew, and the soup shrank</h3>
   <p>Look at a plate honestly. Most Nigerian plates today are three quarters {swallow(0)} or rice, with a smear of soup on the side and one small piece of meat. That is not a balanced meal with too much carbohydrate; it is <em>a plate of carbohydrate with a garnish</em>.</p>
 
+  <div class="il"><p class="il-cap">Your plate is not wrong. It is upside down.</p>
+    <div class="il-pair">
+      <div class="il-card">{PLATE_NOW}</div>
+      <div class="il-card">{PLATE}</div>
+    </div>
+  </div>
+
   <h3>Two &mdash; the drinks</h3>
   <p>This is the biggest one and the one nobody counts. A bottle of malt carries more sugar than most people would ever eat in one sitting, and because it is liquid your body does not register it as food at all. You drink 250 calories in ninety seconds and feel exactly as hungry as before.</p>
 
@@ -392,7 +400,7 @@ CH1 = f"""<div class="page">
   <p>Your weight includes water, food still inside you, and muscle. It swings two kilograms in a day for reasons that have nothing to do with fat, which is why the scale destroys more plans than biscuits do.</p>
   <p>Your waist measures the fat that actually matters &mdash; the kind packed around your organs, which is the kind that causes diabetes, high blood pressure and heart disease.</p>
 
-  <div class="box cool">
+{il('Where exactly to put the tape', WAIST)}  <div class="box cool">
     <p class="k">The numbers to aim below</p>
     <p style="margin:0">For a woman, a waist under <b>80cm</b>. For a man, under <b>94cm</b>. Measured at the navel, standing, first thing in the morning, breathing out normally &mdash; not sucked in.</p>
   </div>
@@ -403,7 +411,7 @@ CH1 = f"""<div class="page">
 
 def main():
     body = COVER_FALLBACK + PRAYER + letter() + toc() + myths() + about() + CH1
-    head = HEAD.replace("  .cover {", CSS + COVER_CSS + "  .cover {", 1)
+    head = HEAD.replace("  .cover {", CSS + COVER_CSS + FIGCSS + "  .cover {", 1)
     io.open("book.src.html", "w", encoding="utf-8", newline="\n").write(
         head + '\n<div class="stack">\n\n' + body)
     n = body.count('<div class="page')
