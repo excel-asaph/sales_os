@@ -2,8 +2,8 @@
 
 Fourth product, and the first built for two price tiers off one manuscript.
 
-**Status at 2026-09-27:** complete draft. 10,100 words, 69 A4 pages, four
-exercise diagrams, typographic cover. No photography yet.
+**Status at 2026-09-28:** complete draft. 73 A4 pages, four exercise diagrams,
+typographic cover. No photography yet.
 
 ## "10X" means ten exchanges
 
@@ -34,6 +34,43 @@ say what the ten are is a slimming tea; this one can, on page one.
 Switch 2 is the most interesting and the one readers dismiss: same plate,
 same quantity, eaten in a different order, with a gentler glucose rise and
 less swallow eaten without deciding to eat less.
+
+
+## Ten days, ninety days
+
+Changed on 2026-09-28. The owner's instinct was right on the physiology and
+the resolution was not to choose.
+
+**Ten days is the right ask and the wrong promise.** It converts well in an
+ad because the commitment feels small, and it buys one to two kilograms,
+which nobody photographs. **Ninety days is the right promise and a harder
+ask** — seven to thirteen kilograms, which is a different body.
+
+So the ten days became Phase 1 rather than the product: *ten switches, ten
+days to turn them all on, ninety days to change your body.* The name still
+means what it means, every word already written stayed, and the ad line got
+stronger rather than weaker.
+
+What that added:
+
+- **Chapter 5 rebuilt** as *Days 11 to 90*, with three phases (the fast
+  part, the quiet part, the visible part), realistic ranges for each, and
+  checkpoints at Day 30, 60 and 90.
+- **The week-six plateau**, which is the most valuable page in the book.
+  Weight loss genuinely stalls around then — a smaller body needs less, and
+  portions creep without anybody deciding to eat more. Readers who are not
+  warned read the stall as proof it stopped working and quit within a
+  fortnight of it starting again. The page also says what *not* to do: no
+  cutting further, no skipping, no extra sessions.
+- **The switch audit.** Almost everybody whose progress stalls has quietly
+  dropped two or three switches, usually 1, 4 or 9. Nobody remembers this,
+  which is why it is a written checklist at each monthly checkpoint.
+- **A 90-day wall chart** in the back matter, and the workout extended from
+  four weeks to twelve.
+
+Every figure is a range, and they agree with Chapter 3's argument: half a
+kilogram to one kilogram of fat a week is the mechanism, so anything faster
+is water or a banned drug.
 
 ## The differentiator: Chapter 3
 
@@ -88,7 +125,7 @@ them and the word "liver" as an organ in the detox debunk.
     python build.py && python topdf.py
 
 Inherits the hepatitis print stylesheet unchanged. Measured: **median 67
-characters a line** (90th 77), 64% average fill, nothing past the trim, no
+characters a line**, 66% average fill, nothing past the trim, no
 line sliced across a break.
 
 ## Still open

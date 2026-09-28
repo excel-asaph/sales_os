@@ -86,54 +86,112 @@ MARCH = """      <svg viewBox="0 0 200 150" role="img" aria-label="Marching on t
         <text x="16" y="82" font-size="10" font-weight="700" fill="var(--clay)" font-family="var(--body)">hip height</text>
       </svg>"""
 
-CH5 = f"""<div class="page">
-  <div class="chap-band"><p class="kicker">Chapter five</p><h2 class="chapno">05</h2><h2 class="chaptitle">After day 10</h2></div>
+CH5 = '''<div class="page">
+  <div class="chap-band"><p class="kicker">Chapter five</p><h2 class="chapno">05</h2><h2 class="chaptitle">Days 11 to 90 &mdash; where your body actually changes</h2></div>
 
-  <p class="lead">Ten days was never the hard part. Week six is the hard part, and nobody writes about it.</p>
-  <p>Here is what happens. The first fortnight goes well. Then there is a funeral, or a wedding, or a week where everything goes wrong at work, and you eat the way you used to for three days. On the fourth day you stand on a scale, feel disgusted, and decide you have ruined it.</p>
-  <p>That decision &mdash; not the three days &mdash; is what ends every attempt. Nobody ever regained twenty kilograms from one owambe.</p>
+  <p class="lead">The ten days were not the programme. The ten days were how you switched everything on without being overwhelmed.</p>
+  <p>Here is the honest arithmetic. Real fat loss runs at about half a kilogram to one kilogram a week. Over ten days that is one to two kilograms &mdash; genuinely good, and not something anybody photographs. Over ninety days the same rate is <b>seven to thirteen kilograms</b>, which is a different body.</p>
+  <p>Nothing changes about what you are doing. The ten switches simply keep running, and this chapter tells you what each stretch of the next eighty days is going to feel like &mdash; including the part where it stops working, which it will, around week six.</p>
 
-  <div class="box good">
-    <p class="k">The only rule that matters after Day 10</p>
-    <p style="margin:0"><b>Never miss twice.</b> One bad meal is a meal. One bad day is a day. The damage begins when a bad day is used as proof that you cannot do this, and becomes a bad month. Eat the next meal properly and the week is still yours.</p>
-  </div>
+  <h3>The three phases</h3>
 
-  <h3>The four weeks that decide it</h3>
   <div class="t-wrap keep"><table>
-    <thead><tr><th>Week</th><th>Walking</th><th>Strength</th><th>Waist</th></tr></thead>
+    <thead><tr><th>Phase</th><th>What is happening</th><th>What to expect</th></tr></thead>
     <tbody>
-      <tr><td class="k">Week 1</td><td>30 min, 5 days</td><td>Full set, twice</td><td>Measure Monday</td></tr>
-      <tr><td class="k">Week 2</td><td>30 min, 5 days</td><td>Full set, three times</td><td>Measure Monday</td></tr>
-      <tr><td class="k">Week 3</td><td>35 min, 5 days</td><td>Full set, three times</td><td>Measure Monday</td></tr>
-      <tr><td class="k">Week 4</td><td>40 min, 5 days</td><td>Full set, three times</td><td>Measure Monday</td></tr>
+      <tr><td class="k">Days 11&ndash;30<br>The fast part</td><td>Water leaving, and real fat starting. Bloating gone, clothes loosening before the scale agrees.</td><td><b>3&ndash;5kg</b><br>3&ndash;5cm off the waist</td></tr>
+      <tr><td class="k">Days 31&ndash;60<br>The quiet part</td><td>Steady fat loss and nothing dramatic. This is where almost everybody quits, and it is where the work is actually being done.</td><td><b>2&ndash;4kg</b><br>2&ndash;4cm</td></tr>
+      <tr><td class="k">Days 61&ndash;90<br>The visible part</td><td>Other people start asking what you are doing. Your face changes before your stomach does, which is why they notice before you do.</td><td><b>2&ndash;4kg</b><br>2&ndash;3cm</td></tr>
     </tbody>
   </table></div>
-  <p>Four Mondays, four numbers. That is the whole record you need.</p>
+
+  <div class="box warn">
+    <h4>If you are losing faster than this</h4>
+    <p style="margin-bottom:0">More than about a kilogram a week, sustained, is not extra discipline paying off. It is water, or muscle, or something in a capsule that nobody declared. All three come back, and the third one can hurt you. Slow is the mechanism, not a consolation.</p>
+  </div>
 </div>
 
 <div class="page">
-  <h3 class="first">Owambe, parties and eating out</h3>
-  <p>You are going to go. Plan for it instead of pretending you will not.</p>
+  <h3 class="first">The three days that matter: 30, 60 and 90</h3>
+  <p>Do the same four things on each of them. It takes fifteen minutes and it is the whole record.</p>
   <ul class="marks">
-    <li><b>Do not arrive hungry.</b> Eat a boiled egg and drink water before you leave. Arriving starving at a party with jollof and small chops is not a test of character, it is a losing position.</li>
-    <li><b>Take the protein first</b> &mdash; meat, fish, moi moi &mdash; then the vegetables, then a small portion of rice last. Switch 2 works at a party exactly as it works at home.</li>
-    <li><b>Hold water, not a bottle.</b> Most of the damage at a Nigerian party is drunk, not eaten. Two malts and a beer is most of a day, standing up, talking.</li>
-    <li><b>One plate, sitting down.</b> Not three passes standing at a table.</li>
-    <li><b>And then eat normally the next morning.</b> Not a punishment fast. That is the swing that ends plans.</li>
+    <li><b>Measure your waist</b> &mdash; morning, standing, at the navel, breathing out normally.</li>
+    <li><b>Take the photograph</b> &mdash; same light, same spot, same clothes, front and side.</li>
+    <li><b>Audit the ten switches</b> honestly. Not &ldquo;am I trying&rdquo;. Switch by switch: is this one still running, yes or no?</li>
+    <li><b>Write all three down</b> in the log at the back, with the date.</li>
   </ul>
 
-  <h3>The week you slip</h3>
-  <p>It will happen, and when it does the book asks three things of you:</p>
+  <div class="box cool">
+    <p class="k">The audit is the important one</p>
+    <p style="margin:0">Almost everybody whose progress has stopped has quietly dropped two or three switches without noticing. Usually Switch 1 (a bottle crept back in), Switch 4 (the oil stopped being measured) or Switch 9 (the bag stopped being packed). <b>You will not remember this. That is exactly why it is written down as a checklist.</b></p>
+  </div>
+
+  <h3>Week six, and why it is not failure</h3>
+  <p>Somewhere between week five and week nine, it stops.</p>
+  <p>The scale sits still for ten days. The waist does not move. You are doing everything you were doing in week two and nothing is happening. This is the single commonest point at which people decide the plan has stopped working and go back to how they were eating.</p>
+  <p><b>It has not stopped working. Two ordinary things are happening at once.</b></p>
   <ul class="marks">
-    <li><b>Do not weigh yourself.</b> Not that week. You will see water and salt and read it as fat, and the number will make a decision that the food never would have.</li>
-    <li><b>Restart with Switch 1, not with all ten.</b> Take the bottles out again and eat normally otherwise. One switch is a restart you will actually make.</li>
-    <li><b>Do not add punishment.</b> No skipping meals to make up for it, no double walking. That teaches your body that food is unreliable, and it is the exact pattern that put the weight on in the first place.</li>
+    <li><b>You are smaller now, so you need less.</b> A body seven kilograms lighter burns measurably less than it did in week one, just carrying itself around. The same plan that created a gap in week two creates a smaller one in week seven.</li>
+    <li><b>Portions have crept.</b> Not deliberately. The measured spoon of oil becomes a generous spoon. Half the swallow becomes two thirds. Nobody decides to do this and everybody does it.</li>
+  </ul>
+
+  <div class="box good">
+    <p class="k">What to do about the plateau &mdash; and what not to</p>
+    <p><b>Do:</b> the audit above, honestly. Re-measure the oil with an actual spoon for a week. Add ten minutes to the daily walk. Give it a fortnight.</p>
+    <p style="margin-bottom:0"><b>Do not:</b> cut your food further, skip meals, or add a second workout out of frustration. Eating less on top of a plateau is how bodies learn that food is unreliable, and it is the exact mechanism that puts weight back on afterwards with interest.</p>
+  </div>
+</div>
+
+<div class="page">
+  <h3 class="first">The weeks, written out</h3>
+  <p>Pin this somewhere. It is the only thing you need to look at between the monthly checkpoints.</p>
+
+  <div class="t-wrap keep"><table>
+    <thead><tr><th>Weeks</th><th>Food</th><th>Walking</th><th>Strength</th><th>Waist</th></tr></thead>
+    <tbody>
+      <tr><td class="k">1&ndash;2</td><td>All ten switches running</td><td>30 min, 5 days</td><td>Full set, twice a week</td><td>Every Monday</td></tr>
+      <tr><td class="k">3&ndash;4</td><td>Same. Nothing new.</td><td>30 min, 5 days</td><td>Three times a week</td><td>Every Monday</td></tr>
+      <tr><td class="k">5&ndash;6</td><td><b>Day 30 audit</b></td><td>35 min, 5 days</td><td>Three times a week</td><td>Every Monday</td></tr>
+      <tr><td class="k">7&ndash;8</td><td>Expect the plateau here</td><td>40 min, 5 days</td><td>Three times a week</td><td>Every Monday</td></tr>
+      <tr><td class="k">9&ndash;10</td><td><b>Day 60 audit</b></td><td>40 min, 5 days</td><td>Three times a week</td><td>Every Monday</td></tr>
+      <tr><td class="k">11&ndash;12</td><td>Same. It is working.</td><td>40 min, 6 days</td><td>Three times a week</td><td><b>Day 90</b></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="box cool">
+    <p class="k">Notice what is not in that table</p>
+    <p style="margin:0">Nothing is cut. No food is removed at week six to &ldquo;push through&rdquo;. No new rule appears at week ten. <b>The plan you start on Day 1 is the plan you are still running on Day 90</b> &mdash; which is precisely why you will still be running it in year two, and why every plan that escalates gets abandoned.</p>
+  </div>
+</div>
+
+<div class="page">
+  <h3 class="first">The only rule that matters after Day 10</h3>
+  <div class="box good">
+    <p class="k">Never miss twice</p>
+    <p style="margin:0">One bad meal is a meal. One bad day is a day. The damage begins when a bad day is used as proof that you cannot do this, and becomes a bad month. <b>Nobody ever regained twenty kilograms from one owambe.</b> Eat the next meal properly and the week is still yours.</p>
+  </div>
+
+  <h3>The week you slip</h3>
+  <p>It will happen inside ninety days. When it does, the book asks three things:</p>
+  <ul class="marks">
+    <li><b>Do not weigh yourself.</b> Not that week. You will see water and salt and read it as fat, and the number will make a decision the food never would have.</li>
+    <li><b>Restart with Switch 1, not all ten.</b> Take the bottles out again and eat normally otherwise. One switch is a restart you will actually make; ten is a resolution you will not.</li>
+    <li><b>Do not add punishment.</b> No skipping meals to make up for it, no double walking. That teaches your body that food is unreliable, which is the pattern that put the weight on in the first place.</li>
+  </ul>
+
+  <h3>Owambe, parties and eating out</h3>
+  <p>Over ninety days you will go to several. Plan for them instead of pretending you will not.</p>
+  <ul class="marks">
+    <li><b>Do not arrive hungry.</b> A boiled egg and a glass of water before you leave. Arriving starving at a party with jollof and small chops is not a test of character, it is a losing position.</li>
+    <li><b>Protein first</b> &mdash; meat, fish, moi moi &mdash; then vegetables, then a small portion of rice last. Switch 2 works at a party exactly as it works at home.</li>
+    <li><b>Hold water, not a bottle.</b> Most of the damage at a Nigerian party is drunk, not eaten. Two malts and a beer is most of a day, standing up, talking.</li>
+    <li><b>One plate, sitting down.</b> Not three passes standing at a table.</li>
+    <li><b>Eat normally the next morning.</b> Not a punishment fast. That swing is what ends plans.</li>
   </ul>
 
   <div class="pullquote">The people who keep it off are not the ones who never slipped. They are the ones who never turned a slip into a verdict.</div>
 </div>
 
-"""
+'''
 
 CH6 = f"""<div class="page">
   <div class="chap-band"><p class="kicker">Chapter six</p><h2 class="chapno">06</h2><h2 class="chaptitle">The home workout plan</h2></div>
@@ -150,17 +208,20 @@ CH6 = f"""<div class="page">
 </div>
 
 <div class="page">
-  <h3 class="first">Four weeks, written out</h3>
+  <h3 class="first">Twelve weeks, written out</h3>
   <div class="t-wrap keep"><table>
-    <thead><tr><th>Week</th><th>Wall squat</th><th>Chair stands</th><th>Wall press-ups</th><th>How often</th></tr></thead>
+    <thead><tr><th>Weeks</th><th>Wall squat</th><th>Chair stands</th><th>Wall press-ups</th><th>How often</th></tr></thead>
     <tbody>
-      <tr><td class="k">Week 1</td><td>60s &times; 2</td><td>10</td><td>10</td><td>Twice</td></tr>
-      <tr><td class="k">Week 2</td><td>90s &times; 2</td><td>12</td><td>12</td><td>Three times</td></tr>
-      <tr><td class="k">Week 3</td><td>90s &times; 3</td><td>15</td><td>15</td><td>Three times</td></tr>
-      <tr><td class="k">Week 4</td><td>120s &times; 3</td><td>20</td><td>20</td><td>Three times</td></tr>
+      <tr><td class="k">1&ndash;2</td><td>60s &times; 2</td><td>10</td><td>10</td><td>Twice a week</td></tr>
+      <tr><td class="k">3&ndash;4</td><td>90s &times; 2</td><td>12</td><td>12</td><td>Three times</td></tr>
+      <tr><td class="k">5&ndash;6</td><td>90s &times; 3</td><td>15</td><td>15</td><td>Three times</td></tr>
+      <tr><td class="k">7&ndash;8</td><td>120s &times; 3</td><td>18</td><td>18</td><td>Three times</td></tr>
+      <tr><td class="k">9&ndash;10</td><td>120s &times; 3</td><td>20</td><td>20</td><td>Three times</td></tr>
+      <tr><td class="k">11&ndash;12</td><td>150s &times; 3</td><td>25</td><td>25</td><td>Three times</td></tr>
     </tbody>
   </table></div>
-  <p>Two minutes of marching before you start. That is the entire session &mdash; about twelve minutes, three times a week.</p>
+  <p>Two minutes of marching before you start. That is the entire session &mdash; twelve to fifteen minutes, three times a week, for the whole ninety days.</p>
+  <p><b>Do not add a fourth day.</b> The progression above is the increase. Adding sessions out of frustration during a plateau is the commonest way people injure themselves out of a plan that was working.</p>
 
   <div class="box good">
     <p class="k">Plus the walking, which matters more</p>
@@ -245,7 +306,7 @@ CH8 = """<div class="page">
 TRACKER = """<div class="page">
   <p class="runhead">Your tracker</p>
   <h3 class="first">Ten switches to tick off</h3>
-  <p>One a day, and you never turn one off. Print this page or mark it on your phone.</p>
+  <p>One a day for the first ten days, and you never turn one off. These ten keep running for the whole ninety.</p>
   <div class="tracker">
     <div class="tcell"><span class="w">Day 1</span><span class="t">The bottle switch</span><span class="box-tick"></span></div>
     <div class="tcell"><span class="w">Day 2</span><span class="t">The order switch</span><span class="box-tick"></span></div>
@@ -257,6 +318,24 @@ TRACKER = """<div class="page">
     <div class="tcell"><span class="w">Day 8</span><span class="t">The move switch</span><span class="box-tick"></span></div>
     <div class="tcell"><span class="w">Day 9</span><span class="t">The snack switch</span><span class="box-tick"></span></div>
     <div class="tcell"><span class="w">Day 10</span><span class="t">The plate switch</span><span class="box-tick"></span></div>
+  </div>
+
+
+  <h3>The 90-day wall chart</h3>
+  <p>Twelve weeks. Tick a box each week you kept all ten switches running. Put this on a wall where you will see it, not in a drawer.</p>
+  <div class="tracker">
+    <div class="tcell"><span class="w">Week 1</span><span class="t">Switch everything on</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 2</span><span class="t">Hold it</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 3</span><span class="t">Hold it</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 4</span><span class="t">Hold it</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 5</span><span class="t">Day 30 &mdash; waist, photo, audit</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 6</span><span class="t">The plateau may start</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 7</span><span class="t">Hold through it</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 8</span><span class="t">Hold through it</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 9</span><span class="t">Day 60 &mdash; waist, photo, audit</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 10</span><span class="t">It is working</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 11</span><span class="t">Hold it</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 12</span><span class="t">Day 90 &mdash; waist, photo, audit</span><span class="box-tick"></span></div>
   </div>
 
   <h3>Your waist log</h3>
@@ -310,7 +389,8 @@ def worksheet():
 CLOSING = f"""<div class="page closing">
   <p class="runhead">Before you close this book</p>
   <p class="lead">You did not need more discipline. You needed a plan that did not require any.</p>
-  <p>You know now where the weight was actually coming from, and that almost none of it was the {sw}. You know what is in the tea. You know why the scale lied to you in week one and why a tailor&rsquo;s tape cannot. You have ten switches, all of them still running, and two numbers ten days apart in your own handwriting.</p>
+  <p>You know now where the weight was actually coming from, and that almost none of it was the {sw}. You know what is in the tea. You know why the scale lied to you in week one and why a tailor&rsquo;s tape cannot. You have ten switches, all of them still running.</p>
+  <p>You know what week six is going to feel like before it arrives, which is the single thing that decides whether somebody finishes ninety days or stops at forty.</p>
   <p>And you know the only rule that matters from here, which is that you never miss twice.</p>
 
   <div class="pullquote">Start tomorrow morning. Not Monday &mdash; the Monday plan is the one that never begins.</div>
@@ -345,7 +425,7 @@ CLOSING = f"""<div class="page closing">
 </div>
 
 <footer class="meta">
-  <b>The 10X Fat Switch</b> &middot; ten exchanges, ten days, written for Nigeria.<br>
+  <b>The 10X Fat Switch</b> &middot; ten exchanges, ninety days, written for Nigeria.<br>
   &ldquo;10X&rdquo; means ten exchanges. Every claim in this book refers to a named switch on a
   named day. Sibutramine was withdrawn from worldwide markets in 2010 following evidence of
   increased heart attack and stroke. Every clinical statement is pending review and sign-off

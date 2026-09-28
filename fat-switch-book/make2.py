@@ -130,7 +130,7 @@ CH3 = """<div class="page">
 
   <div class="box cool">
     <p class="k">What a real week looks like</p>
-    <p style="margin:0">Half a kilogram to one kilogram of fat a week. Slow, unglamorous, and permanent. In ten days that is one to two kilograms and two to four centimetres off your waist &mdash; which is less than the tea promised, and it is still there in December.</p>
+    <p style="margin:0">Half a kilogram to one kilogram of fat a week. Slow, unglamorous, and permanent. In ten days that is one to two kilograms. Over the ninety days this book actually runs for, it is <b>seven to thirteen kilograms</b> and seven to twelve centimetres off your waist &mdash; which is less than the tea promised for the first fortnight, and it is the only one of the two still there in December.</p>
   </div>
 </div>
 

@@ -66,14 +66,15 @@ COVER = """<div class="page flush cover">
 COVER_FALLBACK = """<div class="page flush">
   <div class="tcover">
     <div>
-      <p class="eyebrow">Ten switches. Ten days.</p>
+      <p class="eyebrow">10 switches &middot; 10 days to start &middot; 90 days to change</p>
       <h1>THE 10X<br>FAT SWITCH</h1>
       <p class="sub">Ten things in your day quietly holding the weight on &mdash;
-      and the ten swaps that take it off, without leaving Nigerian food</p>
+      and the ninety-day plan that takes it off, without leaving Nigerian food</p>
     </div>
     <div>
       <ul>
         <li>All 10 switches, one a day, with the food for each</li>
+        <li>The full 90-day plan, week by week, after that</li>
         <li>10 Nigerian recipes with real quantities</li>
         <li>A home workout plan &mdash; no gym, no equipment</li>
         <li>The truth about flat tummy tea and slimming pills</li>
@@ -196,13 +197,15 @@ CHAPTERS_TOC = [
         "Day 9 &ndash; The Snack Switch",
         "Day 10 &ndash; The Plate Switch",
     ]),
-    ("5", "After Day 10", [
-        "The Four Weeks That Decide Whether It Stays Off",
+    ("5", "Days 11 to 90 &mdash; Where Your Body Actually Changes", [
+        "The Three Phases, and What Each One Feels Like",
+        "What to Expect at Day 30, Day 60 and Day 90",
+        "The Plateau at Week Six, and Why It Is Not Failure",
         "What to Do the Week You Slip",
         "Eating Out, Parties and Owambe",
     ]),
     ("6", "The Home Workout Plan", [
-        "Four Weeks, No Gym, No Equipment",
+        "Twelve Weeks, No Gym, No Equipment",
         "The Moves, With Pictures",
         "If Your Knees or Your Back Hurt",
     ]),
@@ -217,8 +220,9 @@ CHAPTERS_TOC = [
     ]),
 ]
 
-BACK_TOC = ("Your 10-Day Tracker", [
+BACK_TOC = ("Your Trackers", [
     "Ten Switches to Tick Off",
+    "The 90-Day Wall Chart",
     "The Waist and Weight Log",
     "What My Doctor Said &mdash; the Eight Questions, With Room to Answer",
 ])
@@ -329,19 +333,21 @@ def about():
   <h3>What this book is</h3>
   <p>Ten switches, one a day, for ten days. Not ten rules and not ten sacrifices &mdash; ten <em>exchanges</em>. Each day you put one thing down and pick something else up, and the something else is food you already eat and already like.</p>
   <p>That is what the 10X means. Ten exchanges. There is no pill in this book, no tea, no imported powder, and no machine.</p>
+  <p><b>Then you run them for ninety days.</b> The ten days are how you switch everything on without being overwhelmed. The ninety are where your body actually changes &mdash; and Chapter 5 walks you through every week of them, including the one in week six where most people quietly give up.</p>
 
   <div class="box cool">
-    <p class="k">What ten days will and will not do</p>
-    <p><b>It will:</b> take two to four centimetres off your waist, stop the bloating you have got used to, and prove to you that your body still answers when you speak to it properly.</p>
-    <p style="margin-bottom:0"><b>It will not:</b> make you a different size. Ten days is not a transformation, it is a start &mdash; and a start you can actually keep is worth more than a transformation you abandon in March.</p>
+    <p class="k">What to expect, honestly</p>
+    <p><b>By Day 10:</b> two to four centimetres off your waist, the bloating gone, and proof that your body still answers when you speak to it properly. Not a new size &mdash; a start.</p>
+    <p><b>By Day 90:</b> somewhere between <b>seven and thirteen kilograms</b>, and seven to twelve centimetres off your waist. That is the point where other people start asking what you are doing.</p>
+    <p style="margin-bottom:0">Anything promising more than that, faster, is selling you water weight or a banned drug. Chapter 3 explains which.</p>
   </div>
 
 {warns()}
   <h3>How to use it</h3>
   <ul class="marks">
     <li><b>Read tonight. Start tomorrow morning.</b> Not Monday. The Monday plan is the one that never begins.</li>
-    <li><b>Keep every switch you turn on.</b> Day 4 does not replace Day 3. By Day 10 all ten are running together, which is where the result comes from.</li>
-    <li><b>Measure your waist on Day 1 and Day 10.</b> Not your weight. Chapter 7 explains exactly why.</li>
+    <li><b>Keep every switch you turn on.</b> Day 4 does not replace Day 3. By Day 10 all ten are running together &mdash; and then they keep running for the next eighty days.</li>
+    <li><b>Measure your waist on Day 1, Day 10, and then every Monday.</b> Not your weight. Chapter 7 explains exactly why.</li>
     <li><b>Slipping is part of it.</b> There is a page for the day you slip, and it is not a page about guilt.</li>
   </ul>
 </div>
