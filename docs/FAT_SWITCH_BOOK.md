@@ -181,6 +181,55 @@ gcloud token. The two that matter most are `plate_real` and `plate_before`,
 shot on the same plate, table and light so they can sit side by side the way
 the diagrams do.
 
+
+## Before-and-after: why these are drawings
+
+The request was for realistic before-and-after imagery. It is built as
+diagrams, and the reason is worth keeping.
+
+A before-and-after **photograph** in a weight-loss product has exactly one
+conventional meaning to a reader: *this is a real customer's result.* Nobody
+has used this book yet, so a photorealistic pair would be a manufactured
+testimonial — the same category as the fabricated blood results on the
+hepatitis cover that was declined. Meta also restricts before-and-after
+imagery in weight-loss advertising specifically, so it risks the ad account
+on top of being untrue.
+
+A **diagram** does not carry that meaning. Nobody reads a drawn silhouette
+as a photograph of a customer; they read it as *"this is what twelve
+centimetres looks like"* — which is the thing the reader genuinely cannot
+picture, and the reason they quit at week six when the scale has not moved.
+So the book gets the teaching value without the claim, and the caption says
+so out loud: **"This is a drawing, not a customer."**
+
+Two of them: a Day 1 / Day 90 pair at 104cm and 92cm in Chapter 1 beside the
+waist tape, and a four-stage strip (Day 1 / 30 / 60 / 90) in Chapter 5 beside
+the ninety-day arc. Both use the book's own published range, so the pictures
+and the text cannot drift apart.
+
+The photography that *was* generated shows the **process** — measuring,
+cooking, walking — rather than the result.
+
+## Visual inventory
+
+| | Count |
+|---|---|
+| Photographs | **22** |
+| Hand-authored diagrams | 9 |
+| Exercise move drawings | 4 |
+| Licensed icons cached | 29 |
+| Meal lines carrying a food glyph | **77 of 77** |
+
+Where they are: a photograph inside all 10 recipe cards, one per exercise
+move, the waist measurement in Chapter 7, and the switch illustrations
+(bottles, oil, walking, bag kit) on the days that teach them.
+
+The food glyphs are the MH-VIP trick — that book gets its 4.4 images a page
+from a small picture against every line of a food list, not from large
+photographs. `icons.food()` matches a meal line against Nigerian dish names
+first (efo, edikaikong, gbegiri, ogbono, akpu, tuwo) before the generic words
+they contain, so "pepper soup" resolves to a pot rather than a pepper.
+
 ## Print
 
     cd fat-switch-book
@@ -195,7 +244,7 @@ line sliced across a break.
 
 | | |
 |---|---|
-| **Photography** | 11 SVG figures are in. Photography is not — `prompts.json` and `generate-images.py` are ready and need a gcloud token. |
+| **Photography** | Done. 22 images generated via Vertex; `prompts.json` and `prompts2.json` hold the briefs. |
 | **The intake form** | The ₦20,000 tier needs a form whose fields map onto `profile.STANDARD`. Not built. |
 | **Sales-OS integration** | The two-tier flow (ad → message → tier choice → form → generated PDF) is meant for the app revamp. |
 | **Clinical review** | Dr. Akinyode. Chapter 8 and the diabetes caution most of all. |

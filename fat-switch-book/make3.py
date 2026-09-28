@@ -18,9 +18,12 @@ import io
 from switches import SWITCHES
 from profile import meal, swallow, proteins, PROFILE, disliked
 from figures import il, ph, HANDS, OIL, CLOCK
+from icons import food
 
 # Photograph and caption per day, keyed by index. A day without one
 # simply renders nothing, so this can be filled in over time.
+RECIPE_PHOTO = {0: 'zobo', 1: 'vegetable_soup', 2: 'okra_soup', 3: 'peppered_chicken', 4: 'ewa_agoyin', 5: 'moi_moi', 6: 'edikaikong', 7: 'brown_jollof', 8: 'bag_kit', 9: 'plate_real'}
+
 PHOTO = {0: ('bottles', 'This is what comes out of the fridge today'), 3: ('oil', 'One spoon, or most of a day. The bottle decides, unless you do'), 5: ('moi_moi', 'Nine wraps on Sunday is what makes Switch 6 survive a Monday'), 7: ('walking', 'Thirty minutes, ordinary shoes, no gym anywhere in it'), 8: ('bag_kit', 'What goes in the bag before you leave the house'), 9: ('plate_real', 'The reversed plate, in a real kitchen')}
 
 CSS = """  /* The day. Built on the switch card, which opens it. */
@@ -409,12 +412,14 @@ def day_html(i):
            '  <div class="dmeals">']
     for label, items in meals:
         out.append(f'    <div><span class="dlbl">{label}</span><ul>')
-        out += [f'      <li>{x}</li>' for x in meal(items)]
+        out += [f'      <li class="fd">{food(x)}<span>{x}</span></li>' for x in meal(items)]
         out.append('    </ul></div>')
     out.append('  </div>')
     out.append(f'  <div class="dsnack"><span class="dlbl">Between meals</span>{snack}</div>')
     out.append('  <div class="drec">')
     out.append(f'    <div class="drec-top">Today&rsquo;s recipe &mdash; {rname}</div>')
+    if i in RECIPE_PHOTO:
+        out.append(f'    <div class="drec-ph">{{{{IMG:{RECIPE_PHOTO[i]}}}}}</div>')
     out.append('    <div class="drec-in">')
     out.append('      <div><span class="dlbl">Ingredients</span><ul>')
     out += [f'        <li>{x}</li>' for x in ing]

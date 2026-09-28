@@ -16,7 +16,8 @@ a hormone.
 """
 import io
 from profile import swallow
-from figures import il, ph, ARC, CLOCK, OIL
+from figures import il, ph, ARC, CLOCK, OIL, PROGRESS
+from icons import icon
 
 sw = swallow(0)
 
@@ -96,6 +97,12 @@ CH5 = f'''<div class="page">
 
 {il('Ninety days, including the part nobody warns you about', ARC)}
 
+  <div class="baf">
+    {PROGRESS}
+    <p class="note">The same ninety days, drawn on a body instead of a graph.
+    Nothing here is a photograph of anybody.</p>
+  </div>
+
   <h3>The three phases</h3>
 
   <div class="t-wrap keep"><table>
@@ -151,12 +158,12 @@ CH5 = f'''<div class="page">
   <div class="t-wrap keep"><table>
     <thead><tr><th>Weeks</th><th>Food</th><th>Walking</th><th>Strength</th><th>Waist</th></tr></thead>
     <tbody>
-      <tr><td class="k">1&ndash;2</td><td>All ten switches running</td><td>30 min, 5 days</td><td>Full set, twice a week</td><td>Every Monday</td></tr>
-      <tr><td class="k">3&ndash;4</td><td>Same. Nothing new.</td><td>30 min, 5 days</td><td>Three times a week</td><td>Every Monday</td></tr>
-      <tr><td class="k">5&ndash;6</td><td><b>Day 30 audit</b></td><td>35 min, 5 days</td><td>Three times a week</td><td>Every Monday</td></tr>
-      <tr><td class="k">7&ndash;8</td><td>Expect the plateau here</td><td>40 min, 5 days</td><td>Three times a week</td><td>Every Monday</td></tr>
-      <tr><td class="k">9&ndash;10</td><td><b>Day 60 audit</b></td><td>40 min, 5 days</td><td>Three times a week</td><td>Every Monday</td></tr>
-      <tr><td class="k">11&ndash;12</td><td>Same. It is working.</td><td>40 min, 6 days</td><td>Three times a week</td><td><b>Day 90</b></td></tr>
+      <tr><td class="ig">{icon("flame", size=20, colour="var(--ochre)")}</td><td class="k">1&ndash;2</td><td>All ten switches running</td><td>30 min, 5 days</td><td>Full set, twice a week</td><td>Every Monday</td></tr>
+      <tr><td class="ig">{icon("flame", size=20, colour="var(--ochre)")}</td><td class="k">3&ndash;4</td><td>Same. Nothing new.</td><td>30 min, 5 days</td><td>Three times a week</td><td>Every Monday</td></tr>
+      <tr><td class="ig">{icon("scale", size=20, colour="var(--ochre)")}</td><td class="k">5&ndash;6</td><td><b>Day 30 audit</b></td><td>35 min, 5 days</td><td>Three times a week</td><td>Every Monday</td></tr>
+      <tr><td class="ig">{icon("flame", size=20, colour="var(--ochre)")}</td><td class="k">7&ndash;8</td><td>Expect the plateau here</td><td>40 min, 5 days</td><td>Three times a week</td><td>Every Monday</td></tr>
+      <tr><td class="ig">{icon("scale", size=20, colour="var(--ochre)")}</td><td class="k">9&ndash;10</td><td><b>Day 60 audit</b></td><td>40 min, 5 days</td><td>Three times a week</td><td>Every Monday</td></tr>
+      <tr><td class="ig">{icon("tape", size=20, colour="var(--ochre)")}</td><td class="k">11&ndash;12</td><td>Same. It is working.</td><td>40 min, 6 days</td><td>Three times a week</td><td><b>Day 90</b></td></tr>
     </tbody>
   </table></div>
 
@@ -212,9 +219,11 @@ CH6 = f"""<div class="page">
 
 <div class="page">
 {ph('wall_squat', 'The wall squat. A wall, a right angle at the knee, and nothing else.')}
+{ph('chair_stand', 'The chair stand. Arms crossed, no hands, and slower going down than coming up.')}
+{ph('wall_press', 'The wall press-up. Body in one straight line, chest to the wall, push back.')}
   <h3 class="first">Twelve weeks, written out</h3>
   <div class="t-wrap keep"><table>
-    <thead><tr><th>Weeks</th><th>Wall squat</th><th>Chair stands</th><th>Wall press-ups</th><th>How often</th></tr></thead>
+    <thead><tr><th></th><th>Weeks</th><th>Wall squat</th><th>Chair stands</th><th>Wall press-ups</th><th>How often</th></tr></thead>
     <tbody>
       <tr><td class="k">1&ndash;2</td><td>60s &times; 2</td><td>10</td><td>10</td><td>Twice a week</td></tr>
       <tr><td class="k">3&ndash;4</td><td>90s &times; 2</td><td>12</td><td>12</td><td>Three times</td></tr>
@@ -258,6 +267,7 @@ CH7 = f"""<div class="page">
   <p><b>Fat is slow and it is honest.</b> Half a kilogram to one kilogram a week is what real fat loss looks like. Anything faster is water, and water always comes back.</p>
 
   <h3>The tape, and exactly where to put it</h3>
+{ph('waist_measure', 'At the navel, standing, breathing out normally. Not at the narrowest point, and not where your trousers sit.')}
   <ul class="marks">
     <li><b>First thing in the morning</b>, before eating or drinking, after the toilet.</li>
     <li><b>Standing up straight</b>, not sitting, not lying down.</li>

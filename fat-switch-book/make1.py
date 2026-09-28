@@ -15,7 +15,7 @@ withdrawn worldwide in 2010 after it caused heart attacks and strokes.
 """
 import io
 from profile import PROFILE, is_personal, swallow, you, warns
-from figures import FIGCSS, il, ph, PLATE, PLATE_NOW, WAIST
+from figures import FIGCSS, il, ph, PLATE, PLATE_NOW, WAIST, BEFORE_AFTER
 
 HEAD = io.open("_head.html", encoding="utf-8").read()
 
@@ -421,7 +421,15 @@ CH1 = f"""<div class="page">
   <p>Your weight includes water, food still inside you, and muscle. It swings two kilograms in a day for reasons that have nothing to do with fat, which is why the scale destroys more plans than biscuits do.</p>
   <p>Your waist measures the fat that actually matters &mdash; the kind packed around your organs, which is the kind that causes diabetes, high blood pressure and heart disease.</p>
 
-{il('Where exactly to put the tape', WAIST)}  <div class="box cool">
+{il('Where exactly to put the tape', WAIST)}  <div class="baf">
+    {BEFORE_AFTER}
+    <p class="note"><b>This is a drawing, not a customer.</b> It is here because
+    &ldquo;twelve centimetres&rdquo; means nothing until you can see it &mdash; and
+    twelve centimetres is what ninety days of all ten switches looks like on
+    somebody starting at 104.</p>
+  </div>
+
+  <div class="box cool">
     <p class="k">The numbers to aim below</p>
     <p style="margin:0">For a woman, a waist under <b>80cm</b>. For a man, under <b>94cm</b>. Measured at the navel, standing, first thing in the morning, breathing out normally &mdash; not sucked in.</p>
   </div>

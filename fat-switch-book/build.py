@@ -44,6 +44,17 @@ ALT = {
     "bag_kit": "A work bag with unsalted groundnut, two boiled eggs, an orange and a water bottle beside it",
     "moi_moi": "Moi moi unwrapped on a plate with sliced boiled egg, beside a bowl of pap",
     "family_kitchen": "A family of four eating the same balanced meal together at home",
+    "zobo": "A jug of deep red unsweetened zobo with sliced ginger, beside a poured glass",
+    "vegetable_soup": "A bowl of dark green Nigerian vegetable soup with ugu and smoked fish, beside a small ball of eba",
+    "okra_soup": "A bowl of okra soup with ugu stirred through and smoked fish on top",
+    "peppered_chicken": "Grilled peppered chicken with the skin removed, in a dark red pepper sauce with sliced onion",
+    "ewa_agoyin": "Soft mashed beans with slow-fried onion and pepper sauce, beside boiled plantain",
+    "edikaikong": "A thick bowl of edikaikong with ugu, waterleaf, beef and smoked fish",
+    "brown_jollof": "Jollof rice made with brown rice, with grilled chicken and a fresh salad",
+    "chair_stand": "A woman standing up from a dining chair with her arms crossed, mid-movement",
+    "wall_press": "A man doing a press-up against a plain interior wall, body in one straight line",
+    "marching": "A woman marching on the spot at home, one knee lifted to hip height",
+    "waist_measure": "A woman measuring her own waist at the navel with a yellow tailor's tape",
 }
 
 

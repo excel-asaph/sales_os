@@ -56,6 +56,13 @@ SOURCES = {
     "salad":      ("twemoji", "1f957", "CC-BY-4.0"),
     "egg":        ("twemoji", "1f95a", "CC-BY-4.0"),
     "bread":      ("twemoji", "1f956", "CC-BY-4.0"),
+    "bowl":       ("twemoji", "1f963", "CC-BY-4.0"),
+    "nut":        ("twemoji", "1f95c", "CC-BY-4.0"),
+    "banana":     ("twemoji", "1f34c", "CC-BY-4.0"),
+    "citrus":     ("twemoji", "1f34a", "CC-BY-4.0"),
+    "leafy":      ("twemoji", "1f96c", "CC-BY-4.0"),
+    "meat":       ("twemoji", "1f356", "CC-BY-4.0"),
+    "moon2":      ("twemoji", "1f319", "CC-BY-4.0"),
     "pot":        ("twemoji", "1f372", "CC-BY-4.0"),
     "drink":      ("twemoji", "1f964", "CC-BY-4.0"),
     "water":      ("twemoji", "1f4a7", "CC-BY-4.0"),
@@ -127,3 +134,43 @@ if __name__ == "__main__":
     print(f"cached {len(ok)} icons into icons/")
     for n, e in bad:
         print(f"  FAILED {n}: {e}")
+
+
+# Which glyph a line of a meal list gets. First match wins, so the more
+# specific words have to come first -- "pepper soup" is a soup, not a pepper.
+FOOD_MATCH = [
+    # Drinks first -- "pepper soup" must not be caught by "pepper".
+    ("zobo", "drink"), ("water", "water"), ("tea", "drink"),
+    # Nigerian dishes by name, before the generic words they contain.
+    ("efo", "leafy"), ("edikaikong", "leafy"), ("ewedu", "leafy"),
+    ("ugu", "leafy"), ("bitter leaf", "leafy"), ("waterleaf", "leafy"),
+    ("gbegiri", "bowl"), ("ogbono", "bowl"), ("egusi", "bowl"),
+    ("pap", "bowl"), ("oats", "bowl"), ("porridge", "bowl"),
+    ("moi moi", "egg"), ("akara", "egg"), ("beans", "egg"), ("egg", "egg"),
+    ("pepper soup", "pot"), ("soup", "pot"), ("stew", "pot"), ("sauce", "pot"),
+    ("fish", "fish"), ("titus", "fish"), ("tilapia", "fish"), ("catfish", "fish"),
+    ("sardine", "fish"), ("mackerel", "fish"),
+    ("chicken", "meat"), ("turkey", "meat"), ("beef", "meat"), ("goat", "meat"),
+    ("meat", "meat"), ("protein", "meat"),
+    ("jollof", "rice"), ("rice", "rice"), ("eba", "rice"), ("amala", "rice"),
+    ("akpu", "rice"), ("tuwo", "rice"), ("swallow", "rice"), ("semo", "rice"),
+    ("millet", "rice"), ("yam", "rice"), ("potato", "rice"),
+    ("plantain", "banana"), ("banana", "banana"),
+    ("bread", "bread"), ("groundnut", "nut"), ("coconut", "nut"),
+    ("orange", "citrus"), ("pawpaw", "citrus"), ("guava", "citrus"),
+    ("watermelon", "citrus"), ("fruit", "citrus"),
+    ("cabbage", "salad"), ("cucumber", "salad"), ("salad", "salad"),
+    ("garden egg", "salad"), ("vegetable", "salad"), ("carrot", "salad"),
+    ("tomato", "salad"), ("onion", "salad"),
+    # The night switch has lines that are instructions, not food.
+    ("nothing", "moon2"), ("after 8pm", "moon2"),
+]
+
+
+def food(line):
+    """The glyph for a meal line, or an empty string if nothing matches."""
+    low = line.lower()
+    for word, glyph in FOOD_MATCH:
+        if word in low:
+            return icon(glyph, size=19)
+    return ""

@@ -236,6 +236,31 @@ FIGCSS = """  /* The figure system. Measured against the inspiration books, whic
     .ph { margin: 16pt 0 !important; break-inside: avoid; }
     .ph figcaption { font-size: 10pt !important; margin-top: 8pt !important; }
   }
+  /* Before-and-after as diagrams. See baf.py for why these are drawings
+     rather than photographs -- a photographic pair in a weight-loss book
+     reads as a customer testimonial, and nobody has used this book yet. */
+  .baf { border: 1.5px solid var(--indigo); border-radius: var(--r); background: var(--paper-2);
+         padding: 20px 20px 16px; margin: 26px 0; }
+  .baf svg { width: 100%; height: auto; display: block; }
+  .baf .note { font-size: 0.95rem; line-height: 1.58; color: var(--ink-2); margin: 12px 0 0;
+               max-width: none; text-align: center; }
+  @media print {
+    .baf { padding: 13pt 13pt 11pt !important; margin: 16pt 0 !important; break-inside: avoid; }
+    .baf .note { font-size: 10pt !important; margin-top: 8pt !important; }
+  }
+  /* An icon cell in a table. A row of numbers is the least findable thing
+     in a book; a glyph in the first cell makes the row locatable again. */
+  td.ig, th.ig { width: 34px; padding-right: 0 !important; vertical-align: middle; }
+  td.ig .ic { display: block; }
+  /* A recipe photograph sits flush under the recipe's heading bar, so the
+     card reads picture-then-method rather than method-then-picture. */
+  .drec-ph { line-height: 0; }
+  .drec-ph img { width: 100%; display: block; }
+  /* A glyph against every line of a meal list. The bullet is replaced by
+     the picture rather than sitting beside it. */
+  .dmeals li.fd { display: flex; align-items: flex-start; gap: 8px; padding-left: 0; }
+  .dmeals li.fd::before { display: none; }
+  .dmeals li.fd .ic { margin-top: 1px; }
   .il { margin: 26px 0; }
   .il svg { width: 100%; height: auto; display: block; }
   .il-cap { font-size: 0.86rem; letter-spacing: 0.13em; text-transform: uppercase; font-weight: 700;
@@ -275,3 +300,96 @@ def il(caption, svg):
 def ph(key, caption):
     """A full-width photograph with a teaching caption."""
     return f'  <figure class="ph">{{{{IMG:{key}}}}}<figcaption>{caption}</figcaption></figure>\n'
+
+
+# ------------------------------------------------- before and after
+BEFORE_AFTER = '''<svg viewBox="0 0 440 280" role="img" aria-label="Diagram: the same body at a 104cm waist and at a 92cm waist, ninety days apart">
+  <g font-family="var(--body)">
+    <g transform="translate(110,0)">
+      <circle cx="0" cy="26" r="17" fill="var(--clay)" opacity="0.85"/>
+      <path d="M0 43
+               C -26 43 -34 60 -36 78
+               C -37 92 -34 104 -46 112
+               C -44 132 -42 152 -20 172
+               L -20 214 L -7 214 L -5 176 L 5 176 L 7 214 L 20 214 L 20 172
+               C 42 152 44 132 46 112
+               C 34 104 37 92 36 78
+               C 34 60 26 43 0 43 Z"
+            fill="var(--clay)" opacity="0.85"/>
+    </g>
+    <g transform="translate(310,0)">
+      <circle cx="0" cy="26" r="17" fill="var(--moss)" opacity="0.9"/>
+      <path d="M0 43
+               C -26 43 -34 60 -36 78
+               C -37 92 -34 104 -32 112
+               C -30 132 -28 152 -20 172
+               L -20 214 L -7 214 L -5 176 L 5 176 L 7 214 L 20 214 L 20 172
+               C 28 152 30 132 32 112
+               C 34 104 37 92 36 78
+               C 34 60 26 43 0 43 Z"
+            fill="var(--moss)" opacity="0.9"/>
+    </g>
+
+    <line x1="64" y1="112" x2="156" y2="112" stroke="var(--ink)" stroke-width="2"/>
+    <line x1="64" y1="106" x2="64" y2="118" stroke="var(--ink)" stroke-width="2"/>
+    <line x1="156" y1="106" x2="156" y2="118" stroke="var(--ink)" stroke-width="2"/>
+    <line x1="278" y1="112" x2="342" y2="112" stroke="var(--ink)" stroke-width="2"/>
+    <line x1="278" y1="106" x2="278" y2="118" stroke="var(--ink)" stroke-width="2"/>
+    <line x1="342" y1="106" x2="342" y2="118" stroke="var(--ink)" stroke-width="2"/>
+
+    <text x="110" y="248" text-anchor="middle" font-size="14" font-weight="800" fill="var(--clay)">DAY 1</text>
+    <text x="110" y="266" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink-2)">104cm waist</text>
+    <text x="310" y="248" text-anchor="middle" font-size="14" font-weight="800" fill="var(--moss)">DAY 90</text>
+    <text x="310" y="266" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink-2)">92cm waist</text>
+
+    <path d="M180 132 L250 132" stroke="var(--indigo)" stroke-width="2.5" stroke-dasharray="6 4"/>
+    <polygon points="250,126 262,132 250,138" fill="var(--indigo)"/>
+    <text x="215" y="120" text-anchor="middle" font-size="13" font-weight="800" fill="var(--indigo)">12cm</text>
+    <text x="215" y="152" text-anchor="middle" font-size="11" fill="var(--ink-2)">about 11kg</text>
+  </g>
+</svg>'''
+
+PROGRESS = '''<svg viewBox="0 0 440 175" role="img" aria-label="Diagram: the waist narrowing across day 1, day 30, day 60 and day 90">
+  <g font-family="var(--body)">
+    <g transform="translate(58,0)">
+      <circle cx="0" cy="16" r="10" fill="var(--clay)"/>
+      <path d="M0 26 C -15 26 -20 36 -21 47 C -22 55 -20 62 -27 67
+               C -26 79 -25 91 -12 103 L -12 128 L -4 128 L -3 106
+               L 3 106 L 4 128 L 12 128 L 12 103
+               C 25 91 26 79 27 67
+               C 20 62 22 55 21 47 C 20 36 15 26 0 26 Z" fill="var(--clay)"/>
+    </g>
+    <g transform="translate(184,0)">
+      <circle cx="0" cy="16" r="10" fill="var(--ochre)"/>
+      <path d="M0 26 C -15 26 -20 36 -21 47 C -22 55 -20 62 -24 67
+               C -23 79 -22 91 -12 103 L -12 128 L -4 128 L -3 106
+               L 3 106 L 4 128 L 12 128 L 12 103
+               C 22 91 23 79 24 67
+               C 20 62 22 55 21 47 C 20 36 15 26 0 26 Z" fill="var(--ochre)"/>
+    </g>
+    <g transform="translate(310,0)">
+      <circle cx="0" cy="16" r="10" fill="var(--moss)"/>
+      <path d="M0 26 C -15 26 -20 36 -21 47 C -22 55 -20 62 -21 67
+               C -20 79 -19 91 -12 103 L -12 128 L -4 128 L -3 106
+               L 3 106 L 4 128 L 12 128 L 12 103
+               C 19 91 20 79 21 67
+               C 20 62 22 55 21 47 C 20 36 15 26 0 26 Z" fill="var(--moss)"/>
+    </g>
+    <g transform="translate(410,0)">
+      <circle cx="0" cy="16" r="10" fill="var(--moss)"/>
+      <path d="M0 26 C -15 26 -20 36 -21 47 C -22 55 -20 62 -19 67
+               C -18 79 -17 91 -12 103 L -12 128 L -4 128 L -3 106
+               L 3 106 L 4 128 L 12 128 L 12 103
+               C 17 91 18 79 19 67
+               C 20 62 22 55 21 47 C 20 36 15 26 0 26 Z" fill="var(--moss)"/>
+    </g>
+    <line x1="24" y1="142" x2="430" y2="142" stroke="var(--rule)" stroke-width="1.5"/>
+    <text x="58" y="160" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--ink)">Day 1</text>
+    <text x="184" y="160" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--ink)">Day 30</text>
+    <text x="310" y="160" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--ink)">Day 60</text>
+    <text x="410" y="160" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--ink)">Day 90</text>
+    <text x="184" y="174" text-anchor="middle" font-size="10" fill="var(--ink-2)">3&#8211;5kg</text>
+    <text x="310" y="174" text-anchor="middle" font-size="10" fill="var(--ink-2)">+2&#8211;4kg</text>
+    <text x="410" y="174" text-anchor="middle" font-size="10" font-weight="700" fill="var(--clay)">7&#8211;13kg</text>
+  </g>
+</svg>'''

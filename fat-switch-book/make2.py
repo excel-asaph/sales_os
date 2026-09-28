@@ -16,6 +16,7 @@ import io
 from switches import SWITCHES
 from profile import swallow
 from figures import il, ORDER, BOTTLE
+from icons import icon
 
 CH2_HEAD = """<div class="page">
   <div class="chap-band"><p class="kicker">Chapter two</p><h2 class="chapno">02</h2><h2 class="chaptitle">The ten switches, explained</h2></div>
