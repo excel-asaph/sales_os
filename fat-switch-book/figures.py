@@ -61,56 +61,24 @@ PLATE_NOW = """<svg viewBox="0 0 300 250" role="img" aria-label="The usual plate
 </svg>"""
 
 # --------------------------------------------------------- the hand guide
-# Four different shapes, not one shape in four colours. A palm, a fist, a
-# cupped hand and a thumb are the whole lesson, so drawing them identically
-# and relying on the caption throws the lesson away.
-
-_PALM = """    <path d="M24 98 C24 78 28 62 34 56 L34 32 A6 6 0 0 1 46 32 L46 52
-             L50 52 L50 24 A6 6 0 0 1 62 24 L62 52 L66 52 L66 28
-             A6 6 0 0 1 78 28 L78 54 L82 54 L82 40 A6 6 0 0 1 94 40
-             L94 76 C94 98 82 112 60 112 C38 112 24 106 24 98 Z"
-          fill="{fill}" stroke="var(--ink-3)" stroke-width="1.6"/>"""
-
-_FIST = """    <path d="M26 76 C26 56 40 44 60 44 C80 44 94 56 94 76 L94 88
-             C94 104 80 112 60 112 C40 112 26 104 26 88 Z"
-          fill="{fill}" stroke="var(--ink-3)" stroke-width="1.6"/>
-    <path d="M38 62 L82 62 M38 74 L82 74 M38 86 L82 86" stroke="var(--ink-3)"
-          stroke-width="1.2" opacity="0.45"/>
-    <path d="M26 72 C18 70 16 60 24 56 L34 52" fill="none" stroke="var(--ink-3)" stroke-width="1.6"/>"""
-
-_CUP = """    <path d="M20 62 C20 92 36 112 60 112 C84 112 100 92 100 62
-             C100 58 96 56 92 58 C84 62 72 66 60 66 C48 66 36 62 28 58
-             C24 56 20 58 20 62 Z"
-          fill="{fill}" stroke="var(--ink-3)" stroke-width="1.6"/>
-    <path d="M22 60 C34 48 46 44 60 44 C74 44 86 48 98 60" fill="none"
-          stroke="var(--ink-3)" stroke-width="1.4" stroke-dasharray="4 3" opacity="0.6"/>"""
-
-_THUMB = """    <path d="M48 112 C38 112 34 104 34 94 L34 74 C34 62 40 54 50 50
-             L54 30 A9 9 0 0 1 72 32 L70 52 C78 56 82 64 82 74 L82 94
-             C82 104 78 112 68 112 Z"
-          fill="{fill}" stroke="var(--ink-3)" stroke-width="1.6"/>"""
+# Drawn by the Twemoji team rather than by me. A fist is a known object, and
+# a hand-rolled one is a green blob -- see icons.py for where that line sits.
+from icons import icon as _icon
 
 
-def _hand(x, fill, label, what, shape):
-    return "\n".join([
-        f'  <g transform="translate({x},0)">',
-        shape.format(fill=fill),
-        f'    <text x="59" y="134" text-anchor="middle" font-size="13" font-weight="800"'
-        f' fill="var(--ink)" font-family="var(--body)">{label}</text>',
-        f'    <text x="59" y="151" text-anchor="middle" font-size="11"'
-        f' fill="var(--ink-2)" font-family="var(--body)">{what}</text>',
-        '  </g>',
-    ])
+def _hand(glyph, label, what):
+    return (f'    <div class="hand">{_icon(glyph, size=74)}'
+            f'<span class="hl">{label}</span>'
+            f'<span class="hw">{what}</span></div>')
 
 
-HANDS = ("""<svg viewBox="0 0 470 162" role="img" aria-label="Portion sizes measured with your own hand: palm for protein, fist for vegetables, cupped hand for swallow, thumb for oil">
-""" + "\n".join([
-    _hand(0, "var(--clay)", "PALM", "protein", _PALM),
-    _hand(118, "var(--moss)", "FIST", "vegetables", _FIST),
-    _hand(236, "var(--ochre)", "CUPPED", "swallow, rice", _CUP),
-    _hand(354, "var(--indigo)", "THUMB", "oil, fat", _THUMB),
-]) + """
-</svg>""")
+HANDS = "\n".join(
+    ['  <div class="hands">']
+    + [_hand("palm", "PALM", "protein"),
+       _hand("fist", "FIST", "vegetables"),
+       _hand("cupped", "CUPPED", "swallow, rice"),
+       _hand("thumbsup", "THUMB", "oil, fat")]
+    + ['  </div>'])
 
 # ---------------------------------------------------- the bottle in cubes
 def _cubes(x, y, n, fill, per_row=6):
@@ -253,6 +221,21 @@ FIGCSS = """  /* The figure system. Measured against the inspiration books, whic
      because the ideas here are quantities, orders and comparisons, which
      are diagrams by nature -- and because a drawing of a portion teaches it
      better than a photograph of somebody else's plate. */
+  .hands { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 18px; }
+  .hand { text-align: center; }
+  .hand .ic { margin: 0 auto 10px; }
+  .hand .hl { display: block; font-size: 1.02rem; font-weight: 800; color: var(--ink); }
+  .hand .hw { display: block; font-size: 0.94rem; color: var(--ink-2); margin-top: 2px; }
+  /* Photography. Full column width, rounded to match every other block,
+     with the caption doing the teaching rather than describing the picture. */
+  .ph { margin: 26px 0; }
+  .ph img { width: 100%; border-radius: var(--r); display: block; }
+  .ph figcaption { font-size: 0.97rem; line-height: 1.6; color: var(--ink-2); font-weight: 500;
+                   margin: 12px auto 0; max-width: 56ch; text-align: center; text-wrap: balance; }
+  @media print {
+    .ph { margin: 16pt 0 !important; break-inside: avoid; }
+    .ph figcaption { font-size: 10pt !important; margin-top: 8pt !important; }
+  }
   .il { margin: 26px 0; }
   .il svg { width: 100%; height: auto; display: block; }
   .il-cap { font-size: 0.86rem; letter-spacing: 0.13em; text-transform: uppercase; font-weight: 700;
@@ -278,10 +261,17 @@ FIGCSS = """  /* The figure system. Measured against the inspiration books, whic
     .split .panel, .split .side { padding: 16pt 17pt !important; }
     .split .panel p, .split .panel li, .split .side p { font-size: 10.5pt !important; }
     .split .panel .big { font-size: 15pt !important; }
-    .il, .il-card, .split { break-inside: avoid; }
+    .hand .hl { font-size: 10.5pt !important; }
+    .hand .hw { font-size: 10pt !important; }
+    .il, .il-card, .split, .hands { break-inside: avoid; }
   }
 """
 
 
 def il(caption, svg):
     return f'  <div class="il"><p class="il-cap">{caption}</p>\n{svg}\n  </div>\n'
+
+
+def ph(key, caption):
+    """A full-width photograph with a teaching caption."""
+    return f'  <figure class="ph">{{{{IMG:{key}}}}}<figcaption>{caption}</figcaption></figure>\n'

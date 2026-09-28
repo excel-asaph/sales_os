@@ -15,7 +15,7 @@ withdrawn worldwide in 2010 after it caused heart attacks and strokes.
 """
 import io
 from profile import PROFILE, is_personal, swallow, you, warns
-from figures import FIGCSS, il, PLATE, PLATE_NOW, WAIST
+from figures import FIGCSS, il, ph, PLATE, PLATE_NOW, WAIST
 
 HEAD = io.open("_head.html", encoding="utf-8").read()
 
@@ -59,6 +59,11 @@ CSS = """  /* The switch card. The book's whole structure is ten of these, so it
 
 COVER = """<div class="page flush cover">
   {{IMG:cover_v1}}
+  <div class="cover-top">
+    <p class="eyebrow">10 switches &middot; 10 days to start &middot; 90 days to change</p>
+    <h1>THE 10X<br>FAT SWITCH</h1>
+  </div>
+  <div class="cover-band">Published by Dr David Akinyode</div>
 </div>
 
 """
@@ -87,7 +92,22 @@ COVER_FALLBACK = """<div class="page flush">
 
 """
 
-COVER_CSS = """  .tcover { background: var(--indigo); color: #FFFFFF; min-height: 118vw; display: flex;
+COVER_CSS = """  /* Title set over the artwork's own cream band, the way the other two
+     books in the series carry it. The supplied covers have their text baked
+     in; this one is generated artwork, so the type is ours. */
+  .cover { position: relative; }
+  .cover img { width: 100%; display: block; }
+  .cover-top { position: absolute; top: 7.5%; left: 0; right: 0; text-align: center;
+               padding-inline: clamp(24px, 7vw, 70px); }
+  .cover-top .eyebrow { font-size: clamp(0.46rem, 1.45vw, 0.7rem); letter-spacing: 0.15em;
+                        text-transform: uppercase; font-weight: 700; color: #1F5F4F;
+                        margin: 0 0 clamp(3px, 1vw, 9px); max-width: none; }
+  .cover-top h1 { font-size: clamp(1.5rem, 6.4vw, 3rem); font-weight: 800; line-height: 0.95;
+                  letter-spacing: -0.035em; color: #0E3B4F; margin: 0; }
+  .cover-band { position: absolute; left: 0; right: 0; bottom: 3.5%; background: var(--indigo);
+                color: #FFFFFF; text-align: center; padding: clamp(6px, 1.5vw, 12px) 10px;
+                font-weight: 700; font-size: clamp(0.58rem, 1.75vw, 0.92rem); }
+  .tcover { background: var(--indigo); color: #FFFFFF; min-height: 118vw; display: flex;
             flex-direction: column; justify-content: space-between; padding: clamp(28px,7vw,64px); }
   .tcover .eyebrow { font-size: clamp(0.62rem,2vw,0.86rem); letter-spacing: 0.18em; text-transform: uppercase;
                      font-weight: 700; color: #FFD9A0; margin: 0 0 clamp(14px,3vw,26px); max-width: none; }
@@ -373,6 +393,7 @@ CH1 = f"""<div class="page">
     </div>
   </div>
 
+{ph('market', 'Everything in this book is in the nearest market at the usual price. Nothing in it is imported.')}
   <h3>Two &mdash; the drinks</h3>
   <p>This is the biggest one and the one nobody counts. A bottle of malt carries more sugar than most people would ever eat in one sitting, and because it is liquid your body does not register it as food at all. You drink 250 calories in ninety seconds and feel exactly as hungry as before.</p>
 
@@ -410,7 +431,7 @@ CH1 = f"""<div class="page">
 
 
 def main():
-    body = COVER_FALLBACK + PRAYER + letter() + toc() + myths() + about() + CH1
+    body = COVER + PRAYER + letter() + toc() + myths() + about() + CH1
     head = HEAD.replace("  .cover {", CSS + COVER_CSS + FIGCSS + "  .cover {", 1)
     io.open("book.src.html", "w", encoding="utf-8", newline="\n").write(
         head + '\n<div class="stack">\n\n' + body)

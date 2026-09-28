@@ -16,7 +16,7 @@ a hormone.
 """
 import io
 from profile import swallow
-from figures import il, ARC, CLOCK, OIL
+from figures import il, ph, ARC, CLOCK, OIL
 
 sw = swallow(0)
 
@@ -211,6 +211,7 @@ CH6 = f"""<div class="page">
 </div>
 
 <div class="page">
+{ph('wall_squat', 'The wall squat. A wall, a right angle at the knee, and nothing else.')}
   <h3 class="first">Twelve weeks, written out</h3>
   <div class="t-wrap keep"><table>
     <thead><tr><th>Weeks</th><th>Wall squat</th><th>Chair stands</th><th>Wall press-ups</th><th>How often</th></tr></thead>

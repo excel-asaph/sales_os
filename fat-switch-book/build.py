@@ -33,7 +33,17 @@ QUALITY = {"cover_v1": 92}
 # Alt text is not decoration here: this is a health book and the figures carry
 # meaning for anyone using a screen reader.
 ALT = {
-    "cover_v1": "Book cover: Hypertension Clear, published by Dr David Akinyode. A Nigerian couple behind fresh vegetables and a blood pressure monitor, framed by green leaves, above the promises the book makes.",
+    "cover_v1": "Book cover: The 10X Fat Switch, published by Dr David Akinyode.",
+    "plate_real": "A single plate, half dark green vegetable soup, a quarter grilled mackerel, a quarter a small ball of eba",
+    "plate_before": "A typical plate, three quarters a mound of eba with a smear of soup and one small piece of meat",
+    "market": "A woman choosing ugu, okra and garden egg at an open-air market stall in the early morning",
+    "bottles": "Bottles of malt and soft drink beside a jug of unsweetened zobo and a bottle of water, with sugar cubes",
+    "oil": "One measured tablespoon of palm oil beside a full small cup of it",
+    "walking": "A woman walking briskly along a quiet street at dawn in ordinary clothes",
+    "wall_squat": "A man holding a wall squat against a plain wall at home, knees bent to a right angle",
+    "bag_kit": "A work bag with unsalted groundnut, two boiled eggs, an orange and a water bottle beside it",
+    "moi_moi": "Moi moi unwrapped on a plate with sliced boiled egg, beside a bowl of pap",
+    "family_kitchen": "A family of four eating the same balanced meal together at home",
 }
 
 

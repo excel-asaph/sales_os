@@ -17,7 +17,11 @@ anything the customer said they will not eat without any of this changing.
 import io
 from switches import SWITCHES
 from profile import meal, swallow, proteins, PROFILE, disliked
-from figures import il, HANDS, OIL, CLOCK
+from figures import il, ph, HANDS, OIL, CLOCK
+
+# Photograph and caption per day, keyed by index. A day without one
+# simply renders nothing, so this can be filled in over time.
+PHOTO = {0: ('bottles', 'This is what comes out of the fridge today'), 3: ('oil', 'One spoon, or most of a day. The bottle decides, unless you do'), 5: ('moi_moi', 'Nine wraps on Sunday is what makes Switch 6 survive a Monday'), 7: ('walking', 'Thirty minutes, ordinary shoes, no gym anywhere in it'), 8: ('bag_kit', 'What goes in the bag before you leave the house'), 9: ('plate_real', 'The reversed plate, in a real kitchen')}
 
 CSS = """  /* The day. Built on the switch card, which opens it. */
   .dfirst { background: var(--ochre-soft); border-left: 4px solid var(--ochre); border-radius: var(--r-sm);
@@ -424,6 +428,9 @@ def day_html(i):
     out.append(f'  <div class="dsecret"><span class="dlbl">Today&rsquo;s secret &mdash; {slabel}</span>')
     out += [f'    <p>{p}</p>' for p in sparas]
     out.append('  </div>')
+    if i in PHOTO:
+        key, cap = PHOTO[i]
+        out.append(ph(key, cap).rstrip())
     out.append('  <div class="dread"><span class="dlbl">Waist this morning (cm)</span>'
                '<span class="slot"></span></div>')
     out.append('</div>\n')
