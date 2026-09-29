@@ -318,24 +318,24 @@
   .hand .hw { display: block; font-size: 0.94rem; color: var(--ink-2); margin-top: 2px; }
   /* Photography. Full column width, rounded to match every other block,
      with the caption doing the teaching rather than describing the picture. */
-  .ph { margin: 26px 0; }
+  .ph { margin: 40px 0; }
   .ph img { width: 100%; border-radius: var(--r); display: block; }
   .ph figcaption { font-size: 0.97rem; line-height: 1.6; color: var(--ink-2); font-weight: 500;
                    margin: 12px auto 0; max-width: 56ch; text-align: center; text-wrap: balance; }
   @media print {
-    .ph { margin: 16pt 0 !important; break-inside: avoid; }
-    .ph figcaption { font-size: 10pt !important; margin-top: 8pt !important; }
+    .ph { margin: 26pt 0 !important; break-inside: avoid; }
+    .ph figcaption { font-size: 10pt !important; margin-top: 11pt !important; }
   }
   /* Before-and-after as diagrams. See baf.py for why these are drawings
      rather than photographs -- a photographic pair in a weight-loss book
      reads as a customer testimonial, and nobody has used this book yet. */
   .baf { border: 1.5px solid var(--indigo); border-radius: var(--r); background: var(--paper-2);
-         padding: 20px 20px 16px; margin: 26px 0; }
+         padding: 24px 24px 20px; margin: 40px 0; }
   .baf svg { width: 100%; height: auto; display: block; }
   .baf .note { font-size: 0.95rem; line-height: 1.58; color: var(--ink-2); margin: 12px 0 0;
                max-width: none; text-align: center; }
   @media print {
-    .baf { padding: 13pt 13pt 11pt !important; margin: 16pt 0 !important; break-inside: avoid; }
+    .baf { padding: 16pt 16pt 13pt !important; margin: 26pt 0 !important; break-inside: avoid; }
     .baf .note { font-size: 10pt !important; margin-top: 8pt !important; }
   }
   /* An icon cell in a table. A row of numbers is the least findable thing
@@ -351,16 +351,17 @@
   .dmeals li.fd { display: flex; align-items: flex-start; gap: 8px; padding-left: 0; }
   .dmeals li.fd::before { display: none; }
   .dmeals li.fd .ic { margin-top: 1px; }
-  .il { margin: 26px 0; }
+  .il { margin: 40px 0; }
+  .il-fig { margin: 0 auto; }
   .il svg { width: 100%; height: auto; display: block; }
   .il-cap { font-size: 0.86rem; letter-spacing: 0.13em; text-transform: uppercase; font-weight: 700;
-            color: var(--ochre); margin: 0 0 12px; }
-  .il-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; align-items: start; }
-  .il-card { border: 1.5px solid var(--rule); border-radius: var(--r-sm); background: var(--paper-2); padding: 16px; }
+            color: var(--ochre); margin: 0 0 18px; }
+  .il-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 24px; align-items: start; }
+  .il-card { border: 1.5px solid var(--rule); border-radius: var(--r-sm); background: var(--paper-2); padding: 22px; }
   .il-card svg { margin-bottom: 4px; }
   /* Borrowed from PhD Nutrition: give half the page to a solid panel and
      the spread carries itself even where the prose is ordinary. */
-  .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0; border-radius: var(--r); overflow: hidden; margin: 26px 0; }
+  .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0; border-radius: var(--r); overflow: hidden; margin: 40px 0; }
   .split .panel { background: var(--indigo); color: var(--on-solid); padding: 26px 26px 28px; }
   .split .panel h4 { color: #FFD9A0; margin: 0 0 12px; font-size: 0.82rem; letter-spacing: 0.16em; text-transform: uppercase; }
   .split .panel p, .split .panel li { color: #FFFFFF; font-size: 1.02rem; line-height: 1.62; max-width: none; }
@@ -368,11 +369,11 @@
   .split .side { background: var(--paper-2); padding: 26px; }
   .split .side p { font-size: 1.02rem; line-height: 1.64; max-width: none; }
   @media print {
-    .il { margin: 16pt 0 !important; }
-    .il-cap { font-size: 8.5pt !important; margin-bottom: 8pt !important; }
-    .il-pair { gap: 14pt !important; }
-    .il-card { padding: 11pt !important; }
-    .split { margin: 16pt 0 !important; }
+    .il { margin: 26pt 0 !important; }
+    .il-cap { font-size: 8.5pt !important; margin-bottom: 12pt !important; }
+    .il-pair { gap: 16pt !important; }
+    .il-card { padding: 15pt !important; }
+    .split { margin: 26pt 0 !important; }
     .split .panel, .split .side { padding: 16pt 17pt !important; }
     .split .panel p, .split .panel li, .split .side p { font-size: 10.5pt !important; }
     .split .panel .big { font-size: 15pt !important; }
@@ -784,9 +785,11 @@
   <circle cx="150" cy="112" r="96" fill="none" stroke="var(--ink-3)" stroke-width="2.5"/>
   <line x1="150" y1="16" x2="150" y2="112" stroke="#FFFFFF" stroke-width="2.5"/>
   <line x1="54" y1="112" x2="150" y2="112" stroke="#FFFFFF" stroke-width="2.5"/>
-  <text x="172" y="106" text-anchor="middle" font-size="13" font-weight="800" fill="#FFFFFF" font-family="var(--body)">THREE</text>
-  <text x="172" y="124" text-anchor="middle" font-size="13" font-weight="800" fill="#FFFFFF" font-family="var(--body)">QUARTERS</text>
-  <text x="172" y="142" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF" font-family="var(--body)">swallow or rice</text>
+  <!-- The whole bottom half is swallow, so the label sits there, clear of
+       both white dividing lines. -->
+  <text x="150" y="152" text-anchor="middle" font-size="13" font-weight="800" fill="#FFFFFF" font-family="var(--body)">THREE</text>
+  <text x="150" y="169" text-anchor="middle" font-size="13" font-weight="800" fill="#FFFFFF" font-family="var(--body)">QUARTERS</text>
+  <text x="150" y="186" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF" font-family="var(--body)">swallow or rice</text>
   <text x="104" y="68" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)" font-family="var(--body)">a smear</text>
   <text x="104" y="82" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)" font-family="var(--body)">of soup</text>
   <text x="150" y="238" text-anchor="middle" font-size="12" font-weight="700" fill="var(--clay)" font-family="var(--body)">Most Nigerian plates today</text>
@@ -839,8 +842,9 @@
   <p>Your waist tells you about the fat that matters most, the fat packed around your organs. That&rsquo;s the kind linked to diabetes, high blood pressure and heart disease.</p>
 
   <div class="il"><p class="il-cap">Where to put the tape</p>
-<svg viewBox="0 0 300 220" role="img" aria-label="Measure your waist at the navel, standing, breathing out">
+<div class="il-fig" style="max-width:460px"><svg viewBox="0 0 360 226" role="img" aria-label="Measure your waist at the navel, standing, breathing out">
   <g font-family="var(--body)">
+    <g transform="translate(-52,0)">
     <circle cx="150" cy="34" r="18" fill="var(--indigo)"/>
     <path d="M150 52 C124 52 116 74 116 96 L116 126 C116 150 122 168 126 196
              M150 52 C176 52 184 74 184 96 L184 126 C184 150 178 168 174 196"
@@ -848,12 +852,13 @@
     <path d="M116 96 L116 126 L184 126 L184 96 Z" fill="var(--indigo)" opacity="0.1"/>
     <rect x="102" y="106" width="96" height="13" rx="2" fill="var(--clay)"/>
     <circle cx="150" cy="112" r="3.5" fill="#FFFFFF"/>
-    <text x="212" y="108" font-size="12.5" font-weight="800" fill="var(--clay)">AT THE NAVEL</text>
-    <text x="212" y="126" font-size="11" fill="var(--ink-2)">standing, breathing out,</text>
-    <text x="212" y="140" font-size="11" fill="var(--ink-2)">belly relaxed</text>
-    <text x="150" y="214" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink-2)">Under 80cm (woman) &#183; under 94cm (man)</text>
+    </g>
+    <text x="164" y="108" font-size="12.5" font-weight="800" fill="var(--clay)">AT THE NAVEL</text>
+    <text x="164" y="126" font-size="11" fill="var(--ink-2)">standing, breathing out,</text>
+    <text x="164" y="140" font-size="11" fill="var(--ink-2)">belly relaxed</text>
+    <text x="180" y="218" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink-2)">Under 80cm (woman) &#183; under 94cm (man)</text>
   </g>
-</svg>
+</svg></div>
   </div>
   <div class="baf">
     <svg viewBox="0 0 440 280" role="img" aria-label="Diagram: the same body at a 104cm waist and at a 92cm waist, ninety days apart">
@@ -1135,19 +1140,21 @@
   </ul>
 
   <div class="il"><p class="il-cap">What is really in that bottle</p>
-<svg viewBox="0 0 420 190" role="img" aria-label="Sugar in a bottle of malt compared with water">
-  <text x="14" y="20" font-size="12" font-weight="800" fill="var(--clay)" font-family="var(--body)" letter-spacing="1">ONE BOTTLE OF MALT</text>
+<div class="il-fig" style="max-width:560px"><svg viewBox="0 0 420 222" role="img" aria-label="Sugar in a bottle of malt compared with water">
+  <text x="210" y="20" text-anchor="middle" font-size="12" font-weight="800" fill="var(--clay)" font-family="var(--body)" letter-spacing="1">ONE BOTTLE OF MALT</text>
+  <g transform="translate(63,6)">
   <path d="M40 46 L40 38 L58 38 L58 46 C58 52 66 58 66 70 L66 128 A8 8 0 0 1 58 136 L40 136 A8 8 0 0 1 32 128 L32 70 C32 58 40 52 40 46 Z"
         fill="var(--clay)" opacity="0.88" stroke="var(--ink-3)" stroke-width="1.6"/>
   <rect x="92" y="40" width="12" height="12" rx="2" fill="var(--clay-soft)" stroke="var(--ink-3)" stroke-width="0.8"/><rect x="107" y="40" width="12" height="12" rx="2" fill="var(--clay-soft)" stroke="var(--ink-3)" stroke-width="0.8"/><rect x="122" y="40" width="12" height="12" rx="2" fill="var(--clay-soft)" stroke="var(--ink-3)" stroke-width="0.8"/><rect x="137" y="40" width="12" height="12" rx="2" fill="var(--clay-soft)" stroke="var(--ink-3)" stroke-width="0.8"/><rect x="152" y="40" width="12" height="12" rx="2" fill="var(--clay-soft)" stroke="var(--ink-3)" stroke-width="0.8"/><rect x="167" y="40" width="12" height="12" rx="2" fill="var(--clay-soft)" stroke="var(--ink-3)" stroke-width="0.8"/><rect x="92" y="55" width="12" height="12" rx="2" fill="var(--clay-soft)" stroke="var(--ink-3)" stroke-width="0.8"/><rect x="107" y="55" width="12" height="12" rx="2" fill="var(--clay-soft)" stroke="var(--ink-3)" stroke-width="0.8"/><rect x="122" y="55" width="12" height="12" rx="2" fill="var(--clay-soft)" stroke="var(--ink-3)" stroke-width="0.8"/><rect x="137" y="55" width="12" height="12" rx="2" fill="var(--clay-soft)" stroke="var(--ink-3)" stroke-width="0.8"/><rect x="152" y="55" width="12" height="12" rx="2" fill="var(--clay-soft)" stroke="var(--ink-3)" stroke-width="0.8"/><rect x="167" y="55" width="12" height="12" rx="2" fill="var(--clay-soft)" stroke="var(--ink-3)" stroke-width="0.8"/>
-  <text x="92" y="108" font-size="12.5" font-weight="700" fill="var(--ink)" font-family="var(--body)">about 12 cubes of sugar</text>
-  <text x="92" y="126" font-size="11.5" fill="var(--ink-2)" font-family="var(--body)">gone in a minute and a half,</text>
-  <text x="92" y="142" font-size="11.5" fill="var(--ink-2)" font-family="var(--body)">and you&#8217;re still hungry after</text>
+  <text x="92" y="100" font-size="12.5" font-weight="700" fill="var(--ink)" font-family="var(--body)">about 12 cubes of sugar</text>
+  <text x="92" y="118" font-size="11.5" fill="var(--ink-2)" font-family="var(--body)">gone in a minute and a half,</text>
+  <text x="92" y="134" font-size="11.5" fill="var(--ink-2)" font-family="var(--body)">and you&#8217;re still hungry after</text>
+  </g>
 
-  <line x1="14" y1="156" x2="406" y2="156" stroke="var(--rule)" stroke-width="1.5"/>
-  <text x="14" y="178" font-size="12" font-weight="800" fill="var(--moss)" font-family="var(--body)" letter-spacing="1">THE SAME BOTTLE OF WATER OR ZOBO</text>
-  <text x="300" y="178" font-size="12.5" font-weight="700" fill="var(--moss)" font-family="var(--body)">zero</text>
-</svg>
+  <line x1="60" y1="166" x2="360" y2="166" stroke="var(--rule)" stroke-width="1.5"/>
+  <text x="210" y="190" text-anchor="middle" font-size="12" font-weight="800" fill="var(--moss)" font-family="var(--body)" letter-spacing="1">THE SAME BOTTLE OF WATER OR ZOBO</text>
+  <text x="210" y="210" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--moss)" font-family="var(--body)">zero sugar</text>
+</svg></div>
   </div>
 
 

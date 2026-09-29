@@ -422,7 +422,7 @@ CH1 = f"""<div class="page">
   <p>The number on the scale includes water, food still sitting in your stomach, and muscle. It can go up or down by two kilos in a single day for reasons that have nothing to do with fat, and that&rsquo;s enough to discourage anybody.</p>
   <p>Your waist tells you about the fat that matters most, the fat packed around your organs. That&rsquo;s the kind linked to diabetes, high blood pressure and heart disease.</p>
 
-{il('Where to put the tape', WAIST)}  <div class="baf">
+{il('Where to put the tape', WAIST, max=460)}  <div class="baf">
     {BEFORE_AFTER}
     <p class="note"><b>This is an illustration, to help you picture the change.</b>
     Twelve centimetres is hard to imagine until you see it, and it&rsquo;s roughly

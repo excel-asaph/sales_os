@@ -122,7 +122,7 @@ CH3 = f"""<div class="page">
     <li><b>Slimming coffee.</b> Same story as the capsules, with extra caffeine so you feel like something is happening.</li>
   </ul>
 
-{il('What is really in that bottle', BOTTLE)}
+{il('What is really in that bottle', BOTTLE, max=560)}
 
   <div class="box good">
     <p class="k">A better way to spend ten thousand naira</p>
