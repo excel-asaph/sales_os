@@ -89,18 +89,18 @@ MARCH = """      <svg viewBox="0 0 200 150" role="img" aria-label="Marching on t
       </svg>"""
 
 CH5 = f'''<div class="page">
-  <div class="chap-band"><p class="kicker">Chapter five</p><h2 class="chapno">05</h2><h2 class="chaptitle">Days 11 to 90 &mdash; where your body actually changes</h2></div>
+  <div class="chap-band"><p class="kicker">Chapter five</p><h2 class="chapno">05</h2><h2 class="chaptitle">Days 11 to 90: when your body really changes</h2></div>
 
-  <p class="lead">The ten days were not the programme. The ten days were how you switched everything on without being overwhelmed.</p>
-  <p>Here is the honest arithmetic. Real fat loss runs at about half a kilogram to one kilogram a week. Over ten days that is one to two kilograms &mdash; genuinely good, and not something anybody photographs. Over ninety days the same rate is <b>seven to thirteen kilograms</b>, which is a different body.</p>
-  <p>Nothing changes about what you are doing. The ten switches simply keep running, and this chapter tells you what each stretch of the next eighty days is going to feel like &mdash; including the part where it stops working, which it will, around week six.</p>
+  <p class="lead">The first ten days were for switching everything on. The real change happens over the next eighty.</p>
+  <p>Real fat loss happens at about half a kilo to one kilo a week. Over ten days that&rsquo;s one to two kilos, which is a good start, though most people won&rsquo;t notice it on you yet. Over ninety days the same pace adds up to <b>seven to thirteen kilograms</b>, and that&rsquo;s a change everybody can see.</p>
+  <p>You don&rsquo;t need to do anything new. You keep the ten switches going, and this chapter tells you what each part of the next eighty days will feel like, including the slow patch that usually comes around week six.</p>
 
-{il('Ninety days, including the part nobody warns you about', ARC)}
+{il('Your ninety days, including the slow patch', ARC)}
 
   <div class="baf">
     {PROGRESS}
-    <p class="note">The same ninety days, drawn on a body instead of a graph.
-    Nothing here is a photograph of anybody.</p>
+    <p class="note">The same ninety days, drawn as a body. This is an illustration,
+    to help you picture the change.</p>
   </div>
 
   <h3>The three phases</h3>
@@ -108,97 +108,97 @@ CH5 = f'''<div class="page">
   <div class="t-wrap keep"><table>
     <thead><tr><th>Phase</th><th>What is happening</th><th>What to expect</th></tr></thead>
     <tbody>
-      <tr><td class="k">Days 11&ndash;30<br>The fast part</td><td>Water leaving, and real fat starting. Bloating gone, clothes loosening before the scale agrees.</td><td><b>3&ndash;5kg</b><br>3&ndash;5cm off the waist</td></tr>
-      <tr><td class="k">Days 31&ndash;60<br>The quiet part</td><td>Steady fat loss and nothing dramatic. This is where almost everybody quits, and it is where the work is actually being done.</td><td><b>2&ndash;4kg</b><br>2&ndash;4cm</td></tr>
-      <tr><td class="k">Days 61&ndash;90<br>The visible part</td><td>Other people start asking what you are doing. Your face changes before your stomach does, which is why they notice before you do.</td><td><b>2&ndash;4kg</b><br>2&ndash;3cm</td></tr>
+      <tr><td class="k">Days 11&ndash;30<br>The fast part</td><td>Some water comes off first, then real fat starts to go. The bloating eases and your clothes start to feel looser, sometimes before the scale shows much.</td><td><b>3&ndash;5kg</b><br>3&ndash;5cm off the waist</td></tr>
+      <tr><td class="k">Days 31&ndash;60<br>The quiet part</td><td>Steady progress, with nothing dramatic happening. This is when a lot of people give up, even though the plan is working.</td><td><b>2&ndash;4kg</b><br>2&ndash;4cm</td></tr>
+      <tr><td class="k">Days 61&ndash;90<br>The visible part</td><td>People around you start to notice. Your face often slims down before your stomach does, so others may see it before you do.</td><td><b>2&ndash;4kg</b><br>2&ndash;3cm</td></tr>
     </tbody>
   </table></div>
 
   <div class="box warn">
-    <h4>If you are losing faster than this</h4>
-    <p style="margin-bottom:0">More than about a kilogram a week, sustained, is not extra discipline paying off. It is water, or muscle, or something in a capsule that nobody declared. All three come back, and the third one can hurt you. Slow is the mechanism, not a consolation.</p>
+    <h4>If you&rsquo;re losing faster than this</h4>
+    <p style="margin-bottom:0">If you keep losing more than about a kilo a week, week after week, it&rsquo;s usually water, muscle, or something in a capsule that wasn&rsquo;t on the label. That kind of weight tends to come back, and the capsule can hurt you. Slow and steady is what lasts.</p>
   </div>
 </div>
 
 <div class="page">
-  <h3 class="first">The three days that matter: 30, 60 and 90</h3>
-  <p>Do the same four things on each of them. It takes fifteen minutes and it is the whole record.</p>
+  <h3 class="first">Check in on Day 30, 60 and 90</h3>
+  <p>On each of these days, do the same four things. It takes about fifteen minutes.</p>
   <ul class="marks">
-    <li><b>Measure your waist</b> &mdash; morning, standing, at the navel, breathing out normally.</li>
-    <li><b>Take the photograph</b> &mdash; same light, same spot, same clothes, front and side.</li>
-    <li><b>Audit the ten switches</b> honestly. Not &ldquo;am I trying&rdquo;. Switch by switch: is this one still running, yes or no?</li>
-    <li><b>Write all three down</b> in the log at the back, with the date.</li>
+    <li><b>Measure your waist</b> in the morning, standing, at the navel, breathing out normally.</li>
+    <li><b>Take a photo</b> in the same spot, with the same light and the same clothes, from the front and the side.</li>
+    <li><b>Check your ten switches</b> one by one. For each one, ask yourself: am I still doing this, yes or no?</li>
+    <li><b>Write it all down</b> in the log at the back of the book, with the date.</li>
   </ul>
 
   <div class="box cool">
-    <p class="k">The audit is the important one</p>
-    <p style="margin:0">Almost everybody whose progress has stopped has quietly dropped two or three switches without noticing. Usually Switch 1 (a bottle crept back in), Switch 4 (the oil stopped being measured) or Switch 9 (the bag stopped being packed). <b>You will not remember this. That is exactly why it is written down as a checklist.</b></p>
+    <p class="k">The switch check matters most</p>
+    <p style="margin:0">When progress stops, it&rsquo;s very often because two or three switches have slipped without you noticing. Usually it&rsquo;s Switch 1 (a Malta Guinness here and there), Switch 4 (you stopped measuring the oil) or Switch 9 (you stopped packing your bag). It&rsquo;s easy to miss, which is why it helps to go through them one at a time.</p>
   </div>
 
-  <h3>Week six, and why it is not failure</h3>
-  <p>Somewhere between week five and week nine, it stops.</p>
-  <p>The scale sits still for ten days. The waist does not move. You are doing everything you were doing in week two and nothing is happening. This is the single commonest point at which people decide the plan has stopped working and go back to how they were eating.</p>
-  <p><b>It has not stopped working. Two ordinary things are happening at once.</b></p>
+  <h3>The week six slowdown, and what to do about it</h3>
+  <p>Somewhere between week five and week nine, things usually slow down.</p>
+  <p>The scale stays the same for ten days and your waist doesn&rsquo;t move, even though you&rsquo;re doing everything you did in week two. This is when a lot of people decide the plan has stopped working and go back to their old way of eating.</p>
+  <p><b>The plan is still working. Two normal things are happening at the same time.</b></p>
   <ul class="marks">
-    <li><b>You are smaller now, so you need less.</b> A body seven kilograms lighter burns measurably less than it did in week one, just carrying itself around. The same plan that created a gap in week two creates a smaller one in week seven.</li>
-    <li><b>Portions have crept.</b> Not deliberately. The measured spoon of oil becomes a generous spoon. Half the swallow becomes two thirds. Nobody decides to do this and everybody does it.</li>
+    <li><b>You&rsquo;re smaller now, so your body needs less.</b> A body that is seven kilos lighter uses less energy just moving around, so the same food makes a smaller difference than it did at the start.</li>
+    <li><b>Your portions have slowly grown.</b> The measured spoon of oil becomes a generous spoon, and half the swallow becomes two thirds. Nobody plans it, but almost everybody does it.</li>
   </ul>
 
   <div class="box good">
-    <p class="k">What to do about the plateau &mdash; and what not to</p>
-    <p><b>Do:</b> the audit above, honestly. Re-measure the oil with an actual spoon for a week. Add ten minutes to the daily walk. Give it a fortnight.</p>
-    <p style="margin-bottom:0"><b>Do not:</b> cut your food further, skip meals, or add a second workout out of frustration. Eating less on top of a plateau is how bodies learn that food is unreliable, and it is the exact mechanism that puts weight back on afterwards with interest.</p>
+    <p class="k">What to do when things slow down</p>
+    <p><b>Do:</b> go through the switch check above. Measure your oil with a real spoon again for a week, add ten minutes to your daily walk, and give it two weeks.</p>
+    <p style="margin-bottom:0"><b>Don&rsquo;t:</b> cut your food even more, skip meals or add extra workouts because you&rsquo;re frustrated. Starving yourself during a slow patch is what makes the weight come back later, often with extra.</p>
   </div>
 </div>
 
 <div class="page">
-  <h3 class="first">The weeks, written out</h3>
-  <p>Pin this somewhere. It is the only thing you need to look at between the monthly checkpoints.</p>
+  <h3 class="first">Your twelve weeks at a glance</h3>
+  <p>Stick this page on your wall or your fridge. It&rsquo;s all you need between your monthly check-ins.</p>
 
   <div class="t-wrap keep"><table>
-    <thead><tr><th>Weeks</th><th>Food</th><th>Walking</th><th>Strength</th><th>Waist</th></tr></thead>
+    <thead><tr><th></th><th>Weeks</th><th>Food</th><th>Walking</th><th>Strength</th><th>Waist</th></tr></thead>
     <tbody>
       <tr><td class="ig">{icon("flame", size=20, colour="var(--ochre)")}</td><td class="k">1&ndash;2</td><td>All ten switches running</td><td>30 min, 5 days</td><td>Full set, twice a week</td><td>Every Monday</td></tr>
-      <tr><td class="ig">{icon("flame", size=20, colour="var(--ochre)")}</td><td class="k">3&ndash;4</td><td>Same. Nothing new.</td><td>30 min, 5 days</td><td>Three times a week</td><td>Every Monday</td></tr>
+      <tr><td class="ig">{icon("flame", size=20, colour="var(--ochre)")}</td><td class="k">3&ndash;4</td><td>Keep going, nothing new</td><td>30 min, 5 days</td><td>Three times a week</td><td>Every Monday</td></tr>
       <tr><td class="ig">{icon("scale", size=20, colour="var(--ochre)")}</td><td class="k">5&ndash;6</td><td><b>Day 30 audit</b></td><td>35 min, 5 days</td><td>Three times a week</td><td>Every Monday</td></tr>
-      <tr><td class="ig">{icon("flame", size=20, colour="var(--ochre)")}</td><td class="k">7&ndash;8</td><td>Expect the plateau here</td><td>40 min, 5 days</td><td>Three times a week</td><td>Every Monday</td></tr>
+      <tr><td class="ig">{icon("flame", size=20, colour="var(--ochre)")}</td><td class="k">7&ndash;8</td><td>Expect the slowdown here</td><td>40 min, 5 days</td><td>Three times a week</td><td>Every Monday</td></tr>
       <tr><td class="ig">{icon("scale", size=20, colour="var(--ochre)")}</td><td class="k">9&ndash;10</td><td><b>Day 60 audit</b></td><td>40 min, 5 days</td><td>Three times a week</td><td>Every Monday</td></tr>
-      <tr><td class="ig">{icon("tape", size=20, colour="var(--ochre)")}</td><td class="k">11&ndash;12</td><td>Same. It is working.</td><td>40 min, 6 days</td><td>Three times a week</td><td><b>Day 90</b></td></tr>
+      <tr><td class="ig">{icon("tape", size=20, colour="var(--ochre)")}</td><td class="k">11&ndash;12</td><td>Keep going, it&rsquo;s working</td><td>40 min, 6 days</td><td>Three times a week</td><td><b>Day 90</b></td></tr>
     </tbody>
   </table></div>
 
   <div class="box cool">
-    <p class="k">Notice what is not in that table</p>
-    <p style="margin:0">Nothing is cut. No food is removed at week six to &ldquo;push through&rdquo;. No new rule appears at week ten. <b>The plan you start on Day 1 is the plan you are still running on Day 90</b> &mdash; which is precisely why you will still be running it in year two, and why every plan that escalates gets abandoned.</p>
+    <p class="k">The plan stays the same all the way</p>
+    <p style="margin:0">You never have to cut more food at week six, and no new rules show up at week ten. <b>The plan you start on Day 1 is the same plan you&rsquo;re still following on Day 90</b>, and that&rsquo;s why it&rsquo;s something you can keep doing for years.</p>
   </div>
 </div>
 
 <div class="page">
-  <h3 class="first">The only rule that matters after Day 10</h3>
+  <h3 class="first">One rule for after Day 10</h3>
   <div class="box good">
     <p class="k">Never miss twice</p>
-    <p style="margin:0">One bad meal is a meal. One bad day is a day. The damage begins when a bad day is used as proof that you cannot do this, and becomes a bad month. <b>Nobody ever regained twenty kilograms from one owambe.</b> Eat the next meal properly and the week is still yours.</p>
+    <p style="margin:0">One bad meal or one bad day won&rsquo;t undo your progress. The trouble starts when a bad day makes you feel you&rsquo;ve failed, and it turns into a bad month. <b>Nobody ever put back twenty kilos from one owambe.</b> Eat your next meal properly and carry on.</p>
   </div>
 
-  <h3>The week you slip</h3>
-  <p>It will happen inside ninety days. When it does, the book asks three things:</p>
+  <h3>When you slip</h3>
+  <p>It will probably happen at some point in the ninety days. When it does, do three things:</p>
   <ul class="marks">
-    <li><b>Do not weigh yourself.</b> Not that week. You will see water and salt and read it as fat, and the number will make a decision the food never would have.</li>
-    <li><b>Restart with Switch 1, not all ten.</b> Take the bottles out again and eat normally otherwise. One switch is a restart you will actually make; ten is a resolution you will not.</li>
-    <li><b>Do not add punishment.</b> No skipping meals to make up for it, no double walking. That teaches your body that food is unreliable, which is the pattern that put the weight on in the first place.</li>
+    <li><b>Stay off the scale that week.</b> After a heavy day it will show extra water and salt, and it can make you feel much worse than you should.</li>
+    <li><b>Start again with Switch 1.</b> Take the drinks out of the fridge again and eat normally otherwise. Starting with one switch is much easier than trying to fix everything in a day.</li>
+    <li><b>Don&rsquo;t punish yourself.</b> No skipping meals to make up for it and no double walking. That only starts the same starve-and-binge cycle that put the weight on in the first place.</li>
   </ul>
 
   <h3>Owambe, parties and eating out</h3>
-  <p>Over ninety days you will go to several. Plan for them instead of pretending you will not.</p>
+  <p>In ninety days you&rsquo;ll surely go to a few parties, so plan for them.</p>
   <ul class="marks">
-    <li><b>Do not arrive hungry.</b> A boiled egg and a glass of water before you leave. Arriving starving at a party with jollof and small chops is not a test of character, it is a losing position.</li>
-    <li><b>Protein first</b> &mdash; meat, fish, moi moi &mdash; then vegetables, then a small portion of rice last. Switch 2 works at a party exactly as it works at home.</li>
-    <li><b>Hold water, not a bottle.</b> Most of the damage at a Nigerian party is drunk, not eaten. Two malts and a beer is most of a day, standing up, talking.</li>
-    <li><b>One plate, sitting down.</b> Not three passes standing at a table.</li>
-    <li><b>Eat normally the next morning.</b> Not a punishment fast. That swing is what ends plans.</li>
+    <li><b>Don&rsquo;t arrive hungry.</b> Eat a boiled egg and drink a glass of water before you leave home. If you get there starving, the jollof and small chops will win.</li>
+    <li><b>Eat your protein first</b>, the meat, fish or moi moi, then any vegetables, and a small portion of rice last. Switch 2 works at a party just like it does at home.</li>
+    <li><b>Keep a bottle of water in your hand.</b> At most parties the drinks do more damage than the food. Two malts and a beer can add up to about a third of a day&rsquo;s food while you&rsquo;re just standing and chatting.</li>
+    <li><b>Take one plate and sit down to eat it</b>, instead of going back to the food table again and again.</li>
+    <li><b>Eat normally the next morning.</b> Don&rsquo;t starve yourself to make up for the party.</li>
   </ul>
 
-  <div class="pullquote">The people who keep it off are not the ones who never slipped. They are the ones who never turned a slip into a verdict.</div>
+  <div class="pullquote">Everybody slips. The people who keep the weight off are the ones who get back on track the next day.</div>
 </div>
 
 '''
@@ -206,51 +206,51 @@ CH5 = f'''<div class="page">
 CH6 = f"""<div class="page">
   <div class="chap-band"><p class="kicker">Chapter six</p><h2 class="chapno">06</h2><h2 class="chaptitle">The home workout plan</h2></div>
 
-  <p class="lead">No gym. No equipment. No going anywhere. Four moves, a wall and a chair.</p>
-  <p>This is not here to burn the food off &mdash; Chapter 4 was honest about that. It is here to protect your muscle while the fat comes off, because muscle is what keeps your metabolism up and what stops the weight coming back with interest.</p>
+  <p class="lead">You don&rsquo;t need a gym or any equipment for this. All you need is a wall and a chair.</p>
+  <p>These four moves are there to protect your muscle while the fat comes off. Muscle helps your body keep burning energy, and it helps stop the weight from coming back.</p>
 
   <div class="moves">
-{figure("Wall squat", "Back flat against a wall, feet a step forward. Slide down until your knees are bent to about a right angle. Hold. Breathe normally &mdash; do not hold your breath.", WALL_SQUAT)}
-{figure("Chair stand", "Sit at the front of a chair, arms crossed. Stand up without using your hands, then lower yourself back down slowly &mdash; slower going down than coming up.", CHAIR)}
-{figure("Wall press-up", "Hands flat on a wall at shoulder height and width. Keep your body in one straight line, lower your chest towards the wall, push back.", WALL_PRESS)}
-{figure("Marching on the spot", "Lift each knee towards hip height, arms swinging. Two minutes. This is your warm-up and it is also a full workout on a day you cannot leave the house.", MARCH)}
+{figure("Wall squat", "Stand with your back flat against a wall and your feet a step forward. Slide down until your knees are bent at about a right angle, and hold it. Keep breathing normally.", WALL_SQUAT)}
+{figure("Chair stand", "Sit near the front of a chair with your arms crossed. Stand up without using your hands, then lower yourself back down slowly, taking longer to sit than to stand.", CHAIR)}
+{figure("Wall press-up", "Put your hands flat on a wall at shoulder height and width. Keep your body straight, lower your chest towards the wall, then push back.", WALL_PRESS)}
+{figure("Marching on the spot", "Lift each knee up towards hip height and swing your arms, for two minutes. It&rsquo;s your warm-up, and on a rainy day when you can&rsquo;t go out, it can be your whole workout.", MARCH)}
   </div>
 </div>
 
 <div class="page">
-{ph('wall_squat', 'The wall squat. A wall, a right angle at the knee, and nothing else.')}
-{ph('chair_stand', 'The chair stand. Arms crossed, no hands, and slower going down than coming up.')}
-{ph('wall_press', 'The wall press-up. Body in one straight line, chest to the wall, push back.')}
-  <h3 class="first">Twelve weeks, written out</h3>
+{ph('wall_squat', 'The wall squat: just a wall, with your knees bent at a right angle')}
+{ph('chair_stand', 'The chair stand: arms crossed, no hands, and slow on the way down')}
+{ph('wall_press', 'The wall press-up: keep your body straight, bring your chest to the wall, then push back')}
+  <h3 class="first">Your twelve-week exercise plan</h3>
   <div class="t-wrap keep"><table>
     <thead><tr><th></th><th>Weeks</th><th>Wall squat</th><th>Chair stands</th><th>Wall press-ups</th><th>How often</th></tr></thead>
     <tbody>
-      <tr><td class="k">1&ndash;2</td><td>60s &times; 2</td><td>10</td><td>10</td><td>Twice a week</td></tr>
-      <tr><td class="k">3&ndash;4</td><td>90s &times; 2</td><td>12</td><td>12</td><td>Three times</td></tr>
-      <tr><td class="k">5&ndash;6</td><td>90s &times; 3</td><td>15</td><td>15</td><td>Three times</td></tr>
-      <tr><td class="k">7&ndash;8</td><td>120s &times; 3</td><td>18</td><td>18</td><td>Three times</td></tr>
-      <tr><td class="k">9&ndash;10</td><td>120s &times; 3</td><td>20</td><td>20</td><td>Three times</td></tr>
-      <tr><td class="k">11&ndash;12</td><td>150s &times; 3</td><td>25</td><td>25</td><td>Three times</td></tr>
+      <tr><td class="ig">{icon("walk", size=20, colour="var(--moss)")}</td><td class="k">1&ndash;2</td><td>60s &times; 2</td><td>10</td><td>10</td><td>Twice a week</td></tr>
+      <tr><td class="ig">{icon("walk", size=20, colour="var(--moss)")}</td><td class="k">3&ndash;4</td><td>90s &times; 2</td><td>12</td><td>12</td><td>Three times</td></tr>
+      <tr><td class="ig">{icon("flame", size=20, colour="var(--moss)")}</td><td class="k">5&ndash;6</td><td>90s &times; 3</td><td>15</td><td>15</td><td>Three times</td></tr>
+      <tr><td class="ig">{icon("flame", size=20, colour="var(--moss)")}</td><td class="k">7&ndash;8</td><td>120s &times; 3</td><td>18</td><td>18</td><td>Three times</td></tr>
+      <tr><td class="ig">{icon("flame", size=20, colour="var(--moss)")}</td><td class="k">9&ndash;10</td><td>120s &times; 3</td><td>20</td><td>20</td><td>Three times</td></tr>
+      <tr><td class="ig">{icon("flame", size=20, colour="var(--moss)")}</td><td class="k">11&ndash;12</td><td>150s &times; 3</td><td>25</td><td>25</td><td>Three times</td></tr>
     </tbody>
   </table></div>
-  <p>Two minutes of marching before you start. That is the entire session &mdash; twelve to fifteen minutes, three times a week, for the whole ninety days.</p>
-  <p><b>Do not add a fourth day.</b> The progression above is the increase. Adding sessions out of frustration during a plateau is the commonest way people injure themselves out of a plan that was working.</p>
+  <p>March on the spot for two minutes before you start. The whole session takes twelve to fifteen minutes, three times a week, for the full ninety days.</p>
+  <p><b>Don&rsquo;t add a fourth day.</b> The table already builds up slowly for you. Adding extra sessions when you feel frustrated is an easy way to get injured and have to stop altogether.</p>
 
   <div class="box good">
-    <p class="k">Plus the walking, which matters more</p>
-    <p style="margin:0">Thirty minutes most days, and <b>ten minutes straight after your biggest meal</b>. If you only do one kind of movement, do the walking. If you can do two, keep the ten minutes after eating.</p>
+    <p class="k">Keep walking too</p>
+    <p style="margin:0">Walk for thirty minutes on most days, and for <b>ten minutes straight after your biggest meal</b>. If you only have time for one kind of exercise, make it the walking.</p>
   </div>
 
   <h3>If your knees or your back hurt</h3>
   <ul class="marks">
-    <li><b>Knees.</b> Do not go as low in the wall squat &mdash; a quarter of the way down still works. Skip the chair stands and hold the wall squat longer instead. Never work through sharp pain.</li>
-    <li><b>Back.</b> Keep your back flat against the wall through the whole squat. If the chair stand hurts, put a cushion on the chair to raise you.</li>
-    <li><b>Both.</b> Every kilogram you lose takes roughly four kilograms of load off each knee with every step you take. The weight loss <em>is</em> the joint treatment.</li>
+    <li><b>Knees.</b> Don&rsquo;t go as low in the wall squat. Going a quarter of the way down still works. Skip the chair stands and hold the wall squat a little longer instead, and stop if you feel sharp pain.</li>
+    <li><b>Back.</b> Keep your back flat against the wall for the whole squat. If the chair stand hurts, put a cushion on the chair to raise you up.</li>
+    <li><b>Both.</b> Every kilo you lose takes about four kilos of pressure off your knees with each step, so losing weight helps your joints too.</li>
   </ul>
 
   <div class="box warn">
     <h4>Stop and see a doctor if</h4>
-    <p style="margin-bottom:0">You get chest pain or tightness, severe breathlessness, dizziness or an irregular heartbeat while moving. None of those is normal, and none of them is something to push through.</p>
+    <p style="margin-bottom:0">You feel chest pain or tightness, serious breathlessness, dizziness, or a heartbeat that feels irregular while you&rsquo;re exercising. Don&rsquo;t try to push through any of these.</p>
   </div>
 </div>
 
@@ -259,59 +259,59 @@ CH6 = f"""<div class="page">
 CH7 = f"""<div class="page">
   <div class="chap-band"><p class="kicker">Chapter seven</p><h2 class="chapno">07</h2><h2 class="chaptitle">Measuring it properly</h2></div>
 
-  <p class="lead">More plans have been destroyed by a bathroom scale than by any food.</p>
+  <p class="lead">A lot of people give up on a good plan because of what the bathroom scale told them.</p>
 
-  <h3>Why the scale lies, especially in week one</h3>
-  <p>A grown adult carries several kilograms of water, and it moves. Salt holds it, heat loses it, and your body holds extra water for a few days after you start using your muscles more than usual &mdash; which is exactly when you start a plan.</p>
-  <p>So it is entirely normal to do everything right for a week and see the scale sit still or go <em>up</em>. Meanwhile your waist is falling.</p>
-  <p><b>Fat is slow and it is honest.</b> Half a kilogram to one kilogram a week is what real fat loss looks like. Anything faster is water, and water always comes back.</p>
+  <h3>Why the scale can mislead you in the first week</h3>
+  <p>Your body carries several kilos of water, and the amount keeps changing. Salty food makes you hold more, hot weather makes you lose some, and when you start exercising, your muscles hold on to extra water for a few days.</p>
+  <p>So it&rsquo;s completely normal to do everything right for a week and see the scale stay the same, or even go <em>up</em>, while your waist is getting smaller.</p>
+  <p><b>Fat comes off slowly.</b> Half a kilo to one kilo a week is what real fat loss looks like, and anything faster is usually water.</p>
 
-  <h3>The tape, and exactly where to put it</h3>
-{ph('waist_measure', 'At the navel, standing, breathing out normally. Not at the narrowest point, and not where your trousers sit.')}
+  <h3>The tape, and where to put it</h3>
+{ph('waist_measure', 'Measure at the navel, standing, breathing out normally')}
   <ul class="marks">
-    <li><b>First thing in the morning</b>, before eating or drinking, after the toilet.</li>
-    <li><b>Standing up straight</b>, not sitting, not lying down.</li>
-    <li><b>At the navel</b> &mdash; not at the narrowest point, not where your trousers sit. The navel, every time.</li>
-    <li><b>Breathe out normally and then measure.</b> Not sucked in, not pushed out.</li>
-    <li><b>Once a week, same day.</b> Not daily. Daily measurement gives you noise and worry.</li>
+    <li><b>First thing in the morning</b>, after using the toilet and before you eat or drink anything.</li>
+    <li><b>Standing up straight.</b></li>
+    <li><b>At your navel</b>, every time, even if your trousers usually sit higher or lower.</li>
+    <li><b>Breathe out normally, then measure.</b> Don&rsquo;t pull your stomach in.</li>
+    <li><b>Once a week, on the same day.</b> Measuring every day will only worry you, because small numbers go up and down.</li>
   </ul>
 
   <div class="box cool">
-    <p class="k">The numbers to aim below</p>
-    <p style="margin:0">Under <b>80cm</b> for a woman, under <b>94cm</b> for a man. If you are a long way above those, do not aim at them yet &mdash; aim at <b>five centimetres less than today</b>, and then aim again.</p>
+    <p class="k">The numbers to aim for</p>
+    <p style="margin:0">Under <b>80cm</b> for a woman and under <b>94cm</b> for a man. If you&rsquo;re far above that right now, don&rsquo;t worry about it yet. Aim for <b>five centimetres less than today</b>, and when you get there, aim for five more.</p>
   </div>
 
   <h3>The photograph nobody wants to take</h3>
-  <p>Take one today. Same light, same spot, same clothes, front and side.</p>
-  <p>You will hate it. Take it anyway and do not look at it again for six weeks &mdash; and then take the second one. The mirror lies to you slowly, because you see yourself every day and change is invisible at that speed. Two photographs six weeks apart are the only honest mirror there is.</p>
+  <p>Take one today, from the front and from the side, in a spot you can use again with the same light and the same clothes.</p>
+  <p>You probably won&rsquo;t like it. Take it anyway, put it away for six weeks, and then take another one in the same spot. You see yourself in the mirror every day, so you won&rsquo;t notice the change while it&rsquo;s happening slowly. Two photos six weeks apart will show you what the mirror can&rsquo;t.</p>
 </div>
 
 """
 
 CH8 = """<div class="page">
-  <div class="chap-band"><p class="kicker">Chapter eight</p><h2 class="chapno">08</h2><h2 class="chaptitle">When weight needs a doctor, not a plan</h2></div>
+  <div class="chap-band"><p class="kicker">Chapter eight</p><h2 class="chapno">08</h2><h2 class="chaptitle">When to see a doctor about your weight</h2></div>
 
-  <p class="lead">Sometimes it is not your discipline. Sometimes it is a hormone, and no amount of trying fixes a hormone.</p>
-  <p>This chapter exists because a book that never says this is quietly blaming you for something that is not your fault.</p>
+  <p class="lead">Sometimes weight gain has a medical cause, and trying harder won&rsquo;t fix it.</p>
+  <p>If that&rsquo;s the case for you, it isn&rsquo;t your fault, and a doctor can help.</p>
 
   <h3>Go and ask for a test if</h3>
   <ul class="marks">
-    <li><b>Weight has climbed steadily for no reason you can name</b>, with no real change in how you eat.</li>
-    <li><b>You are tired all the time</b>, cold when others are not, with dry skin, thinning hair or constipation. That combination is worth a thyroid test.</li>
-    <li><b>Your periods are irregular or absent</b>, with weight around the middle, acne or unusual hair growth. That combination is worth asking about PCOS.</li>
-    <li><b>You started a new medicine and the weight followed.</b> Several common ones do this &mdash; some for mental health, steroids, some for diabetes, some contraceptives. <b>Do not stop any of them.</b> Tell the doctor who prescribed it and ask whether there is an alternative.</li>
-    <li><b>You snore heavily and wake unrefreshed.</b> Sleep apnoea makes weight loss much harder and it is treatable.</li>
-    <li><b>You are losing weight without trying.</b> That is not good news and it needs looking at quickly.</li>
+    <li><b>Your weight keeps going up</b> and you haven&rsquo;t changed the way you eat.</li>
+    <li><b>You&rsquo;re tired all the time</b>, you feel cold when others don&rsquo;t, and you have dry skin, thinning hair or constipation. Ask for a thyroid test.</li>
+    <li><b>Your periods are irregular or have stopped</b>, and you have weight around your middle, pimples, or hair growing where it didn&rsquo;t before. Ask your doctor about PCOS.</li>
+    <li><b>You started a new medicine and then gained weight.</b> Some medicines for mental health, steroids, some diabetes medicines and some family planning methods can do this. <b>Don&rsquo;t stop any of them on your own.</b> Tell the doctor who gave it to you and ask if there&rsquo;s another option.</li>
+    <li><b>You snore loudly and wake up tired.</b> A condition called sleep apnoea makes it harder to lose weight, and it can be treated.</li>
+    <li><b>You&rsquo;re losing weight without trying.</b> See a doctor soon, because this needs checking.</li>
   </ul>
 
   <div class="box good">
-    <p class="k">What to ask for, plainly</p>
-    <p style="margin:0">&ldquo;Please, can I have a thyroid test, a fasting blood sugar and a full blood count?&rdquo; Those three are ordinary, widely available, and between them they catch most of what this chapter is about. Take the answers away written down.</p>
+    <p class="k">What to ask for</p>
+    <p style="margin:0">&ldquo;Please, can I have a thyroid test, a fasting blood sugar test and a full blood count?&rdquo; These are common tests that most hospitals and labs can do, and together they cover most of what this chapter talks about. Ask for your results in writing.</p>
   </div>
 
   <div class="box warn">
-    <h4>And one thing not to do</h4>
-    <p style="margin-bottom:0">Do not buy weight-loss injections or capsules from anybody who is not a doctor who has examined you. There are real, effective, prescribed weight-loss medicines now &mdash; and there is a very large market selling fakes, wrong doses and withdrawn drugs beside them. If it is real medicine, it comes with a real consultation.</p>
+    <h4>One thing to avoid</h4>
+    <p style="margin-bottom:0">Don&rsquo;t buy weight-loss injections or capsules from anyone except a doctor who has examined you. There are real weight-loss medicines available now, but there are also many fakes, wrong doses and banned drugs being sold on social media and in the market. Real medicine comes with a proper check-up.</p>
   </div>
 </div>
 
@@ -320,7 +320,7 @@ CH8 = """<div class="page">
 TRACKER = """<div class="page">
   <p class="runhead">Your tracker</p>
   <h3 class="first">Ten switches to tick off</h3>
-  <p>One a day for the first ten days, and you never turn one off. These ten keep running for the whole ninety.</p>
+  <p>Tick one off each day for the first ten days. Once a switch is on, it stays on for the full ninety days.</p>
   <div class="tracker">
     <div class="tcell"><span class="w">Day 1</span><span class="t">The bottle switch</span><span class="box-tick"></span></div>
     <div class="tcell"><span class="w">Day 2</span><span class="t">The order switch</span><span class="box-tick"></span></div>
@@ -336,24 +336,24 @@ TRACKER = """<div class="page">
 
 
   <h3>The 90-day wall chart</h3>
-  <p>Twelve weeks. Tick a box each week you kept all ten switches running. Put this on a wall where you will see it, not in a drawer.</p>
+  <p>Tick a box for every week you kept all ten switches going. Stick it somewhere you&rsquo;ll see it every day, like the fridge door.</p>
   <div class="tracker">
     <div class="tcell"><span class="w">Week 1</span><span class="t">Switch everything on</span><span class="box-tick"></span></div>
-    <div class="tcell"><span class="w">Week 2</span><span class="t">Hold it</span><span class="box-tick"></span></div>
-    <div class="tcell"><span class="w">Week 3</span><span class="t">Hold it</span><span class="box-tick"></span></div>
-    <div class="tcell"><span class="w">Week 4</span><span class="t">Hold it</span><span class="box-tick"></span></div>
-    <div class="tcell"><span class="w">Week 5</span><span class="t">Day 30 &mdash; waist, photo, audit</span><span class="box-tick"></span></div>
-    <div class="tcell"><span class="w">Week 6</span><span class="t">The plateau may start</span><span class="box-tick"></span></div>
-    <div class="tcell"><span class="w">Week 7</span><span class="t">Hold through it</span><span class="box-tick"></span></div>
-    <div class="tcell"><span class="w">Week 8</span><span class="t">Hold through it</span><span class="box-tick"></span></div>
-    <div class="tcell"><span class="w">Week 9</span><span class="t">Day 60 &mdash; waist, photo, audit</span><span class="box-tick"></span></div>
-    <div class="tcell"><span class="w">Week 10</span><span class="t">It is working</span><span class="box-tick"></span></div>
-    <div class="tcell"><span class="w">Week 11</span><span class="t">Hold it</span><span class="box-tick"></span></div>
-    <div class="tcell"><span class="w">Week 12</span><span class="t">Day 90 &mdash; waist, photo, audit</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 2</span><span class="t">Keep going</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 3</span><span class="t">Keep going</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 4</span><span class="t">Keep going</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 5</span><span class="t">Day 30: waist, photo, switch check</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 6</span><span class="t">The slowdown may start</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 7</span><span class="t">Keep going, it will pass</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 8</span><span class="t">Keep going, it will pass</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 9</span><span class="t">Day 60: waist, photo, switch check</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 10</span><span class="t">It&rsquo;s working</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 11</span><span class="t">Keep going</span><span class="box-tick"></span></div>
+    <div class="tcell"><span class="w">Week 12</span><span class="t">Day 90: waist, photo, switch check</span><span class="box-tick"></span></div>
   </div>
 
   <h3>Your waist log</h3>
-  <p>Once a week, same day, first thing in the morning, at the navel. The weight column is optional and the waist column is not.</p>
+  <p>Measure once a week, on the same day, first thing in the morning, at the navel. You can skip the weight column if you like, but always fill in your waist.</p>
   <div class="t-wrap keep"><table>
     <thead><tr><th>Date</th><th>Waist (cm)</th><th>Change</th><th>Weight (optional)</th><th>Note</th></tr></thead>
     <tbody>
@@ -365,11 +365,11 @@ TRACKER = """<div class="page">
 """
 
 QUESTIONS = [
-    "Is there a medical reason my weight is not moving &mdash; thyroid, PCOS, or a medicine I am on?",
+    "Could there be a medical reason my weight isn&rsquo;t moving, like my thyroid, PCOS or a medicine I&rsquo;m taking?",
     "Can I have a thyroid test, a fasting blood sugar and a full blood count?",
     "Is any medicine I am taking known to add weight, and is there an alternative?",
     "What is a safe rate of weight loss for me specifically?",
-    "My blood pressure and sugar &mdash; what are the numbers today, so I can compare later?",
+    "What are my blood pressure and sugar levels today, so I can compare them later?",
     "Is there any exercise I should not do?",
     "Do I snore or stop breathing at night, and should that be looked at?",
     "When should I come back, and what should we measure then?",
@@ -386,15 +386,15 @@ def worksheet():
     return f"""<div class="page">
   <p class="runhead">What my doctor said</p>
   <h3 class="first">Take this page in with you</h3>
-  <p>Eight questions, already written out. Print the page or keep it open on your phone and show the screen. Write the answer under each one <b>before you stand up</b> &mdash; not afterwards in the car, when half of it has gone.</p>
+  <p>Here are eight questions, already written out for you. Print this page, or keep it open on your phone and show the doctor. Write each answer down <b>before you leave the room</b>, because by the time you get home you&rsquo;ll have forgotten half of it.</p>
 
   <div class="qa">
 {items}
   </div>
 
   <div class="box cool">
-    <p class="k">If you are being rushed</p>
-    <p style="margin:0">Say this, out loud: <b>&ldquo;There are three more and they are short.&rdquo;</b> It works, and you are entitled to the answers.</p>
+    <p class="k">If the doctor is in a hurry</p>
+    <p style="margin:0">Say it politely: <b>&ldquo;Doctor, I have just three more quick questions.&rdquo;</b> You have every right to the answers.</p>
   </div>
 </div>
 
@@ -402,27 +402,27 @@ def worksheet():
 
 CLOSING = f"""<div class="page closing">
   <p class="runhead">Before you close this book</p>
-  <p class="lead">You did not need more discipline. You needed a plan that did not require any.</p>
-  <p>You know now where the weight was actually coming from, and that almost none of it was the {sw}. You know what is in the tea. You know why the scale lied to you in week one and why a tailor&rsquo;s tape cannot. You have ten switches, all of them still running.</p>
-  <p>You know what week six is going to feel like before it arrives, which is the single thing that decides whether somebody finishes ninety days or stops at forty.</p>
-  <p>And you know the only rule that matters from here, which is that you never miss twice.</p>
+  <p class="lead">What you needed all along was a plan you could live with.</p>
+  <p>You now know where the extra weight was really coming from, and that your {sw} was only a small part of it. You know what&rsquo;s inside those slimming teas. You know why the scale can mislead you, and why the tape measure is the better guide. And you have ten switches you can keep using for the rest of your life.</p>
+  <p>You also know about the slowdown around week six before it comes, and knowing about it is a big part of getting through it.</p>
+  <p>If you slip, you know what to do: get back on track at your very next meal.</p>
 
-  <div class="pullquote">Start tomorrow morning. Not Monday &mdash; the Monday plan is the one that never begins.</div>
+  <div class="pullquote">Start tomorrow morning. Don&rsquo;t wait for Monday.</div>
 
   <div class="prayer">
     <h2>A Closing Prayer</h2>
     <hr>
     <p class="verse">
-      Lord, thank You for a body that still answers when I speak to it properly.<br>
-      Steady me in the ordinary days, not just the ten.<br>
+      Lord, thank You for my body and the strength to care for it.<br>
+      Help me keep going on the ordinary days, long after the first ten.<br>
       Keep shame away from me when I slip,<br>
-      and pride away from me when it goes well.<br>
-      Let me be well enough, and long enough,<br>
-      to carry the people who are counting on me.
+      and pride away from me when things go well.<br>
+      Give me good health and long life,<br>
+      so I can be there for the people who depend on me.
     </p>
     <p class="verse second">
       For my Muslim brothers and sisters:<br>
-      Bismillahir Rahmanir Raheem. Ya Allah, You are Ash-Shafi &mdash;<br>
+      Bismillahir Rahmanir Raheem. Ya Allah, You are Ash-Shafi,<br>
       the One who heals. Keep us, and keep those we love.
     </p>
     <p class="amen">In Jesus&rsquo; Name, Amen.</p>
@@ -432,7 +432,7 @@ CLOSING = f"""<div class="page closing">
   <div class="signoff">
     <p class="who">Dr. David Akinyode</p>
     <p class="what">Author, The 10X Fat Switch</p>
-    <p class="share">Share this book freely with anybody who needs it &mdash; particularly Chapter 3. Please encourage everyone you send it to to have their blood pressure and blood sugar checked, and to see a qualified doctor before starting any plan.</p>
+    <p class="share">Feel free to share this book with anybody who needs it, especially Chapter 3. Please encourage everyone you send it to to check their blood pressure and blood sugar, and to see a qualified doctor before starting any plan.</p>
   </div>
 </div>
 

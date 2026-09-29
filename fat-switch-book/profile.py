@@ -59,42 +59,42 @@ SWALLOW = {
 PROTEIN = {
     "normal": ["titus (mackerel)", "chicken, skin removed", "eggs", "beans",
                "goat meat, boiled", "catfish", "turkey, skin removed"],
-    "tight": ["beans", "eggs", "sardine", "kpomo is not protein &mdash; eggs instead",
+    "tight": ["beans", "eggs", "sardine", "akara",
               "titus (mackerel)", "moi moi", "groundnut, unsalted"],
 }
 
 CAUTION = {
     "diabetes": ("You also have diabetes",
-                 "Every switch in this book helps your sugar as well as your weight, but "
-                 "two of them can drop it fast: the bottle switch on Day 1 and the size "
-                 "switch on Day 3. <b>If you take insulin or glibenclamide, tell your "
-                 "doctor before you start</b> &mdash; your dose may need to come down, and "
-                 "a low sugar is not something to discover by accident."),
+                 "Every switch in this book helps your sugar as well as your weight, and "
+                 "two of them can bring it down quickly: the bottle switch on Day 1 and the "
+                 "size switch on Day 3. <b>If you take insulin or glibenclamide, tell your "
+                 "doctor before you start.</b> Your dose may need to come down, and you "
+                 "don&rsquo;t want to find that out through a sudden low sugar."),
     "hypertension": ("You also have high blood pressure",
-                     "Good news: weight off your middle takes pressure off your heart, and "
-                     "roughly <b>one point of blood pressure comes off for every kilogram "
-                     "you lose</b>. Keep taking your tablet throughout. And take the "
-                     "seasoning cubes out while you are at it &mdash; two cubes is almost a "
-                     "whole day&rsquo;s sodium."),
+                     "Here&rsquo;s some good news. Losing weight from your middle takes "
+                     "pressure off your heart, and your blood pressure comes down by <b>about "
+                     "one point for every kilo you lose</b>. Keep taking your tablets all the "
+                     "way through. While you&rsquo;re at it, take the seasoning cubes out of "
+                     "your cooking too, because two cubes carry almost a whole day&rsquo;s salt."),
     "knee": ("Your knees hurt",
-             "Do not walk through knee pain. Use the seated and standing routine in "
-             "Chapter 6 instead &mdash; it works the same muscles without loading the joint. "
-             "And know this: <b>every kilogram off your body takes about four kilograms of "
-             "load off each knee with every step.</b> The weight loss is the knee treatment."),
+             "Don&rsquo;t walk through knee pain. Use the chair and wall exercises in "
+             "Chapter 6 instead, since they work the same muscles without putting weight on "
+             "the joint. <b>Every kilo you lose takes about four kilos of pressure off each "
+             "knee with every step</b>, so losing weight will help your knees too."),
     "pregnant": ("You are pregnant, or trying",
-                 "<b>This book is not for you right now.</b> Deliberate weight loss in "
-                 "pregnancy can harm the baby. Keep the vegetable switches and the walking, "
-                 "drop everything about eating less, and see your doctor for a plan built "
-                 "for pregnancy."),
+                 "<b>Please wait until after your pregnancy to use this book.</b> Trying to "
+                 "lose weight while pregnant can harm the baby. You can keep eating more "
+                 "vegetables and keep walking, but leave out anything about eating less, and "
+                 "ask your doctor for a plan made for pregnancy."),
     "thyroid": ("You have a thyroid problem",
-                "An underactive thyroid genuinely slows weight loss, and no amount of "
-                "discipline fixes a hormone. If you have not had your thyroid checked and "
-                "weight has climbed for no reason, ask for the test before you blame "
-                "yourself for anything."),
+                "An underactive thyroid can slow down weight loss, and trying harder "
+                "won&rsquo;t fix a hormone problem. If you haven&rsquo;t had your thyroid "
+                "checked and your weight has been climbing for no clear reason, ask for the "
+                "test before you blame yourself."),
     "ulcer": ("You have ulcer",
-              "Do not do the long gap on Day 7. Keep your meals regular and smaller "
-              "instead &mdash; the night switch works for you as &ldquo;nothing heavy after "
-              "8pm&rdquo;, not as skipping."),
+              "Don&rsquo;t leave long gaps between meals. Eat smaller meals at regular times "
+              "instead. For you, the night switch simply means eating nothing heavy after "
+              "8pm, and you should never skip dinner."),
 }
 
 

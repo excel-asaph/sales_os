@@ -74,15 +74,15 @@ COVER_FALLBACK = """<div class="page flush">
     <div>
       <p class="eyebrow">10 switches &middot; 10 days to start &middot; 90 days to change</p>
       <h1>THE 10X<br>FAT SWITCH</h1>
-      <p class="sub">Ten things in your day quietly holding the weight on &mdash;
-      and the ninety-day plan that takes it off, without leaving Nigerian food</p>
+      <p class="sub">Ten everyday habits that keep the weight on, and a ninety-day
+      plan to take it off while you keep eating Nigerian food</p>
     </div>
     <div>
       <ul>
         <li>All 10 switches, one a day, with the food for each</li>
         <li>The full 90-day plan, week by week, after that</li>
         <li>10 Nigerian recipes with real quantities</li>
-        <li>A home workout plan &mdash; no gym, no equipment</li>
+        <li>A home workout plan with no gym and no equipment</li>
         <li>The truth about flat tummy tea and slimming pills</li>
       </ul>
       <p class="by" style="margin-top:clamp(20px,4vw,34px)">Published by Dr David Akinyode</p>
@@ -139,15 +139,15 @@ PRAYER = """<div class="page prayer-page">
     <p class="verse">
       Heavenly Father,<br>
       I have started and stopped many times before.<br>
-      Give me a quieter kind of strength this time &mdash;<br>
-      not for ten days, but for the ordinary ones after.<br>
-      Keep me from shame when I slip,<br>
-      and from pride when it goes well.<br>
-      Let me be well enough to carry the people who need me.
+      This time, give me the strength to keep going<br>
+      long after the first ten days are over.<br>
+      Keep me from shame when I fall back,<br>
+      and from pride when things go well.<br>
+      Keep me strong and healthy for the people who depend on me.
     </p>
     <p class="verse second">
       For my Muslim brothers and sisters:<br>
-      Bismillahir Rahmanir Raheem. Ya Allah, You are Ash-Shafi &mdash;<br>
+      Bismillahir Rahmanir Raheem. Ya Allah, You are Ash-Shafi,<br>
       the One who heals. Keep us, and keep those we love.
     </p>
     <p class="amen">In Jesus&rsquo; Name, Amen.</p>
@@ -175,7 +175,7 @@ def letter():
   <p class="runhead">A note before you start</p>
   <div class="letter">
     <p>{p['name']},</p>
-    <p>This copy was written for you, not printed for everybody.</p>
+    <p>This copy was put together for you personally.</p>
     <p>{detail}Every meal in the ten days is food you already eat, and the movement plan
     is built for somebody whose work is <b>{p['work']}</b>. Nothing in here asks you to buy
     an imported powder or join a gym.</p>
@@ -188,20 +188,20 @@ def letter():
 
 
 CHAPTERS_TOC = [
-    ("1", "Why Nigerian Food Is Not the Problem", [
-        "The Thing That Actually Puts the Weight On",
-        "Why You Have Lost It Before and Found It Again",
-        "Measure Your Waist, Never Your Weight",
-        "What Ten Days Can and Cannot Do",
+    ("1", "What Really Changed on Our Plates", [
+        "The Four Things That Put the Weight On",
+        "Why the Weight Came Back Last Time",
+        "Use a Tape Measure, Not a Scale",
+        "What to Expect in Ten Days",
     ]),
     ("2", "The Ten Switches, Explained", [
-        "What &ldquo;10X&rdquo; Actually Means",
+        "What 10X Means",
         "All Ten, on One Page",
-        "Why the Order You Eat In Changes What It Does to You",
+        "Why the Order You Eat In Makes a Difference",
         "The Two Switches That Do Half the Work",
     ]),
     ("3", "Flat Tummy Tea, Slimming Pills and the Waist Trainer", [
-        "What Is Actually in the Tea",
+        "What Is Inside the Tea",
         "The Drug That Was Banned Worldwide, and Where It Turned Up",
         "Why the Scale Moves and Nothing Changes",
         "Detox, Waist Trainers and Fat-Burner Injections",
@@ -218,10 +218,10 @@ CHAPTERS_TOC = [
         "Day 9 &ndash; The Snack Switch",
         "Day 10 &ndash; The Plate Switch",
     ]),
-    ("5", "Days 11 to 90 &mdash; Where Your Body Actually Changes", [
+    ("5", "Days 11 to 90: When Your Body Really Changes", [
         "The Three Phases, and What Each One Feels Like",
         "What to Expect at Day 30, Day 60 and Day 90",
-        "The Plateau at Week Six, and Why It Is Not Failure",
+        "The Week Six Slowdown, and What to Do About It",
         "What to Do the Week You Slip",
         "Eating Out, Parties and Owambe",
     ]),
@@ -235,7 +235,7 @@ CHAPTERS_TOC = [
         "Why the Scale Lies in Week One",
         "The Photograph Nobody Wants to Take",
     ]),
-    ("8", "When Weight Needs a Doctor, Not a Plan", [
+    ("8", "When to See a Doctor About Your Weight", [
         "Thyroid, PCOS and the Medicines That Add Weight",
         "What to Ask For, and What It Costs",
     ]),
@@ -245,7 +245,7 @@ BACK_TOC = ("Your Trackers", [
     "Ten Switches to Tick Off",
     "The 90-Day Wall Chart",
     "The Waist and Weight Log",
-    "What My Doctor Said &mdash; the Eight Questions, With Room to Answer",
+    "What My Doctor Said: Eight Questions, With Room to Answer",
 ])
 
 
@@ -273,41 +273,41 @@ def toc():
 
 
 MYTHS = [
-    (1, "&ldquo;Carbohydrate is the enemy. I must stop swallow.&rdquo;",
-     "Nobody in this country has ever kept that up, and you will not either.",
-     "Every plan that tells a Nigerian to stop eating eba, amala, rice and yam works for "
-     "about three weeks and then collapses, because it was never a plan &mdash; it was a "
-     "punishment with a deadline. This book does not remove a single food. It changes the "
-     "order you eat them in, and the size of one thing on the plate.",
+    (1, "&ldquo;Carbohydrate is the enemy. I must stop eating swallow.&rdquo;",
+     "Very few people can keep that up, and you don&rsquo;t need to.",
+     "Every plan that tells a Nigerian to stop eating eba, amala, rice and yam lasts about "
+     "three weeks and then falls apart, because it feels like punishment and nobody can "
+     "live like that for long. This book doesn&rsquo;t take any food away from you. It "
+     "changes the order you eat things in, and the size of one thing on your plate.",
      "Chapter 2"),
-    (2, "&ldquo;Flat tummy tea is natural, so it is safe.&rdquo;",
-     "Most of it is laxative. Some of it has contained a drug banned worldwide for causing strokes.",
-     "What you lose on a laxative is water and the contents of your bowel. It returns the "
-     "day you stop, because you never lost any fat. And &ldquo;natural&rdquo; is a word on "
-     "a label, not a test result &mdash; slimming products bought in this region have "
-     "repeatedly been found to contain sibutramine, which was pulled off the world market "
-     "in 2010 after it caused heart attacks and strokes.",
+    (2, "&ldquo;Flat tummy tea is natural, so it&rsquo;s safe.&rdquo;",
+     "Most of it is a laxative, and some has been found to contain a drug that was banned for causing strokes.",
+     "What you lose on a laxative is water and whatever was in your bowel, and it all comes "
+     "back the day you stop, because no fat left your body. &ldquo;Natural&rdquo; is only a "
+     "word printed on the pack. Slimming products sold in this part of the world have been "
+     "caught more than once with sibutramine inside, a drug that was taken off the market "
+     "around the world in 2010 after it caused heart attacks and strokes.",
      "Chapter 3"),
-    (3, "&ldquo;I am not losing weight, so nothing is working.&rdquo;",
+    (3, "&ldquo;I&rsquo;m not losing weight, so nothing is working.&rdquo;",
      "The scale is the least useful number in this book.",
-     "In the first week your body dumps water and then holds some back, so the scale can "
-     "sit still while your waist is falling. Muscle also weighs more than the fat "
-     "replacing it. <b>Use a tape measure.</b> A waist that has gone down two centimetres "
-     "is real progress even if the scale has not moved a gram.",
+     "In the first week your body lets go of some water and then holds some back, so the "
+     "scale can stay the same while your waist is getting smaller. <b>Use a tape "
+     "measure.</b> If your waist has come down by two centimetres, you&rsquo;re making real "
+     "progress, even if the scale hasn&rsquo;t moved at all.",
      "Chapter 7"),
-    (4, "&ldquo;I must do heavy exercise or it will not count.&rdquo;",
-     "You will lose far more in the kitchen than in the gym, and the walking is for keeping it off.",
-     "An hour of hard exercise burns roughly what one bottle of malt and a sausage roll "
-     "put in. That is not an argument against moving &mdash; movement is what stops the "
-     "weight coming back, and it protects the muscle you would otherwise lose. It is an "
-     "argument against believing you can outrun your plate.",
+    (4, "&ldquo;I must do heavy exercise or it won&rsquo;t count.&rdquo;",
+     "Most of the weight comes off in the kitchen. Walking is what helps keep it off.",
+     "An hour of hard exercise burns about the same as one bottle of malt and a sausage "
+     "roll. So do keep moving, because it protects your muscle and helps stop the weight "
+     "from coming back. Just don&rsquo;t expect the gym to make up for what&rsquo;s on "
+     "your plate.",
      "Chapter 6"),
-    (5, "&ldquo;My own is hereditary. It is my body, nothing works.&rdquo;",
-     "Some of it genuinely is &mdash; and some of it is a thyroid nobody has checked.",
-     "Families do share shapes, and they also share one kitchen, one way of cooking and "
-     "one idea of what a full plate looks like. But if your weight has climbed for no "
-     "reason you can name, get your thyroid checked before you blame your discipline. "
-     "No amount of willpower fixes a hormone, and it is a cheap test.",
+    (5, "&ldquo;Mine is hereditary. It&rsquo;s my body, nothing works.&rdquo;",
+     "Some of it may run in the family, and some of it could be a thyroid nobody has checked.",
+     "Families do share body shapes. They also share one kitchen, one way of cooking and "
+     "one idea of what a full plate should look like. If your weight keeps climbing and "
+     "you can&rsquo;t work out why, get your thyroid checked before you blame yourself. "
+     "It&rsquo;s a cheap test, and willpower can&rsquo;t fix a hormone problem.",
      "Chapter 8"),
 ]
 
@@ -331,13 +331,15 @@ def myths():
     5 things you have been told about losing weight that are costing you money
   </h2>
   <p class="lead">
-    Four of these are sold to you. One of them is sold to you by yourself.
-    All five are why the last attempt did not last.
+    You&rsquo;ve probably heard all five of these from somebody, and a few of them
+    may have cost you money. They&rsquo;re also a big part of why the last attempt
+    didn&rsquo;t last.
   </p>
 {cards}
   <div class="box good">
-    <p class="k">If you recognised even one</p>
-    <p style="font-weight:600;margin:0">Then the problem was the plan, not you. Keep reading.</p>
+    <p class="k">If you believed even one of these</p>
+    <p style="font-weight:600;margin:0">Don&rsquo;t feel bad about it. It means the plans
+    you tried before were set up to fail. Keep reading.</p>
   </div>
 </div>
 
@@ -347,29 +349,29 @@ def myths():
 def about():
     return f"""<div class="page">
   <p class="runhead">About this book</p>
-  <p class="lead">You have done this before. That is the first thing worth saying out loud.</p>
-  <p>You have started on a Monday. You have bought the tea. You have skipped dinner for two weeks and felt proud, then eaten everything in the house on a Saturday and felt like a failure. You have lost seven kilograms and found nine.</p>
-  <p>None of that was weakness. It was arithmetic. Every one of those plans asked you to stop eating the food you grew up on, and nobody keeps that up &mdash; not here, not anywhere.</p>
+  <p class="lead">If you&rsquo;re like most people who pick up this book, you&rsquo;ve tried to lose weight before.</p>
+  <p>Maybe you started on a Monday and bought the slimming tea. Maybe you skipped dinner for two weeks and felt proud of yourself, until Saturday came and you ate everything in the house. Maybe you lost seven kilos once and then put back nine.</p>
+  <p>Please don&rsquo;t blame yourself for any of that. Every one of those plans asked you to stop eating the food you grew up on, and very few people anywhere can keep that up for long.</p>
 
   <h3>What this book is</h3>
-  <p>Ten switches, one a day, for ten days. Not ten rules and not ten sacrifices &mdash; ten <em>exchanges</em>. Each day you put one thing down and pick something else up, and the something else is food you already eat and already like.</p>
-  <p>That is what the 10X means. Ten exchanges. There is no pill in this book, no tea, no imported powder, and no machine.</p>
-  <p><b>Then you run them for ninety days.</b> The ten days are how you switch everything on without being overwhelmed. The ninety are where your body actually changes &mdash; and Chapter 5 walks you through every week of them, including the one in week six where most people quietly give up.</p>
+  <p>This book gives you ten switches, one a day for ten days. Each switch is an exchange. You put one thing down and pick something else up in its place, and what you pick up is food you already eat and already enjoy.</p>
+  <p>That&rsquo;s what the 10X stands for: ten exchanges. You won&rsquo;t find pills in here, or tea, or imported powder, or any machine to buy.</p>
+  <p><b>After the first ten days, you keep the switches going for ninety days.</b> The ten days let you switch everything on one step at a time, so it never feels like too much at once. Over the ninety days is when you&rsquo;ll really see your body change. Chapter 5 takes you through every week, including week six, which is where a lot of people give up.</p>
 
   <div class="box cool">
-    <p class="k">What to expect, honestly</p>
-    <p><b>By Day 10:</b> two to four centimetres off your waist, the bloating gone, and proof that your body still answers when you speak to it properly. Not a new size &mdash; a start.</p>
-    <p><b>By Day 90:</b> somewhere between <b>seven and thirteen kilograms</b>, and seven to twelve centimetres off your waist. That is the point where other people start asking what you are doing.</p>
-    <p style="margin-bottom:0">Anything promising more than that, faster, is selling you water weight or a banned drug. Chapter 3 explains which.</p>
+    <p class="k">What to expect</p>
+    <p><b>By Day 10:</b> two to four centimetres off your waist, and a lot less bloating. You won&rsquo;t be a new size yet, but you&rsquo;ll know it&rsquo;s working.</p>
+    <p><b>By Day 90:</b> somewhere between <b>seven and thirteen kilograms</b> lighter, and seven to twelve centimetres off your waist. This is usually when people around you start asking what you&rsquo;ve been doing.</p>
+    <p style="margin-bottom:0">If anything promises you more than that in less time, it&rsquo;s selling you water weight or a banned drug. Chapter 3 shows you how to tell the difference.</p>
   </div>
 
 {warns()}
   <h3>How to use it</h3>
   <ul class="marks">
-    <li><b>Read tonight. Start tomorrow morning.</b> Not Monday. The Monday plan is the one that never begins.</li>
-    <li><b>Keep every switch you turn on.</b> Day 4 does not replace Day 3. By Day 10 all ten are running together &mdash; and then they keep running for the next eighty days.</li>
-    <li><b>Measure your waist on Day 1, Day 10, and then every Monday.</b> Not your weight. Chapter 7 explains exactly why.</li>
-    <li><b>Slipping is part of it.</b> There is a page for the day you slip, and it is not a page about guilt.</li>
+    <li><b>Read it tonight and start tomorrow morning.</b> Don&rsquo;t wait for Monday. We all know how the Monday plan usually ends.</li>
+    <li><b>Keep every switch you turn on.</b> Day 4 goes on top of Day 3, so by Day 10 you have all ten going at once, and they stay on for the eighty days after that.</li>
+    <li><b>Measure your waist on Day 1, Day 10 and then every Monday.</b> Use a tape measure rather than a scale. Chapter 7 explains why.</li>
+    <li><b>You will slip at some point, and that&rsquo;s normal.</b> There&rsquo;s a page in Chapter 5 for that day, and it won&rsquo;t make you feel guilty.</li>
   </ul>
 </div>
 
@@ -377,61 +379,59 @@ def about():
 
 
 CH1 = f"""<div class="page">
-  <div class="chap-band"><p class="kicker">Chapter one</p><h2 class="chapno">01</h2><h2 class="chaptitle">Why Nigerian food is not the problem</h2></div>
+  <div class="chap-band"><p class="kicker">Chapter one</p><h2 class="chapno">01</h2><h2 class="chaptitle">What really changed on our plates</h2></div>
 
-  <p class="lead">Every diet book sold in this country starts by telling you that what your mother cooked is killing you. That is both insulting and wrong.</p>
-  <p>Eba is not the problem. Rice is not the problem. Amala, tuwo, yam, plantain and beans are not the problem. People have eaten all of them for generations without carrying this weight.</p>
-  <p>Four things changed, and none of them is the food itself.</p>
+  <p class="lead">Most diet books sold in Nigeria start by telling you that the food your mother cooked is the problem. I don&rsquo;t agree with that at all.</p>
+  <p>Our grandparents ate eba, rice, amala, tuwo, yam, plantain and beans nearly every day of their lives, and most of them never carried the kind of weight many of us carry today.</p>
+  <p>What changed is the way we eat that food, and four things in particular.</p>
 
-  <h3>One &mdash; the portion grew, and the soup shrank</h3>
-  <p>Look at a plate honestly. Most Nigerian plates today are three quarters {swallow(0)} or rice, with a smear of soup on the side and one small piece of meat. That is not a balanced meal with too much carbohydrate; it is <em>a plate of carbohydrate with a garnish</em>.</p>
+  <h3>1. The swallow got bigger and the soup got smaller</h3>
+  <p>Take a good look at the next plate you dish. For most of us it&rsquo;s three quarters {swallow(0)} or rice, a small amount of soup at the side and one small piece of meat. That&rsquo;s a plate of starch with a little bit of everything else.</p>
 
-  <div class="il"><p class="il-cap">Your plate is not wrong. It is upside down.</p>
+  <div class="il"><p class="il-cap">The same food, turned around</p>
     <div class="il-pair">
       <div class="il-card">{PLATE_NOW}</div>
       <div class="il-card">{PLATE}</div>
     </div>
   </div>
 
-{ph('market', 'Everything in this book is in the nearest market at the usual price. Nothing in it is imported.')}
-  <h3>Two &mdash; the drinks</h3>
-  <p>This is the biggest one and the one nobody counts. A bottle of malt carries more sugar than most people would ever eat in one sitting, and because it is liquid your body does not register it as food at all. You drink 250 calories in ninety seconds and feel exactly as hungry as before.</p>
+{ph('market', 'Everything in this book is sold in your nearest market, at the normal price.')}
+  <h3>2. The drinks</h3>
+  <p>This is the biggest one, and hardly anybody counts it. A bottle of Malta Guinness has close to ten teaspoons of sugar in it, and because it&rsquo;s a drink, your body doesn&rsquo;t treat it as food. You finish 250 calories in a minute and a half and you&rsquo;re still hungry afterwards.</p>
 
-  <h3>Three &mdash; the oil went up</h3>
-  <p>Not palm oil itself &mdash; the <em>amount</em>. A pot of stew that used to take three spoons now takes a cup, and deep frying arrived in kitchens where nothing used to be deep fried.</p>
+  <h3>3. More oil in the pot</h3>
+  <p>Palm oil itself is fine. The trouble is how much of it goes in. A lot of us now pour oil straight from the bottle into the pot, and we deep fry far more often than people used to.</p>
 
-  <h3>Four &mdash; the moving stopped</h3>
-  <p>A generation ago people walked to the market, walked to school, walked to the farm. Now it is keke, okada, and a chair for nine hours. Nothing about your food changed as much as this did.</p>
+  <h3>4. We stopped walking</h3>
+  <p>Our parents walked to the market, to school and to the farm. Today most of us take a keke or okada to the junction, ride a danfo to work, and then sit in a chair for nine hours.</p>
 
   <div class="box good">
-    <p class="k">Which is genuinely good news</p>
-    <p style="margin:0">Every one of those four is a <b>habit</b>, and habits can be swapped. Not one of them requires you to stop eating Nigerian food, buy anything imported, or join anything.</p>
+    <p class="k">The good news</p>
+    <p style="margin:0">All four of these are <b>habits</b>, and habits can be changed. You can fix every one of them without giving up Nigerian food, buying anything imported or paying for a gym.</p>
   </div>
 </div>
 
 <div class="page">
-  <h3 class="first">Why you lost it before and found it again</h3>
-  <p>Because you did it by suffering, and suffering has a time limit.</p>
-  <p>Cutting your food in half works &mdash; for a while. Then two things happen at once. Your body, which cannot tell the difference between a diet and a famine, slows down to protect you. And your mind, which has been holding its breath for six weeks, finally exhales. The weight comes back, and it brings interest.</p>
-  <p>The way out is not more discipline. It is a plan that does not require any.</p>
-  <p><b>Every switch in this book is designed to be permanent.</b> That is the only reason it will work where the others did not &mdash; you are not enduring anything, so there is nothing to go back from.</p>
+  <h3 class="first">Why the weight came back last time</h3>
+  <p>Most crash diets work by making you suffer, and nobody can suffer forever.</p>
+  <p>When you cut your food in half, the weight does come off for a while. But your body can&rsquo;t tell the difference between a diet and a time of hunger, so it slows down a little to protect you. Meanwhile you&rsquo;re tired of being hungry all the time, and one day you give up. The weight comes back, often with a bit extra.</p>
+  <p><b>That&rsquo;s why every switch in this book is meant to be permanent.</b> None of them is painful, so there&rsquo;s nothing to run away from after a few weeks.</p>
 
-  <h3>Measure your waist, never your weight</h3>
-  <p>Get a tailor&rsquo;s tape. They cost almost nothing.</p>
-  <p>Your weight includes water, food still inside you, and muscle. It swings two kilograms in a day for reasons that have nothing to do with fat, which is why the scale destroys more plans than biscuits do.</p>
-  <p>Your waist measures the fat that actually matters &mdash; the kind packed around your organs, which is the kind that causes diabetes, high blood pressure and heart disease.</p>
+  <h3>Use a tape measure, not a scale</h3>
+  <p>Buy a tailor&rsquo;s tape measure. Any tailor or market stall will sell you one for very little.</p>
+  <p>The number on the scale includes water, food still sitting in your stomach, and muscle. It can go up or down by two kilos in a single day for reasons that have nothing to do with fat, and that&rsquo;s enough to discourage anybody.</p>
+  <p>Your waist tells you about the fat that matters most, the fat packed around your organs. That&rsquo;s the kind linked to diabetes, high blood pressure and heart disease.</p>
 
-{il('Where exactly to put the tape', WAIST)}  <div class="baf">
+{il('Where to put the tape', WAIST)}  <div class="baf">
     {BEFORE_AFTER}
-    <p class="note"><b>This is a drawing, not a customer.</b> It is here because
-    &ldquo;twelve centimetres&rdquo; means nothing until you can see it &mdash; and
-    twelve centimetres is what ninety days of all ten switches looks like on
-    somebody starting at 104.</p>
+    <p class="note"><b>This is an illustration, to help you picture the change.</b>
+    Twelve centimetres is hard to imagine until you see it, and it&rsquo;s roughly
+    what ninety days of all ten switches can do for somebody who starts at 104.</p>
   </div>
 
   <div class="box cool">
-    <p class="k">The numbers to aim below</p>
-    <p style="margin:0">For a woman, a waist under <b>80cm</b>. For a man, under <b>94cm</b>. Measured at the navel, standing, first thing in the morning, breathing out normally &mdash; not sucked in.</p>
+    <p class="k">The numbers to aim for</p>
+    <p style="margin:0">For a woman, a waist under <b>80cm</b>. For a man, under <b>94cm</b>. Measure at the navel, standing up, first thing in the morning, and breathe out normally. Don&rsquo;t hold your stomach in.</p>
   </div>
 </div>
 

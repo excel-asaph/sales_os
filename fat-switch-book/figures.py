@@ -40,7 +40,7 @@ PLATE = """<svg viewBox="0 0 300 250" role="img" aria-label="The reversed plate:
   <text x="196" y="88" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF" font-family="var(--body)">protein</text>
   <text x="196" y="146" text-anchor="middle" font-size="13" font-weight="800" fill="#FFFFFF" font-family="var(--body)">QUARTER</text>
   <text x="196" y="162" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF" font-family="var(--body)">swallow</text>
-  <text x="150" y="238" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink-2)" font-family="var(--body)">This is the whole book, on one plate</text>
+  <text x="150" y="238" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink-2)" font-family="var(--body)">Your plate from now on</text>
 </svg>"""
 
 PLATE_NOW = """<svg viewBox="0 0 300 250" role="img" aria-label="The usual plate: three quarters swallow with a smear of soup">
@@ -96,8 +96,8 @@ BOTTLE = f"""<svg viewBox="0 0 420 190" role="img" aria-label="Sugar in a bottle
         fill="var(--clay)" opacity="0.88" stroke="var(--ink-3)" stroke-width="1.6"/>
   {_cubes(92, 40, 12, "var(--clay-soft)")}
   <text x="92" y="108" font-size="12.5" font-weight="700" fill="var(--ink)" font-family="var(--body)">about 12 cubes of sugar</text>
-  <text x="92" y="126" font-size="11.5" fill="var(--ink-2)" font-family="var(--body)">drunk in 90 seconds, and your body</text>
-  <text x="92" y="142" font-size="11.5" fill="var(--ink-2)" font-family="var(--body)">does not count it as food at all</text>
+  <text x="92" y="126" font-size="11.5" fill="var(--ink-2)" font-family="var(--body)">gone in a minute and a half,</text>
+  <text x="92" y="142" font-size="11.5" fill="var(--ink-2)" font-family="var(--body)">and you&#8217;re still hungry after</text>
 
   <line x1="14" y1="156" x2="406" y2="156" stroke="var(--rule)" stroke-width="1.5"/>
   <text x="14" y="178" font-size="12" font-weight="800" fill="var(--moss)" font-family="var(--body)" letter-spacing="1">THE SAME BOTTLE OF WATER OR ZOBO</text>
@@ -115,8 +115,8 @@ OIL = """<svg viewBox="0 0 420 150" role="img" aria-label="A measured tablespoon
   <ellipse cx="270" cy="34" rx="30" ry="10" fill="var(--ochre)" stroke="var(--ink-3)" stroke-width="1.6"/>
   <text x="270" y="140" text-anchor="middle" font-size="13" font-weight="800" fill="var(--ink)" font-family="var(--body)">1 SMALL CUP</text>
   <text x="352" y="76" font-size="20" font-weight="800" fill="var(--clay)" font-family="var(--body)">900</text>
-  <text x="352" y="94" font-size="11" fill="var(--ink-2)" font-family="var(--body)">poured, not</text>
-  <text x="352" y="108" font-size="11" fill="var(--ink-2)" font-family="var(--body)">measured</text>
+  <text x="352" y="94" font-size="11" fill="var(--ink-2)" font-family="var(--body)">when you pour</text>
+  <text x="352" y="108" font-size="11" fill="var(--ink-2)" font-family="var(--body)">from the bottle</text>
 </svg>"""
 
 # ------------------------------------------------------------- the order
@@ -143,9 +143,9 @@ ORDER = """<svg viewBox="0 0 440 130" role="img" aria-label="Eat in this order: 
     <text x="304" y="98" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">SWALLOW</text>
     <text x="304" y="114" text-anchor="middle" font-size="10.5" fill="var(--ink-2)">last, and less of it</text>
 
-    <text x="352" y="42" font-size="11.5" font-weight="700" fill="var(--clay)">Same plate.</text>
-    <text x="352" y="58" font-size="11.5" font-weight="700" fill="var(--clay)">Same food.</text>
-    <text x="352" y="74" font-size="11.5" font-weight="700" fill="var(--clay)">Nothing removed.</text>
+    <text x="352" y="42" font-size="11.5" font-weight="700" fill="var(--clay)">Nothing is</text>
+    <text x="352" y="58" font-size="11.5" font-weight="700" fill="var(--clay)">taken off</text>
+    <text x="352" y="74" font-size="11.5" font-weight="700" fill="var(--clay)">your plate.</text>
   </g>
 </svg>"""
 
@@ -161,7 +161,7 @@ WAIST = """<svg viewBox="0 0 300 220" role="img" aria-label="Measure your waist 
     <circle cx="150" cy="112" r="3.5" fill="#FFFFFF"/>
     <text x="212" y="108" font-size="12.5" font-weight="800" fill="var(--clay)">AT THE NAVEL</text>
     <text x="212" y="126" font-size="11" fill="var(--ink-2)">standing, breathing out,</text>
-    <text x="212" y="140" font-size="11" fill="var(--ink-2)">not sucked in</text>
+    <text x="212" y="140" font-size="11" fill="var(--ink-2)">belly relaxed</text>
     <text x="150" y="214" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink-2)">Under 80cm (woman) &#183; under 94cm (man)</text>
   </g>
 </svg>"""

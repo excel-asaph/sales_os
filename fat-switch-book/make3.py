@@ -24,7 +24,7 @@ from icons import food
 # simply renders nothing, so this can be filled in over time.
 RECIPE_PHOTO = {0: 'zobo', 1: 'vegetable_soup', 2: 'okra_soup', 3: 'peppered_chicken', 4: 'ewa_agoyin', 5: 'moi_moi', 6: 'edikaikong', 7: 'brown_jollof', 8: 'bag_kit', 9: 'plate_real'}
 
-PHOTO = {0: ('bottles', 'This is what comes out of the fridge today'), 3: ('oil', 'One spoon, or most of a day. The bottle decides, unless you do'), 5: ('moi_moi', 'Nine wraps on Sunday is what makes Switch 6 survive a Monday'), 7: ('walking', 'Thirty minutes, ordinary shoes, no gym anywhere in it'), 8: ('bag_kit', 'What goes in the bag before you leave the house'), 9: ('plate_real', 'The reversed plate, in a real kitchen')}
+PHOTO = {0: ('bottles', 'Everything on the left comes out of the fridge today'), 3: ('oil', 'One spoon on the left, a cup on the right. Most of us pour the cup without noticing'), 5: ('moi_moi', 'Nine wraps made on Sunday means breakfast is sorted for the week'), 7: ('walking', 'Thirty minutes in ordinary shoes, no gym needed'), 8: ('bag_kit', 'What goes in your bag before you leave the house'), 9: ('plate_real', 'The new plate in a real Nigerian kitchen')}
 
 CSS = """  /* The day. Built on the switch card, which opens it. */
   .dfirst { background: var(--ochre-soft); border-left: 4px solid var(--ochre); border-radius: var(--r-sm);
@@ -73,66 +73,64 @@ sw = swallow(0)
 
 DAYS = [
     # first, meals, snack, recipe, move, secret
-    ("Measure your waist before anything else this morning, standing, at the navel, breathing "
-     "out normally. Write it in the box at the bottom of this page. Then go through the house "
-     "and remove every soft drink, malt and bottle of beer from the fridge.",
+    ("Before you do anything else this morning, measure your waist. Stand up straight, put the "
+     "tape at your navel and breathe out normally. Write the number in the box at the bottom of "
+     "this page. Then clear every soft drink, malt and beer out of your fridge. Give them away "
+     "if you like, but get them out of the house.",
      [("Morning", ["Oats &ndash; 1 cup, no sugar", "Groundnut &ndash; a small handful, unsalted", "Boiled egg &ndash; 1"]),
       ("Afternoon", ["Efo riro &ndash; 1 full bowl", "Titus (mackerel) &ndash; 1 medium piece", f"{sw.capitalize()} &ndash; your normal portion today"]),
       ("Evening", ["Pepper soup &ndash; 1 bowl", "Garden egg &ndash; 2, sliced raw"])],
-     "Water &ndash; carry a bottle &nbsp;|&nbsp; Orange &ndash; 1 &nbsp;|&nbsp; Cucumber",
-     ("Unsweetened Zobo, Cold",
+     "Water &ndash; keep a bottle with you &nbsp;|&nbsp; Orange &ndash; 1 &nbsp;|&nbsp; Cucumber",
+     ("Cold Zobo With No Sugar",
       ["Dried zobo leaves &ndash; 2 cups, rinsed", "Water &ndash; 2 litres", "Ginger &ndash; a large thumb, sliced",
        "Cloves &ndash; 4", "Pineapple skin &ndash; a few pieces, optional", "<b>Sugar &ndash; none at all</b>"],
-      "Boil the water with ginger and cloves, take it off the heat and pour it over the leaves. "
-      "Cover 20 minutes, sieve, cool, and keep it in the fridge. This is what you reach for now "
-      "instead of the fridge shelf you just emptied.",
-      "About 2 litres. Keeps 3 days cold."),
-     ["A 15-minute walk, any time today.",
-      "You are not training yet. You are starting."],
-     ("Liquid sugar does not make you full",
-      ["Your body has a fullness system and it barely notices anything you drink. Eat 250 "
-       "calories of rice and you feel it; drink 250 calories of malt and you feel nothing at "
-       "all &mdash; and you eat the same dinner an hour later.",
-       "This is why the bottle switch is first. It is the only change in this book that takes "
-       "away a large amount of food energy without taking away any <em>food</em>.",
-       "Do the arithmetic on your own week. Count every bottle of malt, soft drink and beer you "
-       "had in the last seven days, and multiply by 250. Most people find a number between "
-       "3,000 and 7,000 &mdash; which is roughly one to two whole days of eating, drunk "
-       "standing up, unnoticed."]),),
+      "Boil the water with the ginger and cloves, take it off the fire and pour it over the zobo "
+      "leaves. Cover it for 20 minutes, then sieve it, let it cool and keep it in the fridge. "
+      "From today, this is what you reach for when you want something cold.",
+      "About 2 litres. Keeps for 3 days in the fridge."),
+     ["A 15-minute walk at any time today.",
+      "That&rsquo;s all for today. You&rsquo;re only just getting started."],
+     ("Sugary drinks don&rsquo;t fill you up",
+      ["Your body has a way of telling you when you&rsquo;ve had enough to eat, but it hardly "
+       "notices what you drink. If you eat 250 calories of rice, you feel it. If you drink 250 "
+       "calories of malt, you feel nothing, and an hour later you still eat your normal dinner.",
+       "That&rsquo;s why the bottle switch comes first. It takes a lot of calories out of your "
+       "day without taking away any actual food.",
+       "Try this with your own week. Count every bottle of malt, soft drink and beer you had in "
+       "the last seven days, and multiply by 250. Two bottles a day comes to 3,500 calories a "
+       "week, which is close to two full days of eating."]),),
 
-    ("At your first meal today, do not change one thing about what is on the plate. Change only "
-     "the order: water first, then the meat and vegetables, and the swallow last.",
+    ("At your first meal today, leave the plate exactly as it is and only change the order you "
+     "eat in: a glass of water first, then the meat and vegetables, and the swallow last.",
      [("Morning", ["Moi moi &ndash; 1 wrap", "Pap &ndash; 1 cup, no sugar"]),
       ("Afternoon", ["Vegetable soup &ndash; 1 bowl, eaten first", "Chicken &ndash; 1 piece, skin removed", f"{sw.capitalize()} &ndash; eaten last"]),
       ("Evening", ["Beans &ndash; 1 cup, well cooked", "Plantain &ndash; 2 slices, boiled not fried"])],
-     "Unsweetened zobo &nbsp;|&nbsp; Pawpaw &ndash; &frac12; cup &nbsp;|&nbsp; Water",
+     "Zobo, no sugar &nbsp;|&nbsp; Pawpaw &ndash; &frac12; cup &nbsp;|&nbsp; Water",
      ("Vegetable Soup You Eat First",
       ["Ugu and waterleaf &ndash; 1 bunch each", "Smoked fish &ndash; 1 piece, flaked",
-       "Onion &ndash; 1 large, half blended half sliced", "Fresh pepper &ndash; to taste",
+       "Onion &ndash; 1 large, half blended and half sliced", "Fresh pepper &ndash; to taste",
        "Crayfish &ndash; 1 tsp", "Palm oil &ndash; 2 tbsp, measured with a spoon",
-       "Salt &ndash; one pinch, off the heat"],
-      "Cook the waterleaf first and let its own water dry off. Add the measured palm oil, onion, "
-      "pepper, crayfish and fish. Ugu last, two minutes, off the heat. Make it thick enough to "
-      "eat with a spoon on its own, because today you are eating it before the swallow, not with it.",
+       "Salt &ndash; one pinch, after it comes off the fire"],
+      "Cook the waterleaf first and let its water dry off. Add the measured palm oil, onion, "
+      "pepper, crayfish and fish. Put the ugu in last, give it two minutes and take the pot off "
+      "the fire. Make the soup thick enough to eat with a spoon, because today you&rsquo;ll eat "
+      "some of it on its own before you touch the swallow.",
       "4 servings."),
      ["A 15-minute walk.",
-      "And the one that matters: <b>10 minutes of walking straight after your biggest meal.</b> "
-      "Not an hour later. Straight after."],
-     ("Same plate, different result",
-      ["Eating protein and vegetables before the starch slows the whole meal leaving your "
-       "stomach. The sugar climb after the swallow is gentler, so your body releases less "
-       "insulin &mdash; and insulin&rsquo;s other job is storing fat.",
-       "The second effect is the one you will notice today: by the time you reach the "
-       f"{sw}, you are already partly full. Most people leave some on the plate without "
-       "deciding to.",
-       "<b>And the ten-minute walk after eating is the highest-value ten minutes of your day.</b> "
-       "Walking immediately after a meal pulls sugar out of your blood and into your working "
-       "muscles instead of leaving it circulating. It does not need to be brisk. Around the "
-       "compound is enough."]),),
+      "Then the important one: <b>walk for 10 minutes straight after your biggest meal</b>, as "
+      "soon as you get up from the table."],
+     ("Why eating in order works",
+      ["When protein and vegetables go into your stomach first, the whole meal leaves your "
+       "stomach more slowly. Your sugar rises more gently after the swallow, so your body makes "
+       "less insulin, and one of insulin&rsquo;s jobs is telling your body to store fat.",
+       f"You&rsquo;ll notice something else today. By the time you reach the {sw}, you&rsquo;re "
+       "already partly full, and a lot of people end up leaving some of it.",
+       "<b>The ten-minute walk after eating does more than it looks.</b> When you walk right "
+       "after a meal, your muscles use up some of the sugar in your blood straight away. You "
+       "don&rsquo;t need to walk fast. A few rounds of the compound will do."]),),
 
-    (f"Serve yourself exactly as you normally would. Then put half the {sw} back in the pot, "
-     "before you sit down. Fill the space on the plate with more vegetables and one more piece "
-     "of protein.",
+    (f"Dish your food the way you normally do. Then, before you sit down, put half the {sw} "
+     "back in the pot and fill that space with more vegetables and an extra piece of meat or fish.",
      [("Morning", ["Oats &ndash; 1 cup", "Boiled egg &ndash; 2", "Orange &ndash; 1"]),
       ("Afternoon", ["Okra soup &ndash; 1 full bowl", "Fish &ndash; 1 piece, grilled", f"{sw.capitalize()} &ndash; <b>half</b> your usual"]),
       ("Evening", ["Efo tete &ndash; 1 bowl", "Turkey &ndash; 1 piece, skin off", "Cucumber and tomato"])],
@@ -142,25 +140,26 @@ DAYS = [
        "Smoked fish &ndash; 1 piece", "Onion &ndash; &frac12;, chopped",
        "Fresh pepper &ndash; to taste", "Crayfish &ndash; 1 tsp",
        "Palm oil &ndash; 1 tbsp, measured", "Salt &ndash; a pinch"],
-      "Light boil with onion and pepper, add the okra and stir only three minutes &mdash; "
-      "over-stirring kills the draw. Fish, crayfish and the measured oil. Ugu last, one minute. "
-      "Make double what you normally would: the soup is filling the space the swallow used to take.",
+      "Bring a little water to a light boil with the onion and pepper. Add the okra and stir for "
+      "only three minutes, because too much stirring spoils the draw. Add the fish, crayfish and "
+      "measured oil, then the ugu for one last minute. Cook twice as much soup as you normally "
+      "would, since it&rsquo;s taking the space the swallow used to take on your plate.",
       "3 servings."),
-     ["Walk 20 minutes.",
-      "Add the first strength move: <b>the wall squat.</b> Back flat against a wall, slide down "
-      "until your knees are bent halfway, hold 60 seconds. Rest. Do it twice."],
-     ("Fullness comes from volume, not from starch",
-      ["Your stomach measures how much is in it, not how many calories are in it. A big bowl of "
-       "vegetable soup and a small ball of swallow fills you more than a mountain of swallow and "
-       "a smear of soup &mdash; and carries far less.",
-       "This is why the instruction is to <b>put half back before you sit down</b> rather than to "
-       "eat half of what is served. Nobody in the history of this country has left half a wrap of "
-       f"{sw} on a plate in front of them.",
-       "<b>And drink a full glass of water before you sit.</b> It sounds too simple to matter. "
-       "It is worth a noticeable amount at every single meal, and it costs nothing."]),),
+     ["Walk for 20 minutes.",
+      "Add your first strength move, <b>the wall squat</b>. Stand with your back flat against a "
+      "wall and slide down until your knees are bent halfway. Hold it for 60 seconds, rest, and "
+      "do it one more time."],
+     ("What really fills you up",
+      ["Your stomach feels full based on how much food is in it. A big bowl of vegetable soup "
+       "with a small ball of swallow will fill you up more than a mountain of swallow with a "
+       "little soup, and it carries far fewer calories.",
+       f"That&rsquo;s why I tell you to <b>put half back before you sit down</b>. Once that "
+       f"{sw} is sitting on the plate in front of you, you&rsquo;ll finish it. We all do.",
+       "<b>Drink a full glass of water before you sit down to eat, too.</b> It sounds too simple "
+       "to make a difference, but it helps at every meal, and it costs you nothing."]),),
 
-    ("Find the spoon you use for oil and replace it with a tablespoon. Today every pot gets "
-     "measured oil, and nothing gets deep fried.",
+    ("Keep a tablespoon beside your oil from today. Every pot you cook gets measured oil, and "
+     "nothing gets deep fried.",
      [("Morning", ["Sweet potato &ndash; 3 slices, boiled", "Egg sauce &ndash; 2 eggs, 1 tsp oil only"]),
       ("Afternoon", ["Brown jollof rice &ndash; 1 cup", "Chicken &ndash; 1 piece, peppered not fried", "Fresh salad, no salad cream"]),
       ("Evening", ["Grilled tilapia &ndash; 1 whole", "Garden egg sauce &ndash; &frac12; cup"])],
@@ -170,195 +169,191 @@ DAYS = [
        "Fresh pepper and tatashe &ndash; blended", "Onion &ndash; 1, sliced",
        "Thyme and curry &ndash; &frac12; tsp each", "Groundnut oil &ndash; <b>1 tbsp, measured</b>",
        "Salt &ndash; a pinch"],
-      "Boil the chicken with ginger, garlic, thyme and onion until tender, keeping the stock. "
-      "Grill or oven-roast it 15 minutes until the edges catch. In a pan, heat the single "
-      "measured spoon of oil, fry the blended pepper 8 minutes until it darkens, then toss the "
-      "chicken in it. You have used one spoon of oil where frying would have used half a cup.",
+      "Boil the chicken with the ginger, garlic, thyme and onion until it&rsquo;s soft, and keep "
+      "the stock. Grill it, or put it in the oven for 15 minutes until the edges brown. Heat your "
+      "one measured spoon of oil in a pan, fry the blended pepper for 8 minutes until it darkens, "
+      "then toss the chicken in it. That&rsquo;s one spoon of oil, where frying would have taken "
+      "about half a cup.",
       "4 servings."),
-     ["Walk 20 minutes.",
+     ["Walk for 20 minutes.",
       "Wall squat, 60 seconds &times; 2.",
-      "Add <b>10 slow chair stands</b>: sit on a chair, stand up without using your hands, sit "
-      "back down slowly. That is one."],
-     ("A cup of oil is about 900",
-      ["Oil is the most concentrated thing in your kitchen. One tablespoon carries roughly 120; "
-       "a small cup poured into a pot is around 900. It has no volume in your stomach, so it "
-       "fills nothing while carrying everything.",
-       "The point is not that palm oil is bad &mdash; it is not. The point is that the "
-       "<b>amount</b> has quietly tripled in one generation, and pouring straight from the bottle "
-       "is why.",
-       "<b>Deep frying is the other half.</b> Food does not merely cook in oil, it drinks it. The "
-       "same piece of chicken grilled and deep fried differs by more than most people&rsquo;s "
-       "entire daily deficit."]),),
+      "Add <b>10 slow chair stands</b>. Sit on a chair, stand up without using your hands, then "
+      "sit back down slowly. That counts as one."],
+     ("How much oil is really going in",
+      ["Oil packs more calories into a small space than anything else in your kitchen. One "
+       "tablespoon is about 120 calories and a small cup is around 900. It takes up almost no "
+       "room in your stomach, so it doesn&rsquo;t fill you up at all.",
+       "Palm oil is good food. The only problem is how much of it we use, and pouring straight "
+       "from the bottle makes it very easy to use far more than you think.",
+       "<b>Deep frying adds even more.</b> Food soaks up oil while it fries, so a piece of "
+       "chicken carries a lot more calories fried than it does grilled."]),),
 
-    ("Today has one rule: a real piece of protein at all three meals. Not a garnish. Not one "
-     "small piece of meat in a plate of starch.",
+    ("Today there&rsquo;s one rule: a proper piece of protein at all three meals, something you "
+     "can really see on the plate.",
      [("Morning", ["Akara &ndash; 3 balls", "Pap &ndash; 1 cup, no sugar"]),
       ("Afternoon", ["Ewa agoyin &ndash; 1 cup beans", "Ugu in the sauce", "Plantain &ndash; 2 slices, boiled"]),
       ("Evening", ["Catfish pepper soup &ndash; 1 bowl", "Steamed cabbage and carrot"])],
      "Boiled egg &ndash; 1 &nbsp;|&nbsp; Orange &ndash; 1 &nbsp;|&nbsp; Water",
-     ("Ewa Agoyin, Protein That Costs Nothing",
+     ("Ewa Agoyin, Cheap Protein That Fills You Up",
       ["Honey or brown beans &ndash; 2 cups, cooked very soft", "Dried pepper &ndash; 6, soaked and blended",
        "Onion &ndash; 3 large, sliced very thin", "Palm oil &ndash; 2 tbsp, measured",
        "Ginger and garlic &ndash; 1 tsp each", "Salt &ndash; a pinch at the end"],
-      "Cook the beans soft with nothing but water and time &mdash; no soda. For the sauce, fry "
-      "the onion low and slow in the measured oil for 15 minutes until dark and sweet, then add "
-      "pepper, ginger and garlic for 5 more. Salt off the heat.",
-      "4 servings. The cheapest protein in any Nigerian market."),
-     ["Walk 25 minutes.",
-      "Wall squat 60s &times; 2, chair stands &times; 12.",
-      "Add <b>wall press-ups</b>: hands on a wall, shoulder width, lower your chest to it and "
-      "push back. 10 of them."],
-     ("You eat until your protein is met",
-      ["There is good evidence that appetite chases protein specifically: if a day is low in it, "
-       "hunger keeps going until you have had enough, and everything eaten on the way there is "
-       "extra. Nigerian plates are often badly short of protein and very long on starch, which is "
-       "a recipe for eating a great deal and still feeling unsatisfied.",
-       "Protein is also what protects your muscle while you lose fat. Lose weight without it and "
-       "a good share of what leaves is muscle &mdash; which is the tissue that was keeping your "
-       "metabolism up in the first place. That is a large part of why weight comes back harder "
-       "after a crash diet.",
-       "<b>And none of this is expensive.</b> Eggs, beans, moi moi, akara, sardine and titus are "
-       "some of the cheapest food in the market."]),),
+      "Cook the beans until they&rsquo;re very soft, using only water and patience. Don&rsquo;t "
+      "add potash or soda. For the sauce, fry the onion slowly on low heat in the measured oil "
+      "for about 15 minutes, until it turns dark and sweet, then add the pepper, ginger and "
+      "garlic and cook for 5 minutes more. Add the salt after you take it off the fire.",
+      "4 servings. Beans are one of the cheapest proteins in the market."),
+     ["Walk for 25 minutes.",
+      "Wall squat 60s &times; 2, and 12 chair stands.",
+      "Add <b>wall press-ups</b>. Put your hands on a wall at shoulder width, lower your chest "
+      "towards it and push back. Do 10."],
+     ("Why protein stops the hunger",
+      ["Research suggests your appetite keeps pushing you to eat until you&rsquo;ve had enough "
+       "protein. If your meals are low in it, you keep feeling hungry, and everything you eat "
+       "while chasing that protein is extra. Many of our plates have plenty of starch and very "
+       "little protein, which is how you can eat a lot and still not feel satisfied.",
+       "Protein also protects your muscle while you lose fat. If you lose weight without enough "
+       "of it, some of what you lose is muscle, and muscle is what keeps your body burning "
+       "energy. That&rsquo;s one reason the weight comes back so fast after a crash diet.",
+       "<b>You don&rsquo;t need to spend much on it.</b> Eggs, beans, moi moi, akara, sardine and "
+       "titus are some of the cheapest foods in the market."]),),
 
-    ("Change breakfast only. Whatever bread and sweet tea normally happens, replace it with "
-     "something that has protein in it.",
-     [("Morning", ["Moi moi &ndash; 1 wrap, or 2 boiled eggs", "Pap &ndash; 1 cup, unsweetened", "Orange &ndash; 1"]),
+    ("Today you only change breakfast. Instead of bread and sweet tea, eat something with "
+     "protein in it.",
+     [("Morning", ["Moi moi &ndash; 1 wrap, or 2 boiled eggs", "Pap &ndash; 1 cup, no sugar", "Orange &ndash; 1"]),
       ("Afternoon", ["Ogbono soup &ndash; 1 bowl", "Beef &ndash; 2 small pieces, boiled", f"{sw.capitalize()} &ndash; half portion"]),
       ("Evening", ["Chicken pepper soup", "Garden egg &ndash; 2"])],
-     "Groundnut &nbsp;|&nbsp; Cucumber &nbsp;|&nbsp; Unsweetened zobo",
+     "Groundnut &nbsp;|&nbsp; Cucumber &nbsp;|&nbsp; Zobo, no sugar",
      ("Moi Moi You Can Make on Sunday for the Week",
       ["Beans &ndash; 3 cups, peeled and blended", "Tatashe and rodo &ndash; blended in",
        "Onion &ndash; 1, blended in", "Groundnut oil &ndash; 3 tbsp, measured",
        "Boiled egg &ndash; 3, sliced", "Smoked fish &ndash; flaked in", "Crayfish &ndash; 1 tsp",
        "Salt &ndash; one pinch"],
-      "Blend to a smooth pourable batter, stir in the measured oil and crayfish, fold in fish and "
-      "egg, pour into leaves or bowls and steam 45 minutes. Make nine wraps on Sunday and freeze "
-      "them. Breakfast for the entire week is then a two-minute job, which is the only way this "
-      "switch survives a Monday morning.",
-      "9 wraps. Freezes well."),
-     ["Walk 25 minutes.",
-      "Wall squat 90s &times; 2, chair stands &times; 12, wall press-ups &times; 12."],
-     ("The 11 o&rsquo;clock crash is a breakfast problem",
-      ["White bread with sweet tea is sugar on sugar. Blood sugar rises sharply, insulin brings "
-       "it down hard, and the dip lands mid-morning as genuine hunger &mdash; not imagined, not "
-       "weakness.",
-       "That is the hunger that sends people to the kiosk at 11am and makes lunch enormous. Put "
-       "protein in the first meal and the whole day gets easier without a single act of "
-       "willpower.",
-       "<b>The practical trick is Sunday.</b> Nobody makes moi moi at 6am on a workday. Nine "
-       "wraps in the freezer is what turns this from a good idea into a thing that actually "
-       "happens."]),),
+      "Blend the beans into a smooth batter you can pour. Stir in the measured oil and crayfish, "
+      "then the fish and egg. Pour into leaves or small bowls and steam for 45 minutes. Make "
+      "nine wraps on Sunday and freeze them, so breakfast on a weekday only takes two minutes to "
+      "warm up.",
+      "9 wraps. They freeze well."),
+     ["Walk for 25 minutes.",
+      "Wall squat 90s &times; 2, 12 chair stands and 12 wall press-ups."],
+     ("Why you&rsquo;re so hungry by eleven",
+      ["Agege bread with sweet tea or Milo is sugar on top of sugar. Your blood sugar goes up "
+       "fast and then drops, and by mid-morning that drop shows up as real hunger. You&rsquo;re "
+       "not imagining it.",
+       "That&rsquo;s the hunger that sends people out for puff-puff or meat pie at eleven "
+       "o&rsquo;clock, and then makes lunch much bigger than it should be. When your first meal "
+       "has protein in it, the whole day gets easier, and you don&rsquo;t have to fight yourself "
+       "all morning.",
+       "<b>The trick is to cook on Sunday.</b> Nobody is making moi moi at six in the morning "
+       "before rushing out to work. With nine wraps in the freezer, you&rsquo;ll actually do it."]),),
 
-    ("Close the kitchen at 8pm tonight. Move your heaviest meal to the afternoon and let the "
-     "evening one be light.",
+    ("Tonight the kitchen closes at 8pm. Eat your heaviest meal in the afternoon and keep your "
+     "evening meal light.",
      [("Morning", ["Oats &ndash; 1 cup", "Groundnut &ndash; small handful", "Boiled egg &ndash; 1"]),
       ("Afternoon", ["<b>The big meal.</b> Edikaikong &ndash; 1 full bowl", "Beef or fish &ndash; 2 pieces", f"{sw.capitalize()} &ndash; half portion"]),
       ("Evening", ["Light pepper soup, or a bowl of vegetables", "Nothing after 8pm"])],
-     "Pawpaw &nbsp;|&nbsp; Water &nbsp;|&nbsp; Black tea, no sugar, if you want something warm",
-     ("Edikaikong, the Afternoon Meal",
+     "Pawpaw &nbsp;|&nbsp; Water &nbsp;|&nbsp; Black tea with no sugar, if you want something warm",
+     ("Edikaikong for the Afternoon",
       ["Ugu &ndash; 1 big bunch", "Waterleaf &ndash; 1 big bunch",
        "Periwinkle and smoked fish &ndash; a handful each", "Beef &ndash; boiled, stock kept",
        "Onion &ndash; 1, sliced", "Fresh pepper &ndash; to taste", "Crayfish &ndash; 1 tsp",
-       "Palm oil &ndash; 3 tbsp, measured", "Salt &ndash; a pinch off the heat"],
-      "Cook the waterleaf first and let its water dry. Add the measured oil, onion, pepper, "
-      "crayfish, fish and meat with a little stock. Ugu last, two minutes. Eat this at 2pm, not "
-      "at 10pm &mdash; that is the entire switch.",
+       "Palm oil &ndash; 3 tbsp, measured", "Salt &ndash; a pinch, off the fire"],
+      "Cook the waterleaf first and let its water dry up. Add the measured oil, onion, pepper, "
+      "crayfish, fish and meat with a little of the stock. Put the ugu in last for two minutes. "
+      "Eat this in the afternoon, around two o&rsquo;clock, and keep the evening for something "
+      "light.",
       "6 servings."),
-     ["Rest day from the strength work.",
-      "Walk 30 minutes instead, and go to bed at the same time you did last night."],
-     ("Short sleep makes you hungry the next day",
-      ["This is measurable and it is not about willpower. Sleep badly and the hormone that drives "
-       "hunger goes up while the one that signals fullness goes down. You wake up genuinely "
-       "hungrier, and you crave starch and sugar specifically.",
-       "Most people trying to lose weight are also sleeping five or six hours and treating that "
-       "as unrelated. It is not unrelated. <b>Seven hours is part of the plan, not a luxury "
-       "outside it.</b>",
-       "Closing the kitchen at 8pm does two jobs at once: it removes the meal nobody counts, and "
-       "it helps you sleep, because a stomach full of heavy food at midnight is not a stomach "
-       "that rests."]),),
+     ["No strength work today.",
+      "Walk for 30 minutes instead, and go to bed at the same time as last night."],
+     ("Poor sleep makes you hungrier",
+      ["When you sleep badly, the hormone that makes you hungry goes up and the one that tells "
+       "you you&rsquo;re full goes down. So you wake up hungrier than usual, and it&rsquo;s "
+       "usually bread, rice and sweet things you find yourself wanting.",
+       "A lot of people trying to lose weight sleep only five or six hours a night and never "
+       "connect it to their weight. <b>Try to get seven hours.</b> It really is part of the plan.",
+       "Closing the kitchen at eight helps with both. You skip the late meal nobody remembers "
+       "eating, and you sleep better, because it&rsquo;s hard to rest well on a stomach full of "
+       "heavy food."]),),
 
-    ("Today the movement becomes real, and it stays. Find shoes you can walk in and put them by "
-     "the door tonight.",
+    ("From today, walking becomes part of your routine. Find a pair of comfortable shoes and "
+     "put them by the door tonight.",
      [("Morning", ["Oats &ndash; 1 cup", "Boiled egg &ndash; 2"]),
       ("Afternoon", ["Vegetable soup &ndash; 1 bowl first", "Grilled fish &ndash; 1 piece", f"{sw.capitalize()} &ndash; half portion"]),
-      ("Evening", ["Beans &ndash; 1 cup", "Plantain &ndash; 2 slices boiled", "Cucumber"])],
-     "Groundnut &nbsp;|&nbsp; Orange &nbsp;|&nbsp; Water &ndash; plenty",
-     ("Brown Jollof Nobody Notices Is Different",
-      ["Brown rice &ndash; 2 cups, parboiled", "Fresh tomato &ndash; 6, blended and boiled down hard",
+      ("Evening", ["Beans &ndash; 1 cup", "Plantain &ndash; 2 slices, boiled", "Cucumber"])],
+     "Groundnut &nbsp;|&nbsp; Orange &nbsp;|&nbsp; Plenty of water",
+     ("Brown Rice Jollof",
+      ["Brown rice &ndash; 2 cups, parboiled", "Fresh tomato &ndash; 6, blended and boiled down",
        "Tatashe and rodo &ndash; blended", "Onion &ndash; 2", "Groundnut oil &ndash; 2 tbsp, measured",
-       "Thyme, curry, bay leaf", "Garlic and ginger &ndash; 1 tsp each", "Salt &ndash; a pinch"],
-      "Boil the tomato mix down hard for 15 minutes until it thickens and darkens &mdash; that is "
-      "where the flavour lives, not in the oil. Fry the onion in the measured oil, add the paste "
-      "and spices, then the rice and just enough stock. Cover, low heat, 30&ndash;35 minutes.",
-      "5 servings. Brown rice needs more water and more time than white."),
-     ["<b>Walk 30 minutes.</b> Brisk enough that singing would be difficult but talking is possible.",
-      "Wall squat 90s &times; 3, chair stands &times; 15, wall press-ups &times; 15.",
-      "And the ten minutes after your biggest meal, every day from here."],
-     ("You cannot outrun your plate, and that is not the point",
-      ["An hour of hard exercise burns roughly what one bottle of malt and a sausage roll put in. "
-       "Anybody who tells you to exercise your way out of a bad diet is selling gym memberships.",
-       "Movement does two other things, and both matter more than the burn. It <b>protects your "
-       "muscle</b> while you lose fat, so what leaves is fat rather than the tissue keeping your "
-       "metabolism up. And it is the single strongest predictor of whether weight stays off "
-       "&mdash; people who keep it off are almost always still moving a year later.",
-       "<b>The other half is what you do when you are not exercising.</b> Standing, walking to "
-       "the shop instead of sending somebody, taking the stairs, getting up every hour. For most "
-       "people that adds up to more across a week than the actual exercise does."]),),
+       "Thyme, curry and bay leaf", "Garlic and ginger &ndash; 1 tsp each", "Salt &ndash; a pinch"],
+      "Boil the tomato mix hard for about 15 minutes until it thickens and turns darker. "
+      "That&rsquo;s where the jollof taste comes from, so you don&rsquo;t need much oil. Fry the "
+      "onion in the measured oil, add the tomato paste and spices, then the rice and just enough "
+      "stock. Cover and cook on low heat for 30 to 35 minutes.",
+      "5 servings. Brown rice needs a bit more water and time than white rice."),
+     ["<b>Walk for 30 minutes</b>, fast enough that you could still talk but couldn&rsquo;t sing.",
+      "Wall squat 90s &times; 3, 15 chair stands and 15 wall press-ups.",
+      "Keep up the ten-minute walk after your biggest meal, every day from now on."],
+     ("What walking really does for you",
+      ["An hour of hard exercise burns about the same as one bottle of malt and a sausage roll, "
+       "so exercise alone won&rsquo;t fix what&rsquo;s on your plate.",
+       "What walking does is protect your muscle while you lose fat, so the weight you lose is "
+       "mostly fat. It also helps you keep the weight off afterwards. People who manage to keep "
+       "weight off for years are usually still walking or moving regularly.",
+       "<b>Small movements during the day count too.</b> Walk to the shop yourself instead of "
+       "sending a child, take the stairs, and get up from your chair every hour. Over a whole "
+       "week, it all adds up."]),),
 
-    ("Before you leave the house, put something in your bag: unsalted groundnut, a boiled egg, an "
-     "orange. Today you do not arrive at 4pm with nothing.",
+    ("Before you leave the house today, put some unsalted groundnut, a boiled egg and an orange "
+     "in your bag, so you have something to eat when four o&rsquo;clock comes.",
      [("Morning", ["Moi moi &ndash; 1 wrap", "Pap &ndash; 1 cup"]),
       ("Afternoon", ["Efo riro &ndash; 1 bowl first", "Titus &ndash; 1 piece", f"{sw.capitalize()} &ndash; half portion"]),
       ("Evening", ["Pepper soup &ndash; 1 bowl", "Steamed vegetables"])],
-     "<b>In your bag:</b> groundnut, boiled egg, orange. Not at the kiosk.",
+     "<b>From your bag:</b> groundnut, boiled egg, orange",
      ("The Bag Kit, Made on Sunday",
-      ["Raw groundnut &ndash; 2 cups, roasted dry, <b>unsalted</b>", "Eggs &ndash; 6, boiled",
-       "Oranges or guava &ndash; a week's worth", "Small nylon or containers"],
-      "Roast the groundnut dry in a pan, no oil, no salt, and divide it into small portions. Boil "
-      "six eggs and keep them in the fridge. Every morning, two portions go into your bag before "
-      "you go anywhere. This is not a recipe so much as the thing that decides whether Day 9 "
-      "works, because nobody has ever resisted a kiosk on an empty stomach.",
+      ["Raw groundnut &ndash; 2 cups, roasted dry, <b>no salt</b>", "Eggs &ndash; 6, boiled",
+       "Oranges or guava &ndash; enough for the week", "Small nylon bags or containers"],
+      "Roast the groundnut in a dry pan with no oil and no salt, then share it into small nylon "
+      "bags. Boil six eggs and keep them in the fridge. Every morning before you step out, put "
+      "a bag of groundnut and an egg in your bag. It&rsquo;s hard to walk past the kiosk when "
+      "you&rsquo;re hungry, so this is what makes Day 9 work.",
       "A week of snacks for less than one meat pie a day."),
-     ["Walk 30 minutes.",
-      "Wall squat 90s &times; 3, chair stands &times; 15, wall press-ups &times; 15.",
-      "Ten minutes after the biggest meal."],
-     ("Nobody fails at dinner. Everybody fails at 4pm",
-      ["Think honestly about where the last attempt collapsed. It was almost certainly not at the "
-       "dining table. It was standing at a kiosk at four in the afternoon, having skipped lunch, "
-       "with gala and a cold bottle in front of you.",
-       "That is not a discipline failure, it is a planning failure, and it has a planning answer. "
-       "<b>Something in the bag before you leave the house.</b>",
-       "And the money runs the other way from what people assume. Unsalted groundnut and a boiled "
-       "egg cost less than a meat pie and a soft drink, hold you for far longer, and do not leave "
-       "you hungrier than when you started."]),),
+     ["Walk for 30 minutes.",
+      "Wall squat 90s &times; 3, 15 chair stands and 15 wall press-ups.",
+      "Ten minutes of walking after your biggest meal."],
+     ("Four o&rsquo;clock is the danger hour",
+      ["Think about where your last attempt went wrong. For a lot of people it happens around "
+       "four in the afternoon, after skipping lunch, standing at a kiosk with gala and a cold "
+       "Coke right in front of them.",
+       "The answer is to plan for that moment. <b>Put something in your bag before you leave "
+       "the house.</b>",
+       "It&rsquo;s cheaper too. Unsalted groundnut and a boiled egg cost less than a meat pie "
+       "and a soft drink, and they keep you full for much longer."]),),
 
-    ("Measure your waist again this morning, exactly as you did on Day 1 &mdash; standing, at the "
-     "navel, breathing out normally. Then turn back to Day 1 and put the two numbers side by side.",
+    ("Measure your waist again this morning, the same way you did on Day 1: standing, at the "
+     "navel, breathing out normally. Then turn back to Day 1 and compare the two numbers.",
      [("Morning", ["Oats &ndash; 1 cup", "Boiled egg &ndash; 2", "Orange &ndash; 1"]),
-      ("Afternoon", ["<b>The reversed plate.</b> Half vegetables", "A quarter protein", f"A quarter {sw}"]),
-      ("Evening", ["Light: soup and protein", "Nothing heavy after 8pm"])],
-     "The bag kit &nbsp;|&nbsp; Unsweetened zobo &nbsp;|&nbsp; Water",
-     ("The Plate, Not a Recipe",
-      ["Half the plate &ndash; vegetables and soup", "A quarter &ndash; real protein",
+      ("Afternoon", ["<b>The new plate.</b> Half vegetables", "A quarter protein", f"A quarter {sw}"]),
+      ("Evening", ["Something light: soup and protein", "Nothing heavy after 8pm"])],
+     "Your bag kit &nbsp;|&nbsp; Zobo, no sugar &nbsp;|&nbsp; Water",
+     ("Your Plate From Now On",
+      ["Half the plate &ndash; vegetables and soup", "A quarter &ndash; a proper piece of protein",
        f"A quarter &ndash; {sw}, rice or yam", "One measured spoon of oil",
-       "Water before you sit"],
-      "There is no recipe today, because by now you do not need one. Look at the plate in front "
-      "of you and check the shares. That picture is the whole book, and it is the thing you keep "
-      "when everything else here has faded.",
+       "A glass of water before you sit"],
+      "There&rsquo;s no recipe today, because by now you know how to cook all of this. Just look "
+      "at your plate before you eat and check that it looks like this. If you remember only one "
+      "picture from this book, make it this one.",
       "Every meal, from today."),
-     ["Walk 30 minutes.",
-      "The full set: wall squat 90s &times; 3, chair stands &times; 15, wall press-ups &times; 15.",
-      "From tomorrow this becomes Chapter 6, not a challenge."],
+     ["Walk for 30 minutes.",
+      "The full set: wall squat 90s &times; 3, 15 chair stands and 15 wall press-ups.",
+      "From tomorrow, follow the plan in Chapter 6."],
      ("What your two numbers mean",
-      ["<b>Two to four centimetres off your waist:</b> that is exactly what ten days should do, "
-       "and it is fat, not water, because a tape measure cannot be fooled by a laxative. Keep all "
-       "ten switches running.",
-       "<b>One centimetre, or none:</b> you have not failed. Check honestly which switches you "
-       "actually kept &mdash; most people who see nothing dropped Switch 1 or Switch 4 without "
-       "noticing. Ten more days with all ten running will show you.",
-       "<b>And if the scale has not moved at all</b> while your waist has: that is normal and it "
-       "is good. Chapter 7 explains why, and why the scale was never the measurement that "
-       "mattered."]),),
+      ["<b>Two to four centimetres off your waist:</b> that&rsquo;s just what ten days should "
+       "do. Keep all ten switches going.",
+       "<b>One centimetre, or no change:</b> don&rsquo;t worry. Go through the switches and check "
+       "which ones you really kept. Very often it&rsquo;s Switch 1 or Switch 4 that slipped "
+       "without you noticing. Give it ten more days with all ten switches on.",
+       "<b>If the scale hasn&rsquo;t moved but your waist has,</b> that&rsquo;s normal, and "
+       "it&rsquo;s a good sign. Chapter 7 explains why."]),),
 ]
 
 
@@ -371,10 +366,11 @@ ALTERNATES = {
          "Smoked fish &ndash; 1 piece", "Onion &ndash; &frac12;, chopped",
          "Fresh pepper &ndash; to taste", "Crayfish &ndash; 1 tsp",
          "Palm oil &ndash; 1 tbsp, measured", "Salt &ndash; a pinch"],
-        "Boil the ewedu until soft and beat it smooth. In a separate pot heat the measured oil, "
-        "fry onion and pepper, stir in the egusi and let it cook 5 minutes before adding a little "
-        "water, the crayfish and the fish. Combine. Make double what you normally would: the soup "
-        "is filling the space the swallow used to take.",
+        "Boil the ewedu until it&rsquo;s soft, then beat it smooth. In another pot, heat the "
+        "measured oil, fry the onion and pepper, stir in the egusi and let it cook for 5 minutes "
+        "before adding a little water, the crayfish and the fish. Mix the two together. Cook "
+        "twice as much as you normally would, since the soup is taking the space the swallow "
+        "used to take on your plate.",
         "3 servings."),
 }
 
@@ -396,7 +392,7 @@ def day_html(i):
     chips = "".join(f"<span>{c}</span>" for c in costs)
     out = ['<div class="page">',
            '  <div class="sw">',
-           f'    <div class="sw-top"><span class="sn">Day {n} &mdash; Switch {n}</span>'
+           f'    <div class="sw-top"><span class="sn">Day {n} &middot; Switch {n}</span>'
            f'<span class="st">{title}</span></div>',
            '    <div class="sw-in">',
            '      <div class="swap">',
@@ -417,8 +413,11 @@ def day_html(i):
     out.append('  </div>')
     out.append(f'  <div class="dsnack"><span class="dlbl">Between meals</span>{snack}</div>')
     out.append('  <div class="drec">')
-    out.append(f'    <div class="drec-top">Today&rsquo;s recipe &mdash; {rname}</div>')
-    if i in RECIPE_PHOTO:
+    out.append(f'    <div class="drec-top">Today&rsquo;s recipe: {rname}</div>')
+    # The photo belongs to the default recipe. When a veto swaps the recipe
+    # for its fallback, showing the original dish above it is worse than no
+    # photo: a reader who hates okra would see okra soup over an ewedu method.
+    if i in RECIPE_PHOTO and rec is DAYS[i][3]:
         out.append(f'    <div class="drec-ph">{{{{IMG:{RECIPE_PHOTO[i]}}}}}</div>')
     out.append('    <div class="drec-in">')
     out.append('      <div><span class="dlbl">Ingredients</span><ul>')
@@ -430,7 +429,7 @@ def day_html(i):
     out.append('  <div class="dmove"><span class="dlbl">Today&rsquo;s move</span><ul>')
     out += [f'    <li>{m}</li>' for m in move]
     out.append('  </ul></div>')
-    out.append(f'  <div class="dsecret"><span class="dlbl">Today&rsquo;s secret &mdash; {slabel}</span>')
+    out.append(f'  <div class="dsecret"><span class="dlbl">Today&rsquo;s secret: {slabel}</span>')
     out += [f'    <p>{p}</p>' for p in sparas]
     out.append('  </div>')
     if i in PHOTO:
@@ -445,27 +444,27 @@ def day_html(i):
 INTRO = f"""<div class="page">
   <div class="chap-band"><p class="kicker">Chapter four</p><h2 class="chapno">04</h2><h2 class="chaptitle">The 10-day fat switch</h2></div>
 
-  <p class="lead">One switch a day. You never turn one off.</p>
-  <p>By Day 10 all ten are running together, which is where the result comes from &mdash; no single switch does very much on its own, and that is exactly why the plans built on one rule always fail.</p>
+  <p class="lead">Every day for ten days, you add one switch.</p>
+  <p>Once a switch is on, you leave it on, so by Day 10 all ten are working together. That&rsquo;s where the results come from, because each switch on its own only does a little.</p>
 
   <h3>What each day gives you</h3>
   <ul class="marks">
-    <li><b>The switch.</b> What goes down, what comes up, and why it works.</li>
-    <li><b>First thing this morning.</b> One action, before the day gets away from you.</li>
-    <li><b>Three meals and what to carry between them.</b> Nigerian food, from your market.</li>
-    <li><b>Today&rsquo;s recipe.</b> Real quantities, real method.</li>
-    <li><b>Today&rsquo;s move.</b> Building from a 15-minute walk to a full home routine by Day 10.</li>
-    <li><b>Today&rsquo;s secret.</b> The thing nobody told you, and the reason the switch works.</li>
-    <li><b>Your waist.</b> A box to write it in. Day 1 and Day 10 are the two that matter.</li>
+    <li><b>The switch.</b> What you&rsquo;re putting down, what you&rsquo;re picking up, and why it works.</li>
+    <li><b>First thing in the morning.</b> One thing to do before the day gets busy.</li>
+    <li><b>Three meals and snacks.</b> Nigerian food you can buy in your own market.</li>
+    <li><b>Today&rsquo;s recipe.</b> With quantities and simple steps.</li>
+    <li><b>Today&rsquo;s move.</b> You start with a 15-minute walk and build up to a full home routine by Day 10.</li>
+    <li><b>Today&rsquo;s secret.</b> Something most people were never told, and why the switch works.</li>
+    <li><b>Your waist.</b> A box to write your measurement in. Day 1 and Day 10 matter most.</li>
   </ul>
 
-{il('Portions, measured with the only tool you always have', HANDS)}
+{il('Measure your portions with your hand', HANDS)}
 
   <div class="box warn">
     <h4>Three rules before you start</h4>
-    <p><b>Measure your waist on Day 1.</b> If you skip this you will have nothing to compare on Day 10, and the comparison is the entire point.</p>
-    <p><b>Do not skip meals.</b> Nothing in this plan asks you to go hungry. Hunger is what ended every previous attempt.</p>
-    <p style="margin-bottom:0"><b>If you take medicine for diabetes or blood pressure, tell your doctor you are starting this.</b> These switches work, and a dose that was right for your old way of eating may need adjusting.</p>
+    <p><b>Measure your waist on Day 1.</b> If you skip it, you&rsquo;ll have nothing to compare with on Day 10.</p>
+    <p><b>Don&rsquo;t skip meals.</b> This plan never asks you to go hungry, because hunger is what ends most diets.</p>
+    <p style="margin-bottom:0"><b>If you take medicine for diabetes or high blood pressure, tell your doctor you&rsquo;re starting this.</b> As your eating changes, the dose you&rsquo;re on may need adjusting.</p>
   </div>
 </div>
 
