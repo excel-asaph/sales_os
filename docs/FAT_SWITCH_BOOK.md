@@ -1,4 +1,7 @@
-# The 10X Fat Switch — the weight-loss book
+# The 10X Fat-Burning Switch — the weight-loss book
+
+Called **The 10X Fat Switch** until 2026-09-30. The folder, file names in the
+code and the doc name still say `fat-switch`; only what the reader sees changed.
 
 Fourth product, and the first built for two price tiers off one manuscript.
 
@@ -15,6 +18,16 @@ is the same family of claim as the cover I declined on the hepatitis book.
 exactly ten, each is a literal swap on a named day, and Chapter 2 lists all
 ten before the reader has read anything else. A book called 10X that cannot
 say what the ten are is a slimming tea; this one can, on page one.
+
+### Why "Fat-Burning" and not "Fat Burner"
+
+The owner asked for "10X Fat Burner Switch". Three problems with "fat
+burner": it is what capsules and slimming teas call themselves, so the book
+reads as a supplement at a glance; Chapter 3 warns readers off exactly those
+products; and it is the phrase most likely to get a Meta ad restricted.
+"Fat-Burning" keeps the energy and describes the reader's own body, not a
+product. The Chapter 3 line "Fat-burner injections and drips" became
+"Slimming injections and drips" so the book never argues with its own title.
 
 ## The ten switches
 

@@ -1,4 +1,4 @@
-"""The 10X Fat Switch — Chapters 5 to 8 and the back matter.
+"""The 10X Fat-Burning Switch — Chapters 5 to 8 and the back matter.
 
 Chapter 5 is the one that decides whether this book is worth anything. Ten
 days is easy; week six is where every previous attempt died, so the book
@@ -431,7 +431,7 @@ CLOSING = f"""<div class="page closing">
 
   <div class="signoff">
     <p class="who">Dr. David Akinyode</p>
-    <p class="what">Author, The 10X Fat Switch</p>
+    <p class="what">Author, The 10X Fat-Burning Switch</p>
     <p class="share">Feel free to share this book with anybody who needs it, especially Chapter 3. Please encourage everyone you send it to to check their blood pressure and blood sugar, and to see a qualified doctor before starting any plan.</p>
   </div>
 </div>
@@ -439,7 +439,7 @@ CLOSING = f"""<div class="page closing">
 </div>
 
 <footer class="meta">
-  <b>The 10X Fat Switch</b> &middot; ten exchanges, ninety days, written for Nigeria.<br>
+  <b>The 10X Fat-Burning Switch</b> &middot; ten exchanges, ninety days, written for Nigeria.<br>
   &ldquo;10X&rdquo; means ten exchanges. Every claim in this book refers to a named switch on a
   named day. Sibutramine was withdrawn from worldwide markets in 2010 following evidence of
   increased heart attack and stroke. Every clinical statement is pending review and sign-off

@@ -17,7 +17,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "book.html")
-OUT = os.path.join(HERE, "The 10X Fat Switch.pdf")
+OUT = os.path.join(HERE, "The 10X Fat-Burning Switch.pdf")
 # Cover, prayer and the three contents pages go unnumbered, so page 1 is
 # the first page of actual content. This book's contents runs longer than
 # the hepatitis one's, which is why the number differs.

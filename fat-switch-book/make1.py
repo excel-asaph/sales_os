@@ -1,4 +1,4 @@
-"""The 10X Fat Switch — front matter and Chapters 1 to 3.
+"""The 10X Fat-Burning Switch — front matter and Chapters 1 to 3.
 
 "10X" means ten exchanges, not a metabolic multiplier. That distinction is
 the whole reason the title is safe to print: every claim behind it is a
@@ -61,7 +61,7 @@ COVER = """<div class="page flush cover">
   {{IMG:cover_v1}}
   <div class="cover-top">
     <p class="eyebrow">10 switches &middot; 10 days to start &middot; 90 days to change</p>
-    <h1>THE 10X<br>FAT SWITCH</h1>
+    <h1>THE 10X<br>FAT-BURNING<br>SWITCH</h1>
   </div>
   <div class="cover-band">Published by Dr David Akinyode</div>
 </div>
@@ -73,7 +73,7 @@ COVER_FALLBACK = """<div class="page flush">
   <div class="tcover">
     <div>
       <p class="eyebrow">10 switches &middot; 10 days to start &middot; 90 days to change</p>
-      <h1>THE 10X<br>FAT SWITCH</h1>
+      <h1>THE 10X<br>FAT-BURNING<br>SWITCH</h1>
       <p class="sub">Ten everyday habits that keep the weight on, and a ninety-day
       plan to take it off while you keep eating Nigerian food</p>
     </div>
@@ -206,7 +206,7 @@ CHAPTERS_TOC = [
         "Why the Scale Moves and Nothing Changes",
         "Detox, Waist Trainers and Fat-Burner Injections",
     ]),
-    ("4", "The 10-Day Fat Switch", [
+    ("4", "The 10-Day Fat-Burning Switch", [
         "Day 1 &ndash; The Bottle Switch",
         "Day 2 &ndash; The Order Switch",
         "Day 3 &ndash; The Size Switch",

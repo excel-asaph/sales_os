@@ -1,6 +1,6 @@
 # How these books should sound
 
-Written after the owner read the 10X Fat Switch and said it sounded like AI.
+Written after the owner read the 10X Fat-Burning Switch (then called the 10X Fat Switch) and said it sounded like AI.
 He was right, and it was measurable: 115 em dashes in 11,286 words (10 per
 thousand, where ordinary human prose runs at two to four), 23 "it is not X,
 it is Y" sentences, and a lot of *genuinely*, *quietly* and *honestly*.

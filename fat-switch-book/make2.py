@@ -1,4 +1,4 @@
-"""The 10X Fat Switch — Chapters 2 and 3.
+"""The 10X Fat-Burning Switch — Chapters 2 and 3.
 
 Chapter 2 has one job: make "10X" mean something checkable within two pages
 of the reader opening the book, because a title that sounds like a slimming
@@ -118,7 +118,7 @@ CH3 = f"""<div class="page">
   <ul class="marks">
     <li><b>Waist trainers.</b> They hold your stomach in while you&rsquo;re wearing them, and as soon as you take them off you&rsquo;re back where you started. Worn tight for hours, they press on your ribs, stomach and lungs, and they don&rsquo;t burn any fat.</li>
     <li><b>&ldquo;Detox&rdquo; drinks.</b> Your liver and kidneys already clean your body every single day, and they do it far better than any tea or sachet.</li>
-    <li><b>Fat-burner injections and drips.</b> You have no way of knowing what&rsquo;s in the syringe, and once you leave the place, nobody is checking what it does to you.</li>
+    <li><b>Slimming injections and drips.</b> You have no way of knowing what&rsquo;s in the syringe, and once you leave the place, nobody is checking what it does to you.</li>
     <li><b>Slimming coffee.</b> Same story as the capsules, with extra caffeine so you feel like something is happening.</li>
   </ul>
 

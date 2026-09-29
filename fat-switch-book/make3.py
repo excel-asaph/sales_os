@@ -1,4 +1,4 @@
-"""The 10X Fat Switch — Chapter 4, the ten days.
+"""The 10X Fat-Burning Switch — Chapter 4, the ten days.
 
 One switch a day, and the switch card from Chapter 2 opens the day so the
 reader sees the same ten things twice: once as a system, once as today's
@@ -442,7 +442,7 @@ def day_html(i):
 
 
 INTRO = f"""<div class="page">
-  <div class="chap-band"><p class="kicker">Chapter four</p><h2 class="chapno">04</h2><h2 class="chaptitle">The 10-day fat switch</h2></div>
+  <div class="chap-band"><p class="kicker">Chapter four</p><h2 class="chapno">04</h2><h2 class="chaptitle">The 10-day fat-burning switch</h2></div>
 
   <p class="lead">Every day for ten days, you add one switch.</p>
   <p>Once a switch is on, you leave it on, so by Day 10 all ten are working together. That&rsquo;s where the results come from, because each switch on its own only does a little.</p>

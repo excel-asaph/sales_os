@@ -1,7 +1,7 @@
 # Making the next ebook
 
 Three books have been through this pipeline: Hepatitis Clear, Hypertension
-Clear and The 10X Fat Switch. This page is the order of work and where each
+Clear and The 10X Fat-Burning Switch. This page is the order of work and where each
 decision is written down, so the fourth book starts from what the first
 three learned rather than from zero.
 
