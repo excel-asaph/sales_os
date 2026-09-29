@@ -86,8 +86,8 @@ CSS = """  /* The 10-day block. Its own component, not the hepatitis day card: t
 """
 
 DAYS = [
-    (1, "Find out where you actually are",
-     "Before you drink anything, before you eat anything, sit quietly for five minutes and take your blood pressure. Write it in the box at the bottom of this page. This number is the only one this book is trying to beat.",
+    (1, "Take your first reading",
+     "Before you drink anything, before you eat anything, sit quietly for five minutes and take your blood pressure. Write it in the box at the bottom of this page. This is the number you are going to bring down.",
      [("Morning", ["Water &ndash; 1 glass on waking", "Oats &ndash; 1 cup cooked, no sugar",
                    "Pawpaw &ndash; &frac12; cup, diced in", "Boiled egg &ndash; 1"]),
       ("Afternoon", ["Efo riro &ndash; 1 full bowl, no cube", "Titus (mackerel) &ndash; 1 medium piece",
@@ -101,14 +101,14 @@ DAYS = [
        "Salt &ndash; one pinch, at the very end", "Water &ndash; 2 cups"],
       "Boil the water with onion, ginger, pepper and spice. Add the fish, cover, simmer 10&ndash;12 minutes without stirring hard. Leaves in for the last 2 minutes. Take it off the heat, then add the pinch of salt.",
       "2 servings. Keeps 2 days covered in the fridge."),
-     "A 10-minute walk, any time today. That is all. You are not training, you are starting.",
-     ("Measure both arms &mdash; once, today",
+     "A 10-minute walk, any time today. That&rsquo;s all for now, because you are only just starting.",
+     ("Check both arms, just this once",
       ["Take the reading on your left arm, then on your right. Write both down. From tomorrow, use whichever arm read <b>higher</b>, every time.",
        "If the two arms differ by more than about 15 points on the top number, tell your doctor. A real gap between arms can mean a narrowed vessel, and it is something they will want to look at.",
-       "<b>And check the cuff.</b> A cuff that is too small for your arm reads <em>falsely high</em> &mdash; sometimes by 10 to 20 points. If you have a big arm, buy the large cuff. People have been treated for years on a number that was never real."])),
+       "<b>And check the cuff.</b> A cuff that is too small for your arm reads <em>falsely high</em>, sometimes by 10 to 20 points. If you have a big arm, buy the large cuff. People have been treated for years on a number that was never real."])),
 
     (2, "The cubes come out",
-     "Go to the kitchen now, before you cook anything. Take out every seasoning cube, every flavour powder, every noodle sachet. Put them in a bag and give them away or bin them. Today, not Monday.",
+     "Go to the kitchen now, before you cook anything. Take out every seasoning cube, every flavour powder, every noodle sachet. Put them in a bag and give them away or bin them. Do it today, instead of waiting for Monday.",
      [("Morning", ["Pap &ndash; 1 cup, no sugar", "Moi moi &ndash; 1 wrap", "Water &ndash; 1 glass"]),
       ("Afternoon", ["Okra soup &ndash; 1 bowl, no cube", "Smoked fish &ndash; 1 piece",
                      "Oat swallow &ndash; 1 small ball"]),
@@ -120,16 +120,16 @@ DAYS = [
        "Fresh pepper and tatashe &ndash; blended, to taste", "Locust bean (iru) &ndash; 1 tbsp, rinsed twice",
        "Smoked fish &ndash; 1 piece, flaked", "Palm oil &ndash; 2 tbsp, measured",
        "Crayfish &ndash; 1 tsp only", "Salt &ndash; one pinch, off the heat"],
-      "Heat the palm oil, fry the sliced onion until it is properly brown &mdash; this is where the flavour the cube was faking actually comes from. Add the blended pepper and onion, fry 8 minutes until the water has gone. Add iru, crayfish and fish. Add the vegetables last, stir twice, off the heat after 2 minutes. Salt at the end.",
-      "4 servings. This is the recipe that proves the point."),
+      "Heat the palm oil, fry the sliced onion until it is properly brown. This is where the flavour you used to get from the cube really comes from. Add the blended pepper and onion, fry 8 minutes until the water has gone. Add iru, crayfish and fish. Add the vegetables last, stir twice, off the heat after 2 minutes. Salt at the end.",
+      "4 servings. Cook it for the family and see if anybody misses the cube."),
      "Wall squat: back flat against a wall, slide down until your knees are bent about halfway, hold for 2 minutes. Rest 1 minute. Do it twice. Four minutes in total.",
      ("Two cubes is 91% of your whole day",
-      ["An adult should have no more than <b>2,000mg of sodium a day</b>. Nigerian seasoning cubes average <b>22.8g of sodium per 100g</b>, and a cube weighs about 4g &mdash; so one cube is about <b>910mg</b>.",
-       "Two cubes is <b>1,820mg</b>. That is your entire day, before salt, before stockfish, before crayfish, before ponmo.",
-       "This single change moves the top number by <b>four to eight points</b> in most people within a week. You will see it yourself on Day 10."])),
+      ["An adult should have no more than <b>2,000mg of sodium a day</b>. Nigerian seasoning cubes average <b>22.8g of sodium per 100g</b>, and a cube weighs about 4g, so one cube is about <b>910mg</b>.",
+       "Two cubes is <b>1,820mg</b>, which is almost your whole day before you add any salt, stockfish, crayfish or ponmo.",
+       "This one change brings down the top number by <b>four to eight points</b> in most people within a week. You will see it yourself on Day 10."])),
 
     (3, "Zobo, the way it was meant to be drunk",
-     "Buy zobo leaves today &mdash; they cost almost nothing in any market. Make the flask on this page and keep it in the fridge. From today it replaces every soft drink and every malt in your life.",
+     "Buy zobo leaves today. They cost almost nothing in any market. Make the zobo on this page and keep it in the fridge, and from today drink it instead of Coke, Fanta and Malta Guinness.",
      [("Morning", ["Sweet potato &ndash; 3 small slices, boiled", "Sardine &ndash; &frac12; tin, drained and rinsed",
                    "Tomato and onion &ndash; fresh, chopped over it"]),
       ("Afternoon", ["Vegetable soup &ndash; 1 bowl", "Grilled fish &ndash; 1 medium",
@@ -143,13 +143,13 @@ DAYS = [
       "Boil the water with ginger and cloves. Take it off the heat, pour it over the zobo leaves, cover and leave it 20 minutes. Sieve. Cool, and keep it in the fridge. Drink one to two glasses a day.",
       "About 2 litres. Keeps 3 days refrigerated."),
      "Wall squat, 2 minutes &times; 2, as yesterday. Add a 15-minute walk.",
-     ("Zobo lowers blood pressure &mdash; if you leave the sugar out",
-      ["This is not a folk claim. Hibiscus has been through more than a dozen randomised trials, and the pooled result is a fall of roughly <b>7 points on the top number and 4 on the bottom</b>. That is in the same range as a starting dose of a real BP tablet.",
-       "The sugar is what kills it. A glass of zobo made the usual way carries more sugar than a soft drink, and sugar works against you. Unsweetened, cold, with ginger &mdash; that is the medicine version.",
-       "<b>Two honest warnings.</b> It does not replace your tablet, it works alongside it. And because it genuinely does something, tell your doctor you are drinking it daily, especially if you take several medicines."])),
+     ("Zobo lowers blood pressure, as long as you leave the sugar out",
+      ["Hibiscus, the plant zobo is made from, has been tested in more than a dozen randomised trials, and the combined result is a fall of roughly <b>7 points on the top number and 4 on the bottom</b>. That is in the same range as a starting dose of a real BP tablet.",
+       "The sugar is the problem. Zobo made the usual way can be as sweet as a soft drink, and sugar works against you. Drink it unsweetened and cold, with ginger.",
+       "<b>Two warnings.</b> Zobo works alongside your tablet, so keep taking the tablet. And because zobo really does lower pressure, tell your doctor you are drinking it daily, especially if you take several medicines."])),
 
     (4, "The potassium day",
-     "One job today: get potassium into all three meals. It is the mineral that pushes sodium out of your body, and Nigerian food is full of it. Nobody ever mentions this.",
+     "One job today: get potassium into all three meals. It is the mineral that pushes sodium out of your body, and Nigerian food is full of it, but hardly anybody talks about it.",
      [("Morning", ["Oats &ndash; 1 cup", "Banana &ndash; 1", "Groundnut &ndash; a small handful, unsalted"]),
       ("Afternoon", ["Ewa agoyin &ndash; 1 cup beans", "Ugu in the sauce &ndash; 1 cup",
                      "Plantain &ndash; 2 slices, boiled"]),
@@ -160,16 +160,16 @@ DAYS = [
       ["Brown or honey beans &ndash; 2 cups, cooked soft", "Dried pepper &ndash; 6, soaked and blended",
        "Onion &ndash; 3 large, sliced very thin", "Palm oil &ndash; 3 tbsp, measured",
        "Ginger and garlic &ndash; 1 tsp each, pounded", "Salt &ndash; one pinch, at the end"],
-      "Cook the beans very soft with no salt and no soda &mdash; just time and water. For the sauce, heat the palm oil and fry the onion low and slow for 15 minutes until it is dark and sweet. Add pepper, ginger and garlic, fry 5 more minutes. Salt off the heat. Serve over the beans.",
-      "4 servings. The slow onion is the whole trick."),
+      "Cook the beans very soft with no salt and no soda, just water and time. For the sauce, heat the palm oil and fry the onion low and slow for 15 minutes until it is dark and sweet. Add pepper, ginger and garlic, fry 5 more minutes. Salt off the heat. Serve over the beans.",
+      "4 servings. Frying the onion slowly is what gives it the flavour."),
      "A 20-minute walk, brisk enough that singing would be difficult but talking is still possible.",
-     ("Potassium pushes sodium out &mdash; and it is already in your market",
+     ("Potassium pushes sodium out, and your market is full of it",
       ["Sodium and potassium work against each other in the body. Eating more potassium lowers blood pressure on its own, and most Nigerians eat far too little of it while eating far too much sodium.",
-       "The best sources here are ordinary: <b>ugu, waterleaf, beans, plantain, sweet potato, pawpaw, orange, coconut water, avocado (ube), tomato.</b> Nothing imported, nothing expensive.",
-       "<b>One important exception.</b> If you have been told you have kidney disease, or you take a tablet that holds potassium in, ask your doctor before you push potassium up. For that small group, more is not better."])),
+       "The best sources here are ordinary: <b>ugu, waterleaf, beans, plantain, sweet potato, pawpaw, orange, coconut water, avocado (ube), tomato.</b> None of it is imported or expensive.",
+       "<b>One important exception.</b> If you have been told you have kidney disease, or you take a tablet that holds potassium in, ask your doctor before you push potassium up. For that small group, too much potassium can be dangerous."])),
 
     (5, "The swallow becomes the side dish",
-     "Today you do not remove anything. You halve one thing. Whatever ball of swallow you would normally take, take half, and fill the space with vegetables.",
+     "You don&rsquo;t remove anything today. Whatever ball of swallow you would normally take, take half, and fill the space with vegetables.",
      [("Morning", ["Akara &ndash; 3 small balls", "Pap &ndash; 1 cup, no sugar"]),
       ("Afternoon", ["Okra soup &ndash; 1 full bowl", "Fish &ndash; 1 piece, grilled or boiled",
                      "Eba &ndash; <b>half</b> your normal ball"]),
@@ -180,13 +180,13 @@ DAYS = [
        "Smoked fish &ndash; 1 piece", "Fresh pepper &ndash; to taste",
        "Onion &ndash; &frac12;, chopped", "Crayfish &ndash; 1 tsp",
        "Palm oil &ndash; 1 tbsp", "Salt &ndash; one pinch, off the heat"],
-      "Bring 1 cup of water to a light boil with the onion and pepper. Add the okra and stir for 3 minutes only &mdash; over-stirring kills the draw. Add fish, crayfish and palm oil. Ugu last, 1 minute. Off the heat, then salt.",
+      "Bring 1 cup of water to a light boil with the onion and pepper. Add the okra and stir for only 3 minutes, because over-stirring kills the draw. Add fish, crayfish and palm oil. Ugu last, 1 minute. Off the heat, then salt.",
       "3 servings."),
      "Wall squat, 2 minutes &times; 3 today. Then a 15-minute walk.",
-     ("Look at your plate, not your scale",
+     ("Watch your plate more than the scale",
       ["A pressure-lowering plate is simple enough to picture: <b>half vegetables, a quarter protein, a quarter swallow or rice.</b> Most Nigerian plates are three quarters swallow with a smear of soup.",
-       "You are not being asked to give up eba, amala or fufu. You are being asked to make them the side dish instead of the meal.",
-       "Do this and weight comes off your middle without you counting anything &mdash; and weight off the middle is worth about <b>one point of blood pressure for every kilogram</b>."])),
+       "You can keep your eba, amala and fufu. Just make them the side dish, with the soup and vegetables as the main part of the meal.",
+       "Do this and weight comes off your middle without you counting anything. Losing weight from the middle is worth about <b>one point of blood pressure for every kilogram</b>."])),
 
     (6, "Empty the medicine drawer",
      "Find every medicine in the house today. Every sachet in the bag, every tablet in the drawer, every bottle on the shelf. Lay them all out on the table where you can see them.",
@@ -200,16 +200,16 @@ DAYS = [
        "Tatashe and rodo &ndash; blended, to taste", "Onion &ndash; 2, one blended one sliced",
        "Groundnut oil &ndash; 2 tbsp", "Thyme, curry, bay leaf", "Garlic and ginger &ndash; 1 tsp each",
        "Salt &ndash; one pinch. No cube"],
-      "Boil the blended tomato mix down hard until it thickens and darkens &mdash; 15 minutes, do not rush it. Fry the sliced onion in the oil, add the paste, spices, garlic and ginger. Add the rice and just enough stock or water. Cover, low heat, 30&ndash;35 minutes. Salt at the end.",
+      "Boil the blended tomato mix down hard until it thickens and darkens, about 15 minutes. Don&rsquo;t rush it. Fry the sliced onion in the oil, add the paste, spices, garlic and ginger. Add the rice and just enough stock or water. Cover, low heat, 30&ndash;35 minutes. Salt at the end.",
       "5 servings. Brown rice needs more water and more time than white."),
      "A 20-minute walk, and 2 minutes &times; 2 of wall squat.",
      ("The painkiller in your bag is raising your pressure",
-      ["<b>Diclofenac, ibuprofen and piroxicam</b> &mdash; the ordinary painkillers on every counter in Nigeria &mdash; push blood pressure up, and they also weaken several BP tablets. You get hit from both sides.",
+      ["<b>Diclofenac, ibuprofen and piroxicam</b>, the ordinary painkillers sold at every chemist in Nigeria, push blood pressure up. They also weaken several BP tablets, so you get hit from both sides.",
        "Somebody with waist pain taking diclofenac every day for a month can undo an entire prescription and never connect the two.",
-       "From today, one sentence at every chemist: <b>&ldquo;I am on blood pressure medicine &mdash; is this safe with it?&rdquo;</b> Paracetamol is usually the safer answer for pain, but the point is to ask rather than to assume."])),
+       "From today, say this at every chemist: <b>&ldquo;I am on blood pressure medicine. Is this safe with it?&rdquo;</b> Paracetamol is usually the safer choice for pain, but always ask."])),
 
     (7, "Sleep, and the snoring question",
-     "Tonight the phone charges across the room, not beside the bed. And today you ask one person a question you have probably never asked.",
+     "Tonight, charge your phone across the room instead of beside the bed. And today, ask one person a question you have probably never asked.",
      [("Morning", ["Moi moi &ndash; 1 wrap", "Pap &ndash; 1 cup"]),
       ("Afternoon", ["Efo tete &ndash; 1 bowl", "Titus &ndash; 1 piece", "Brown rice &ndash; &frac12; cup"]),
       ("Evening", ["Light pepper soup &ndash; 1 bowl", "Cucumber &ndash; a few slices",
@@ -222,14 +222,14 @@ DAYS = [
        "Crayfish &ndash; 1 tsp", "Salt &ndash; one small pinch"],
       "Blend beans with pepper and onion to a smooth, pourable batter. Stir in oil, crayfish and a pinch of salt. Fold in fish and egg. Pour into leaves or bowls and steam 45 minutes. The smoked fish and the well-blended pepper do the work the cube used to do.",
       "6 wraps. Freezes well."),
-     "A rest day from the wall squat. Instead: sit quietly and breathe slowly &mdash; in for 4 seconds, out for 6 &mdash; for five minutes. Slow breathing lowers pressure while you do it.",
+     "No wall squat today. Instead, sit quietly for five minutes and breathe slowly, in for 4 seconds and out for 6. Slow breathing lowers your pressure while you do it.",
      ("The snoring nobody ever investigates",
       ["Ask whoever sleeps near you two questions: <b>do I snore loudly, and have you ever noticed me stop breathing?</b>",
-       "If the answer to either is yes, tell your doctor. Sleep apnoea &mdash; where breathing stops repeatedly at night &mdash; is one of the most common causes of high blood pressure that refuses to come down, and it is treatable. It is also almost never looked for in this country.",
-       "Short sleep matters on its own too. Fewer than six hours a night raises pressure even in people with no other problem. Seven hours is not laziness; it is treatment."])),
+       "If the answer to either is yes, tell your doctor. Sleep apnoea, where breathing stops again and again during the night, is one of the most common causes of blood pressure that refuses to come down. It can be treated, but in this country doctors rarely check for it.",
+       "Short sleep matters too. Sleeping less than six hours a night raises pressure even in people with no other problem, so aim for seven hours, and don&rsquo;t let anybody call it laziness."])),
 
-    (8, "The bottle, honestly",
-     "No alcohol today. Not a beer, not a shot, and not bitters &mdash; especially not bitters, because that is the one people do not count.",
+    (8, "Alcohol and bitters",
+     "No alcohol today. That means no beer, no shots, and no bitters either, because bitters is the one people forget to count.",
      [("Morning", ["Oats &ndash; 1 cup", "Orange &ndash; 1", "Boiled egg &ndash; 1"]),
       ("Afternoon", ["Ogbono soup &ndash; 1 bowl", "Goat meat &ndash; 2 small pieces, boiled not fried",
                      "Oat swallow &ndash; 1 small ball"]),
@@ -246,11 +246,11 @@ DAYS = [
      "A full 30-minute walk today, plus wall squat 2 minutes &times; 3.",
      ("Bitters is alcohol, and some of it raises pressure twice",
       ["Alcohol raises blood pressure directly, and unlike most things in this book it does it within <b>hours</b>. Cutting back is one of the fastest changes you can make.",
-       "Bitters is the trap. People who would say &ldquo;I do not drink&rdquo; take bitters daily and do not count it. It is alcohol, it is usually strong, and it is usually taken on top of the tablet.",
+       "Bitters is the trap. People who would tell you &ldquo;I don&rsquo;t drink&rdquo; take bitters every day and don&rsquo;t count it. It is alcohol, it is usually strong, and it is usually taken on top of the tablet.",
        "Worse, some herbal preparations sold for blood pressure contain <b>licorice</b>, which is a documented cause of <em>raised</em> pressure and low potassium. Others have been found to contain unlabelled steroids, which also push pressure up. The mixture you were told would help may be the reason your reading will not move."])),
 
     (9, "Cook once, for everybody",
-     "Today the whole house eats what you eat. One pot, one way. Not a special sick-person meal in the corner while everybody else eats the real food.",
+     "Today the whole house eats what you eat, from one pot. Don&rsquo;t cook a special sick-person meal for yourself while everybody else eats something different.",
      [("Morning", ["Sweet potato porridge &ndash; 1 bowl, with ugu stirred in"]),
       ("Afternoon", ["Edikaikong &ndash; 1 bowl", "Beef &ndash; 2 small pieces, boiled",
                      "Eba &ndash; half your normal ball"]),
@@ -262,13 +262,13 @@ DAYS = [
        "Periwinkle and smoked fish &ndash; a handful each", "Beef &ndash; boiled, with its stock kept",
        "Onion &ndash; 1, sliced", "Fresh pepper &ndash; to taste", "Crayfish &ndash; 1 tsp",
        "Palm oil &ndash; 3 tbsp, measured", "Salt &ndash; one pinch, off the heat"],
-      "Cook the waterleaf first and let its water dry out &mdash; that liquid is what makes the soup watery. Add palm oil, onion, pepper, crayfish, fish and meat with a little stock. Ugu last, 2 minutes, off the heat. Salt at the end. Nobody at your table will know a cube is missing.",
-      "6 servings. This is the dish that converts a doubtful family."),
-     "Walk 30 minutes &mdash; but take somebody with you today. The one who walks with you is the one who keeps you walking.",
+      "Cook the waterleaf first and let its water dry out, because that liquid is what makes the soup watery. Add palm oil, onion, pepper, crayfish, fish and meat with a little stock. Ugu last, 2 minutes, off the heat. Salt at the end. Nobody at your table will know a cube is missing.",
+      "6 servings. Cook this one for a family that doubts you."),
+     "Walk 30 minutes, and take somebody with you today. It is much easier to keep walking when somebody is walking with you.",
      ("Two pots is why people fail",
-      ["Almost everybody who goes back to cubes went back because they got tired of cooking twice and eating alone. The household has to move with you, or you will lose.",
-       "You are not asking them to suffer. Everybody at that table benefits: <b>high blood pressure runs in families</b>, and the children growing up in a low-salt kitchen are the ones who never get this diagnosis at all.",
-       "Tell them the plain version: <em>&ldquo;This is not sick food. This is how we cook now, and it is so nobody else in this house ends up where I am.&rdquo;</em>"])),
+      ["Almost everybody who goes back to cubes went back because they got tired of cooking twice and eating alone. The whole household has to change with you, or you won&rsquo;t last.",
+       "Everybody at that table benefits: <b>high blood pressure runs in families</b>, and children who grow up in a low-salt kitchen are much less likely to get this diagnosis later.",
+       "Tell them plainly: <em>&ldquo;This is not sick food. This is how we cook now, and it is so nobody else in this house ends up where I am.&rdquo;</em>"])),
 
     (10, "Measure, compare, and set the calendar",
      "Same as Day 1. Before you drink anything, before you eat anything, sit quietly for five minutes and take your reading. Then turn back to Day 1 and put the two numbers side by side.",
@@ -281,12 +281,12 @@ DAYS = [
       ["Ugu and waterleaf &ndash; 1 bunch each", "Smoked fish &ndash; 1 piece",
        "Fresh pepper and onion &ndash; to taste", "Crayfish &ndash; 1 tsp",
        "Palm oil &ndash; 2 tbsp", "Salt &ndash; one pinch, off the heat"],
-      "You have cooked this shape of soup four times in ten days now, and you no longer need the instructions. That is the actual result of this week.",
+      "You have cooked this kind of soup four times in ten days now, and you don&rsquo;t need the instructions any more. Cook it the way you did on Day 2.",
       "4 servings."),
-     "Walk 30 minutes. Wall squat 2 minutes &times; 3. From tomorrow this becomes the routine in Chapter 5, not a challenge.",
+     "Walk 30 minutes. Wall squat 2 minutes &times; 3. From tomorrow, follow the routine in Chapter 5.",
      ("What your two numbers mean, and what to do now",
-      ["<b>If it came down 5 to 15 points:</b> that is exactly what should happen, and it is the same size of effect as adding a tablet. Keep going &mdash; most of the fall from salt happens in the first two weeks and then holds.",
-       "<b>If it barely moved:</b> you have not failed. Some pressure is stubborn and needs the right medicine, and now you have ten days of honest readings to prove you did your part. Take this book to your doctor.",
+      ["<b>If it came down 5 to 15 points:</b> that is what should happen, and it is about as much as adding another tablet. Keep going. Most of the fall from cutting salt happens in the first two weeks, and then it holds.",
+       "<b>If it barely moved:</b> you haven&rsquo;t failed. Some pressure is stubborn and needs the right medicine, and now you have ten days of readings to show you did your part. Take this book to your doctor.",
        "<b>If it is still 180/120 or above:</b> do not wait for an appointment. Go today.",
        "Either way, <b>do not stop your tablet because the number looks good.</b> The number looks good <em>because of</em> the tablet. That is Chapter 6, and it is the most important chapter in this book."])),
 ]
@@ -309,7 +309,7 @@ def day_html(d):
     out.append('      </div>')
     out.append(f'      <div class="dsnack"><span class="dlbl">Between meals</span>{snack}</div>')
     out.append('      <div class="drec">')
-    out.append(f'        <div class="drec-top">Today&rsquo;s recipe &mdash; {rname}</div>')
+    out.append(f'        <div class="drec-top">Today&rsquo;s recipe: {rname}</div>')
     out.append('        <div class="drec-in">')
     out.append('          <div><span class="dlbl">Ingredients</span><ul>')
     out += [f'            <li>{i}</li>' for i in ing]
@@ -318,7 +318,7 @@ def day_html(d):
                f'<p class="makes"><b>Makes:</b> {makes}</p></div>')
     out.append('        </div></div>')
     out.append(f'      <div class="dmove"><span class="dlbl">Today&rsquo;s move</span><p>{move}</p></div>')
-    out.append(f'      <div class="dsecret"><span class="dlbl">Today&rsquo;s secret &mdash; {slabel}</span>')
+    out.append(f'      <div class="dsecret"><span class="dlbl">Today&rsquo;s secret: {slabel}</span>')
     out += [f'        <p>{p}</p>' for p in sparas]
     out.append('      </div>')
     out.append('      <div class="dread"><span class="dlbl">This morning&rsquo;s reading</span>'
@@ -332,8 +332,8 @@ def day_html(d):
 INTRO = """<div class="page">
   <div class="chap-band"><p class="kicker">Chapter four</p><h2 class="chapno">04</h2><h2 class="chaptitle">The 10-day pressure reset</h2></div>
 
-  <p class="lead">Ten days. Not ten days to a cure &mdash; ten days to a number that is lower than the one you have today, measured on your own machine, by you.</p>
-  <p>Blood pressure is unusual among serious conditions in that it answers quickly. Take the salt out and the top number starts moving within a week. Stop the alcohol and it moves within hours. Start the four-minute exercise on Day 2 and it shows inside a fortnight. You do not have to believe any of this, because on Day 10 you take the same reading you took on Day 1 and you look at the two of them.</p>
+  <p class="lead">In ten days you can get your reading lower than it is today, and you will see it for yourself on your own machine.</p>
+  <p>Blood pressure responds faster than most serious conditions. Take the salt out and the top number starts moving within a week. Stop the alcohol and it moves within hours. Start the four-minute exercise on Day 2 and you will see a difference within two weeks. You don&rsquo;t have to take my word for it, because on Day 10 you take the same reading you took on Day 1 and compare the two.</p>
 
   <h3>How each day works</h3>
   <ul class="marks">
@@ -341,18 +341,18 @@ INTRO = """<div class="page">
     <li><b>Three meals and what to take between them.</b> Ordinary Nigerian food, from your market, at the usual price.</li>
     <li><b>Today&rsquo;s recipe.</b> Full quantities, full method, no seasoning cube anywhere in this book.</li>
     <li><b>Today&rsquo;s move.</b> Mostly four minutes against a wall. Read Day 2 before you dismiss it.</li>
-    <li><b>Today&rsquo;s secret.</b> One thing a day that nobody has told you, and that genuinely moves the number.</li>
-    <li><b>This morning&rsquo;s reading.</b> A box to write it in. Fill it every single day.</li>
+    <li><b>Today&rsquo;s secret.</b> One thing a day you probably haven&rsquo;t been told, that really does move the number.</li>
+    <li><b>This morning&rsquo;s reading.</b> A box to write it in. Fill it in every day.</li>
   </ul>
 
   <div class="box warn">
     <h4>Before you start, three rules</h4>
-    <p><b>Do not stop any tablet.</b> Nothing in these ten days replaces your medicine, and stopping it is the one thing that can genuinely hurt you.</p>
-    <p><b>Measure at the same time every morning</b>, before food, before coffee, sitting, after five quiet minutes. A reading taken any other way is not comparable and will only confuse you.</p>
-    <p><b>If any reading is 180/120 or above, stop the plan and go to hospital that day.</b> That is not a number to manage at home.</p>
+    <p><b>Do not stop any tablet.</b> Nothing in these ten days replaces your medicine, and stopping it is the one thing here that can really hurt you.</p>
+    <p><b>Measure at the same time every morning</b>, before food, before coffee, sitting, after five quiet minutes. If you take it any other way, you can&rsquo;t compare the readings and they will only confuse you.</p>
+    <p><b>If any reading is 180/120 or above, stop the plan and go to hospital that day.</b> Don&rsquo;t try to manage that number at home.</p>
   </div>
 
-  <div class="pullquote">You are not being asked to believe this book. You are being asked to write down two numbers, ten days apart, and let them argue it out.</div>
+  <div class="pullquote">All I ask is that you write down two numbers, ten days apart, and see for yourself.</div>
 </div>
 
 """
