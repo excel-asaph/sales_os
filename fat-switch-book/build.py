@@ -27,13 +27,14 @@ IMGDIR = os.path.join(HERE, "img")
 
 # The cover is the one image a reader looks at closely, so it gets more pixels
 # and less compression than the in-body figures.
-WIDTH = {"cover_v1": 1240}
-QUALITY = {"cover_v1": 92}
+WIDTH = {"cover_v1": 1240, "cover_v2": 1240}
+QUALITY = {"cover_v1": 92, "cover_v2": 92}
 
 # Alt text is not decoration here: this is a health book and the figures carry
 # meaning for anyone using a screen reader.
 ALT = {
     "cover_v1": "Book cover: The 10X Fat-Burning Switch, published by Dr David Akinyode.",
+    "cover_v2": "Book cover: Lose stubborn fat using this secret 10X Fat-Burning Switch, published by Dr. David Akinyode. A boxing glove punches through puff-puff, a ball of swallow, bottles of soft drink and cooking oil, above a tape measure.",
     "plate_real": "A single plate, half dark green vegetable soup, a quarter grilled mackerel, a quarter a small ball of eba",
     "plate_before": "A typical plate, three quarters a mound of eba with a smear of soup and one small piece of meat",
     "market": "A woman choosing ugu, okra and garden egg at an open-air market stall in the early morning",

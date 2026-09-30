@@ -214,9 +214,10 @@
     .sw, .swap, .letter { break-inside: avoid; }
     .sw-top { break-after: avoid; }
   }
-  /* Title set over the artwork's own cream band, the way the other two
-     books in the series carry it. The supplied covers have their text baked
-     in; this one is generated artwork, so the type is ours. */
+  /* The cover now uses the owner's design (cover_v2), which has its text
+     in the artwork. The .cover-top and .cover-band rules below set the
+     title over the earlier generated artwork (cover_v1) and are kept only
+     so that version can be brought back. */
   /* The day. Built on the switch card, which opens it. */
   .dfirst { background: var(--ochre-soft); border-left: 4px solid var(--ochre); border-radius: var(--r-sm);
             padding: 13px 16px; margin: 0 0 20px; font-weight: 600; font-size: 1.04rem; line-height: 1.6; max-width: none; }
@@ -489,7 +490,12 @@
        text column and leaving an 18mm white strip down the right edge. */
     .cover img { width: 210mm !important; max-width: none !important;
                  height: 297mm !important; object-fit: cover !important;
-                 display: block !important; margin: 0 !important; }
+                 display: block !important; margin: 0 !important;
+                 /* The artwork is narrower than A4, so filling the page trims
+                    about 16mm of height. Take it all off the top, where there
+                    is room above the title, so the publisher band at the
+                    bottom stays whole. */
+                 object-position: 50% 100% !important; }
 
     p, li, .box p, .box li { font-size: 12pt !important; line-height: 1.7 !important; }
     td, th { font-size: 11pt !important; line-height: 1.5 !important; }
@@ -559,12 +565,7 @@
 <div class="stack">
 
 <div class="page flush cover">
-  {{IMG:cover_v1}}
-  <div class="cover-top">
-    <p class="eyebrow">10 switches &middot; 10 days to start &middot; 90 days to change</p>
-    <h1>THE 10X<br>FAT-BURNING<br>SWITCH</h1>
-  </div>
-  <div class="cover-band">Published by Dr David Akinyode</div>
+  {{IMG:cover_v2}}
 </div>
 
 <div class="page prayer-page">

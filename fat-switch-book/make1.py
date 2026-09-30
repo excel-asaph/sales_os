@@ -57,13 +57,10 @@ CSS = """  /* The switch card. The book's whole structure is ten of these, so it
   }
 """
 
+# The owner's own cover design, with the title and publisher band already in
+# the artwork, so nothing is set over it.
 COVER = """<div class="page flush cover">
-  {{IMG:cover_v1}}
-  <div class="cover-top">
-    <p class="eyebrow">10 switches &middot; 10 days to start &middot; 90 days to change</p>
-    <h1>THE 10X<br>FAT-BURNING<br>SWITCH</h1>
-  </div>
-  <div class="cover-band">Published by Dr David Akinyode</div>
+  {{IMG:cover_v2}}
 </div>
 
 """
@@ -92,9 +89,10 @@ COVER_FALLBACK = """<div class="page flush">
 
 """
 
-COVER_CSS = """  /* Title set over the artwork's own cream band, the way the other two
-     books in the series carry it. The supplied covers have their text baked
-     in; this one is generated artwork, so the type is ours. */
+COVER_CSS = """  /* The cover now uses the owner's design (cover_v2), which has its text
+     in the artwork. The .cover-top and .cover-band rules below set the
+     title over the earlier generated artwork (cover_v1) and are kept only
+     so that version can be brought back. */
   .cover { position: relative; }
   .cover img { width: 100%; display: block; }
   .cover-top { position: absolute; top: 7.5%; left: 0; right: 0; text-align: center;

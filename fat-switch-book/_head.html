@@ -286,7 +286,12 @@
        text column and leaving an 18mm white strip down the right edge. */
     .cover img { width: 210mm !important; max-width: none !important;
                  height: 297mm !important; object-fit: cover !important;
-                 display: block !important; margin: 0 !important; }
+                 display: block !important; margin: 0 !important;
+                 /* The artwork is narrower than A4, so filling the page trims
+                    about 16mm of height. Take it all off the top, where there
+                    is room above the title, so the publisher band at the
+                    bottom stays whole. */
+                 object-position: 50% 100% !important; }
 
     p, li, .box p, .box li { font-size: 12pt !important; line-height: 1.7 !important; }
     td, th { font-size: 11pt !important; line-height: 1.5 !important; }
