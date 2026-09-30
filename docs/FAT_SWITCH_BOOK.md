@@ -253,6 +253,57 @@ Inherits the hepatitis print stylesheet unchanged. Measured: **median 67
 characters a line**, 66% average fill, nothing past the trim, no
 line sliced across a break.
 
+## Calories: explained, never counted (added 2026-09-30)
+
+The owner asked whether the book should teach calorie counting. Decision:
+explain calories, don't make readers count. Counting fails on Nigerian food
+(nobody knows the oil in a buka stew), people stop, exercise figures on
+phones run high and get eaten back, and "no counting" is part of what sells.
+
+What went in:
+
+- **Chapter 2, "How your body loses fat"**: in and out in plain words, the
+  bank-account comparison, and two diagrams (`BALANCE`, `WHERE`).
+- **Chapter 2, "What the switches add up to"**: one worked day. Bottle 190,
+  Size 340, Oil 240, Move 230, about 1,000 a day, close to a kilo of fat a
+  week, which is where Chapter 5's half-to-one kilo a week comes from.
+- **The Nigerian food calorie guide** at the back: "what 190 calories looks
+  like" tiles, a "same food, cooked differently" chart, six tables with a
+  food picture on every row, an exercise table, what is left out and why,
+  and the sources.
+
+**Every number lives in `fat-switch-book/calories.py`** with its source;
+`calfig.py` draws the pages and diagrams from it, and `switches.py` reads
+its figures from it too, so nothing can disagree. Sources:
+
+| What | Source |
+|---|---|
+| Cooked eba, amala, lafun, rice, beans per 100g | Sanusi, Odukoya & Ejoh, *Afr J Biomed Res* 2018, 21(2), measured in Ibadan |
+| Everything else per 100g | FAO/INFOODS West African Food Composition Table 2019 (the Excel, not the condensed PDF, which lacks many rows) |
+| Portion weights | Bigman et al., *Curr Dev Nutr* 2024, 8(4):102135, Supplemental Table 1, weighed Nigerian portions |
+| Malt | Label, 57 kcal/100ml (Open Food Facts) |
+| Exercise | 2024 Adult Compendium of Physical Activities (brisk walk 4.8 MET, easy walk 3.0, calisthenics 3.5, jogging 7.5), worked at 80kg |
+
+Two rows use the nearest match and say so: pounded yam (boiled Nigerian
+yam) and akara (fried cowpea cakes). Puff-puff, chin chin, meat pie, gala,
+moi moi, soups and stews have no trustworthy figure and are left out on
+purpose. Blog figures ("eba, 400 per 100g") were rejected; that is dry garri.
+
+**What this corrected in the existing book:**
+
+- Malt was "about 250 calories" and "12 cubes of sugar". The label gives a
+  33cl bottle 188 kcal and 36g of sugar, so it is now 190 and 9 cubes, in
+  Switch 1, Chapter 1, Day 1 and the bottle diagram. The Day 1 weekly sum
+  went from 3,500 to about 2,700.
+- "An hour of hard exercise = a malt and a sausage roll" had no source for
+  the sausage roll. It is now "an hour of jogging is about 600, three
+  bottles of malt" (myth 4) and "a 30-minute brisk walk is about 190, one
+  bottle of malt" (Day 8).
+- Switch 3's "200–300 a meal" is now 170–220, from the measured swallows.
+- The contents still said "Fat-Burner Injections"; now "Slimming Injections".
+
+The book went from 83 to 93 pages.
+
 ## Still open
 
 | | |

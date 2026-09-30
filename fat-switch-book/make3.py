@@ -92,13 +92,15 @@ DAYS = [
       "That&rsquo;s all for today. You&rsquo;re only just getting started."],
      ("Sugary drinks don&rsquo;t fill you up",
       ["Your body has a way of telling you when you&rsquo;ve had enough to eat, but it hardly "
-       "notices what you drink. If you eat 250 calories of rice, you feel it. If you drink 250 "
-       "calories of malt, you feel nothing, and an hour later you still eat your normal dinner.",
+       "notices what you drink. Two serving spoons of rice and one bottle of malt carry about "
+       "the same calories, 190 or so. Eat the rice and you feel it. Drink the malt and you feel "
+       "nothing, and an hour later you still eat your normal dinner.",
        "That&rsquo;s why the bottle switch comes first. It takes a lot of calories out of your "
        "day without taking away any actual food.",
        "Try this with your own week. Count every bottle of malt, soft drink and beer you had in "
-       "the last seven days, and multiply by 250. Two bottles a day comes to 3,500 calories a "
-       "week, which is close to two full days of eating."]),),
+       "the last seven days. Each malt is about 190, a 50cl Coke or Fanta about 200, and a big "
+       "bottle of beer about 250. Two bottles of malt a day comes to about 2,700 calories a "
+       "week, which is more than a whole day of eating."]),),
 
     ("At your first meal today, leave the plate exactly as it is and only change the order you "
      "eat in: a glass of water first, then the meat and vegetables, and the swallow last.",
@@ -294,8 +296,8 @@ DAYS = [
       "Wall squat 90s &times; 3, 15 chair stands and 15 wall press-ups.",
       "Keep up the ten-minute walk after your biggest meal, every day from now on."],
      ("What walking really does for you",
-      ["An hour of hard exercise burns about the same as one bottle of malt and a sausage roll, "
-       "so exercise alone won&rsquo;t fix what&rsquo;s on your plate.",
+      ["A 30-minute brisk walk burns about 190 calories for somebody who weighs 80kg. That&rsquo;s "
+       "one bottle of malt, so exercise alone won&rsquo;t fix what&rsquo;s on your plate.",
        "What walking does is protect your muscle while you lose fat, so the weight you lose is "
        "mostly fat. It also helps you keep the weight off afterwards. People who manage to keep "
        "weight off for years are usually still walking or moving regularly.",

@@ -15,6 +15,7 @@ this is a thyroid, not your discipline" is quietly blaming the reader for
 a hormone.
 """
 import io
+from calfig import CALCSS, guide
 from profile import swallow
 from figures import il, ph, ARC, CLOCK, OIL, PROGRESS
 from icons import icon
@@ -450,8 +451,8 @@ CLOSING = f"""<div class="page closing">
 
 def main():
     s = io.open("book.src.html", encoding="utf-8").read()
-    s = s.replace("  .cover {", FIGCSS + "  .cover {", 1)
-    s += CH5 + CH6 + CH7 + CH8 + TRACKER + worksheet() + CLOSING
+    s = s.replace("  .cover {", FIGCSS + CALCSS + "  .cover {", 1)
+    s += CH5 + CH6 + CH7 + CH8 + guide() + TRACKER + worksheet() + CLOSING
     io.open("book.src.html", "w", encoding="utf-8", newline="\n").write(s)
     print("part 4: chapters 5-8, tracker, worksheet, closing")
 

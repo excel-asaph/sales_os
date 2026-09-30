@@ -66,6 +66,21 @@ SOURCES = {
     "pot":        ("twemoji", "1f372", "CC-BY-4.0"),
     "drink":      ("twemoji", "1f964", "CC-BY-4.0"),
     "water":      ("twemoji", "1f4a7", "CC-BY-4.0"),
+    # Added for the calorie guide, so every row of its tables has a picture.
+    "beer":       ("twemoji", "1f37a", "CC-BY-4.0"),
+    "drumstick":  ("twemoji", "1f357", "CC-BY-4.0"),
+    "yam":        ("twemoji", "1f360", "CC-BY-4.0"),
+    "beans":      ("twemoji", "1fad8", "CC-BY-4.0"),
+    "oil":        ("twemoji", "1fad7", "CC-BY-4.0"),
+    "snack":      ("twemoji", "1f369", "CC-BY-4.0"),
+    "noodles":    ("twemoji", "1f35c", "CC-BY-4.0"),
+    "pineapple":  ("twemoji", "1f34d", "CC-BY-4.0"),
+    "melon":      ("twemoji", "1f349", "CC-BY-4.0"),
+    "mango":      ("twemoji", "1f96d", "CC-BY-4.0"),
+    "cucumber":   ("twemoji", "1f952", "CC-BY-4.0"),
+    "gardenegg":  ("twemoji", "1f346", "CC-BY-4.0"),
+    "run":        ("twemoji", "1f3c3", "CC-BY-4.0"),
+    "walker":     ("twemoji", "1f6b6", "CC-BY-4.0"),
 }
 
 

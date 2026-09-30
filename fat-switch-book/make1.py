@@ -196,13 +196,15 @@ CHAPTERS_TOC = [
         "What 10X Means",
         "All Ten, on One Page",
         "Why the Order You Eat In Makes a Difference",
+        "How Your Body Loses Fat",
+        "What the Switches Add Up To",
         "The Two Switches That Do Half the Work",
     ]),
     ("3", "Flat Tummy Tea, Slimming Pills and the Waist Trainer", [
         "What Is Inside the Tea",
         "The Drug That Was Banned Worldwide, and Where It Turned Up",
         "Why the Scale Moves and Nothing Changes",
-        "Detox, Waist Trainers and Fat-Burner Injections",
+        "Detox, Waist Trainers and Slimming Injections",
     ]),
     ("4", "The 10-Day Fat-Burning Switch", [
         "Day 1 &ndash; The Bottle Switch",
@@ -239,6 +241,13 @@ CHAPTERS_TOC = [
     ]),
 ]
 
+GUIDE_TOC = ("The Nigerian Food Calorie Guide", [
+    "What 190 Calories Looks Like",
+    "Same Food, Cooked Differently",
+    "Calories in Everyday Nigerian Food",
+    "What Exercise Burns",
+])
+
 BACK_TOC = ("Your Trackers", [
     "Ten Switches to Tick Off",
     "The 90-Day Wall Chart",
@@ -259,12 +268,12 @@ def toc():
         out.append('      <ul>')
         out += [f'        <li>{x}</li>' for x in subs]
         out.append('      </ul></div>')
-    t, subs = BACK_TOC
-    out.append('    <div>')
-    out.append(f'      <p class="ch-line">{t}</p>')
-    out.append('      <ul>')
-    out += [f'        <li>{x}</li>' for x in subs]
-    out.append('      </ul></div>')
+    for t, subs in (GUIDE_TOC, BACK_TOC):
+        out.append('    <div>')
+        out.append(f'      <p class="ch-line">{t}</p>')
+        out.append('      <ul>')
+        out += [f'        <li>{x}</li>' for x in subs]
+        out.append('      </ul></div>')
     out.append('  </div>')
     out.append('</div>\n')
     return "\n".join(out) + "\n"
@@ -295,8 +304,8 @@ MYTHS = [
      "Chapter 7"),
     (4, "&ldquo;I must do heavy exercise or it won&rsquo;t count.&rdquo;",
      "Most of the weight comes off in the kitchen. Walking is what helps keep it off.",
-     "An hour of hard exercise burns about the same as one bottle of malt and a sausage "
-     "roll. So do keep moving, because it protects your muscle and helps stop the weight "
+     "An hour of jogging burns about 600 calories for somebody who weighs 80kg. That&rsquo;s "
+     "about three bottles of malt, which is easy to drink in one afternoon. So do keep moving, because it protects your muscle and helps stop the weight "
      "from coming back. Just don&rsquo;t expect the gym to make up for what&rsquo;s on "
      "your plate.",
      "Chapter 6"),
@@ -395,7 +404,7 @@ CH1 = f"""<div class="page">
 
 {ph('market', 'Everything in this book is sold in your nearest market, at the normal price.')}
   <h3>2. The drinks</h3>
-  <p>This is the biggest one, and hardly anybody counts it. A bottle of Malta Guinness has close to ten teaspoons of sugar in it, and because it&rsquo;s a drink, your body doesn&rsquo;t treat it as food. You finish 250 calories in a minute and a half and you&rsquo;re still hungry afterwards.</p>
+  <p>This is the biggest one, and hardly anybody counts it. A bottle of Malta Guinness has about nine teaspoons of sugar in it, and because it&rsquo;s a drink, your body doesn&rsquo;t treat it as food. You finish 190 calories in a minute and a half and you&rsquo;re still hungry afterwards.</p>
 
   <h3>3. More oil in the pot</h3>
   <p>Palm oil itself is fine. The trouble is how much of it goes in. A lot of us now pour oil straight from the bottle into the pot, and we deep fry far more often than people used to.</p>

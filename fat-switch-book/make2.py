@@ -16,6 +16,7 @@ import io
 from switches import SWITCHES
 from profile import swallow
 from figures import il, ORDER, BOTTLE
+from calfig import ch2_pages
 from icons import icon
 
 CH2_HEAD = """<div class="page">
@@ -83,6 +84,7 @@ def ch2():
 </div>
 
 """)
+    out.append(ch2_pages())
     return "".join(out)
 
 

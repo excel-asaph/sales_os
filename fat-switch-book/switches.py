@@ -5,24 +5,25 @@ a day of its own. They have to be the same ten, in the same order, with the
 same words -- a reader who finds switch 6 described differently in two
 places stops trusting the book.
 
-Every `saves` figure is deliberately a range and deliberately labelled
-"about". Precise calorie counts in a Nigerian kitchen are fiction: nobody
-weighs a wrap of eba, and a pot of stew varies by household. The ranges are
-honest and they are enough to make the point, which is that these are large
-numbers hiding in small habits.
+Every calorie figure is read from calories.py, which records the source of
+each one, so a number here can never disagree with the calorie guide.
 """
 from profile import swallow
+from calories import cal
+
+MALT = cal("Malta Guinness")
+EBA, POUNDED = cal("Eba"), cal("Pounded yam")
+OIL = cal("Palm oil or vegetable oil")
 
 SWITCHES = [
     (1, "The Bottle Switch",
      "Malta Guinness, Coke, Fanta, sweetened zobo and kunu, beer",
      "Pure water, zobo with no sugar, black tea",
      "This is the biggest one, and most people never notice it. One bottle of malt "
-     "carries about 250 calories, yet your body doesn't count it as food. You drink it, "
+     f"carries about {MALT} calories, yet your body doesn't count it as food. You drink it, "
      "and half an hour later you're as hungry as you were before you opened it. If you "
-     "take two a day, that alone is more than most people need to cut to start losing "
-     "weight.",
-     ["About 250&ndash;400 a bottle", "Nothing to give up but a habit"]),
+     f"take two a day, that's close to {MALT * 2} calories a day that you won't even miss.",
+     [f"About {MALT} a bottle", "Nothing to give up but a habit"]),
 
     (2, "The Order Switch",
      "Swallow first, then the soup and meat",
@@ -42,17 +43,17 @@ SWITCHES = [
      "that space with more soup, more vegetables and an extra piece of meat or fish. You "
      "will get up from the table just as full, because what fills your stomach is how "
      "much food is on the plate, and soup and vegetables do that job very well.",
-     ["About 200&ndash;300 a meal", "You still eat your food"]),
+     [f"About {EBA}&ndash;{POUNDED} a meal", "You still eat your food"]),
 
     (4, "The Oil Switch",
      "Deep frying, and a cup of oil poured into the pot",
      "Grilled, boiled or peppered, with two measured spoons of oil",
      "Oil carries more calories than anything else in your kitchen. One tablespoon is "
-     "about 120 and a small cup is around 900. Many of us now pour far more oil into a "
+     f"about {OIL} and a small cup is around 900. Many of us now pour far more oil into a "
      "pot of stew than our mothers ever did. Measure it with a spoon instead of pouring "
      "from the bottle, and leave deep frying for special occasions. Peppered chicken and "
      "grilled fish taste just as good.",
-     ["About 120 a spoon", "Stew tastes better, not worse"]),
+     [f"About {OIL} a spoon", "Stew tastes better, not worse"]),
 
     (5, "The Protein Switch",
      "One small piece of meat and plenty of starch",

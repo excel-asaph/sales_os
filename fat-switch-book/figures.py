@@ -99,8 +99,8 @@ BOTTLE = f"""<svg viewBox="0 0 420 222" role="img" aria-label="Sugar in a bottle
   <g transform="translate(63,6)">
   <path d="M40 46 L40 38 L58 38 L58 46 C58 52 66 58 66 70 L66 128 A8 8 0 0 1 58 136 L40 136 A8 8 0 0 1 32 128 L32 70 C32 58 40 52 40 46 Z"
         fill="var(--clay)" opacity="0.88" stroke="var(--ink-3)" stroke-width="1.6"/>
-  {_cubes(92, 40, 12, "var(--clay-soft)")}
-  <text x="92" y="100" font-size="12.5" font-weight="700" fill="var(--ink)" font-family="var(--body)">about 12 cubes of sugar</text>
+  {_cubes(92, 40, 9, "var(--clay-soft)")}
+  <text x="92" y="100" font-size="12.5" font-weight="700" fill="var(--ink)" font-family="var(--body)">about 9 cubes of sugar</text>
   <text x="92" y="118" font-size="11.5" fill="var(--ink-2)" font-family="var(--body)">gone in a minute and a half,</text>
   <text x="92" y="134" font-size="11.5" fill="var(--ink-2)" font-family="var(--body)">and you&#8217;re still hungry after</text>
   </g>
