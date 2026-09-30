@@ -117,7 +117,7 @@ personalised one rots.
 | `conditions` | Inserts caution boxes (diabetes, knee, pregnancy, thyroid, ulcer, hypertension) |
 | `dislikes` | **Substitutes** vetoed dishes via `SUBS`, and swaps the whole recipe via `ALTERNATES` where the dish cannot be edited |
 | `budget` | Swaps the protein list down |
-| `work` | Drives the movement plan |
+| `work` | **Not used yet.** The letter claims it shapes the movement plan; it does not. Fix before selling, see [PERSONALISED_EDITION_PLAN.md](PERSONALISED_EDITION_PLAN.md) |
 
 **The substitution rule is deliberate.** Deleting a vetoed dish leaves a
 paying customer with a *thinner* plan than the standard edition, which is
@@ -258,6 +258,5 @@ line sliced across a break.
 | | |
 |---|---|
 | **Photography** | Done. 22 images generated via Vertex; `prompts.json` and `prompts2.json` hold the briefs. |
-| **The intake form** | The ₦20,000 tier needs a form whose fields map onto `profile.STANDARD`. Not built. |
-| **Sales-OS integration** | The two-tier flow (ad → message → tier choice → form → generated PDF) is meant for the app revamp. |
+| **The ₦20,000 tier** | Collected in WhatsApp chat rather than a web form. Full plan, message drafts and the owner's open decisions in [PERSONALISED_EDITION_PLAN.md](PERSONALISED_EDITION_PLAN.md). For the app revamp. |
 | **Clinical review** | Dr. Akinyode. Chapter 8 and the diabetes caution most of all. |
