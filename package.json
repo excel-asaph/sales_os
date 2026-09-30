@@ -10,7 +10,8 @@
     "postinstall": "prisma generate",
     "worker": "tsx watch src/worker/followup-worker.ts",
     "worker:start": "tsx src/worker/followup-worker.ts",
-    "create-admin": "tsx scripts/create-admin.ts"
+    "create-admin": "tsx scripts/create-admin.ts",
+    "seed:dev": "tsx scripts/seed-dev.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

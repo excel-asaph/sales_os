@@ -16,8 +16,12 @@ See [V2_BUILD_PLAN.md](V2_BUILD_PLAN.md).
 | `.env` | points `DATABASE_URL` at the local Postgres. Its WhatsApp token is dead (Meta refuses it for its number), so nothing local can message real customers |
 
 **No production data on this computer.** The local database gets made-up
-data from a seed script (a VitalFix-like business, the Diabetes Fix
-product, sample customers and conversations). Real data is only ever
+data from `scripts/seed-dev.ts`: a demo business with two ebooks and six
+customers, one at each point of the sales flow (new lead, waiting to pay,
+receipt sent, sale completed, being followed up, waiting for a person).
+Their phone numbers start 2340000, which no network issues. The script
+refuses to run against any database that isn't on this computer. Log in
+with `admin@antflow.test` / `antflow-dev`. Real data is only ever
 copied inside Railway, with names and numbers scrambled, for the move
 rehearsal.
 
@@ -26,6 +30,7 @@ rehearsal.
 ```
 docker compose up -d                 # Postgres (start Docker Desktop first)
 npx prisma migrate deploy            # bring the schema up to date
+npm run seed:dev                     # made-up demo business, once (--reset to rebuild)
 npm run dev                          # the app, http://localhost:3000
 npm run worker                       # follow-ups, in a second terminal
 cloudflared tunnel --url http://localhost:3000   # a third terminal
