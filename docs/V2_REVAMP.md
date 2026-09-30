@@ -4,6 +4,22 @@ Started 2026-09-30 on branch `v2`. This is the discussion record and the
 working proposal, not a finished plan. Decisions get marked **Decided** as
 the owner makes them; everything else is a proposal to argue with.
 
+## Decided (2026-09-30)
+
+- **Who v2 is for:** the owner's brother adding more products to his
+  business, and other businesses the owner signs up and sells Antflow to.
+- **What can be sold:** digital products and ebooks, anything that can be
+  sold and delivered inside WhatsApp, in any niche (not only health).
+  Coaching calls, email, calls and services come later.
+- **Price:** ₦300,000 a month for now. Plans, locked features and credits
+  come later.
+- **Name and domain:** Antflow.
+- **Which businesses we accept:** any business selling digital products
+  or ebooks that can be sold on WhatsApp. Other kinds come later.
+- **How businesses connect WhatsApp: each business uses its own Meta App**
+  (see "Connecting WhatsApp without becoming a Tech Provider" below). Tech
+  Provider status is put off until sign-ups outgrow hands-on setup.
+
 ## What the owner asked for
 
 - A business can sign up, onboard its own product, and set everything up
@@ -173,17 +189,63 @@ terms. Meta requires those two for app review. It can live inside the same
 Next.js app as a separate route group, so there is still one thing to
 deploy.
 
-## The long pole: Meta Tech Provider
+## Connecting WhatsApp without becoming a Tech Provider (decided)
 
-To let *other* businesses connect *their own* WhatsApp numbers through our
-app, Meta requires us to be a Tech Provider: a Business-Verified portfolio
+v1 runs every business through **one** Meta App, ours (`NEXT_PUBLIC_META_APP_ID`,
+`WHATSAPP_APP_SECRET`). Meta lets an app message for WhatsApp accounts in
+the same portfolio as the app without review; reaching into *other*
+businesses' portfolios is what needs Tech Provider status and App Review.
+
+v2 avoids that by giving **each business its own Meta App, inside its own
+portfolio**, exactly as the owner's brother's setup was done:
+
+1. The business creates a Meta App in its own portfolio, adds WhatsApp and
+   its number, and creates a system-user token that never expires.
+2. It points the app's webhook at its own Antflow address.
+3. Its app ID, app secret, webhook verify token, access token, WABA ID and
+   number go into its Antflow workspace, encrypted like today's token.
+
+Why this is the right start:
+
+- No Tech Provider application and no App Review, so it isn't a blocker.
+- To Meta each business is a direct developer using its own app, so the
+  Tech Provider terms, including joint liability, don't apply to Antflow.
+- A ban stays inside that business's portfolio and can't sweep other
+  clients, which is the failure that took down Truefix.
+
+What it costs:
+
+- **About an hour of manual setup per business** on Meta's developer site.
+  At ₦300,000 a month, done-for-you setup is part of what they pay for.
+  The runbook is partly written already (META_CONVERSIONS_SETUP.md) and
+  becomes the onboarding guide.
+- **Code:** the webhook today verifies every message against one app
+  secret. In v2 each business gets its own webhook path
+  (e.g. `/api/whatsapp/<workspace>`) and its own stored secret and verify
+  token. Outbound sending already reads per-business credentials
+  (`getMetaCredentials`).
+- **Keep Antflow staff out of client portfolios.** Meta links accounts
+  through the people who administer them, so the business owns its
+  portfolio and app and hands over only the token. We don't become admins
+  on client portfolios.
+- One app and database for everyone, not a separate deployment per client:
+  the same isolation, without updating N copies.
+
+Tech Provider status (below) becomes the upgrade path for one-click
+self-serve sign-up later. The Embedded Signup button already exists in
+`src/components/whatsapp-connect-button.tsx`.
+
+## Later: Meta Tech Provider
+
+For one-click sign-up where *other* businesses connect *their own* WhatsApp
+numbers through *our* app, Meta requires us to be a Tech Provider: a Business-Verified portfolio
 and App Review for advanced access to `whatsapp_business_messaging` and
 `whatsapp_business_management`. Until then, Embedded Signup only works
 for WhatsApp accounts our own portfolio owns. Details and the liability
 terms are in [META_BSP_TECH_PROVIDER_NOTES.md](META_BSP_TECH_PROVIDER_NOTES.md).
 
-This is outside our control and takes time, so it should start **before**
-the code, not after. It also brings responsibilities:
+Not needed for launch (see above). When it's pursued, it takes weeks and
+brings responsibilities:
 
 - We become jointly liable for how clients use WhatsApp through us.
 - Every client has to accept Meta's own terms during onboarding.
@@ -213,15 +275,15 @@ the code, not after. It also brings responsibilities:
 
 ## A possible order of work
 
-0. **Start now, outside the code:** Meta Business Verification and the
-   Tech Provider application; decide the client acceptance policy.
+0. **Outside the code:** turn the brother's setup into a written,
+   repeatable client setup guide (one Meta App per business).
 1. **Data model:** workspaces, people and roles, per-product sales brain
    with inheritance, offers, channel-to-product routing. Move VitalFix and
    Diabetes Fix across as workspace number one, with nothing breaking.
 2. **Product setup in the app:** everything a product needs, including
    file upload and text extraction, playbook, FAQ, and the test chat.
 3. **Sign-up and onboarding:** real accounts, the checklist, templates,
-   Embedded Signup for new businesses.
+   and the per-business WhatsApp connection form with its own webhook.
 4. **Website, pricing and billing.**
 5. **Extras:** the personalised offer, Paystack checkout, more templates.
 
@@ -229,13 +291,6 @@ the code, not after. It also brings responsibilities:
 
 ## Open questions for the owner
 
-1. **Who is v2 for first?** Your brother's businesses running several
-   products (no Tech Provider needed), or outside sellers signing up
-   (Tech Provider needed)?
-2. **What can be sold?** Digital products only, or also courses, coaching
-   calls and services?
-3. **How should we charge?** A monthly naira plan, a fee per sale like
-   Selar, or a mix (small monthly fee plus a smaller per-sale fee)?
-4. **Name and domain** for the public site. Is it Antflow?
-5. **Which businesses will we accept?** Health products included, and with
-   what checks?
+All five first-round questions are answered (see "Decided" at the top).
+Next to discuss: the order of work, the onboarding steps in detail, and
+what the website needs to say.
