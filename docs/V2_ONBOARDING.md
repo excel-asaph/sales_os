@@ -17,9 +17,19 @@ Business name, what you sell (ebooks and digital products for now),
 country and currency (Nigeria and naira by default), and time zone, set
 automatically.
 
-### 3. Plan and payment
-₦300,000 a month, paid through Paystack. Whether payment comes before or
-after the setup call is an open question (see the bottom).
+### 3. Setup call, then the free plan (decided)
+No payment at sign-up. A setup call comes first, the business then runs on
+the free plan, and pays ₦300,000 a month to continue past it. Nothing in
+setup waits for payment.
+
+When the free plan runs out, the AI **stops starting new sales but never
+goes silent on a customer**: new messages still arrive in the dashboard,
+the conversation is handed to the business's team, and the owner is told
+why. No data is deleted, and paying switches the AI straight back on.
+
+Until Paystack billing exists (Phase 4), Antflow staff mark a workspace as
+paid from the admin view after a bank transfer, so billing never has to be
+built before the first clients.
 
 ### 4. The setup checklist
 
@@ -93,10 +103,9 @@ For the Antflow team only:
 
 ## Open questions
 
-1. **Pay first, or setup call first?** Paying at sign-up filters out
-   people who aren't serious. A call first suits a ₦300,000 price better,
-   because most buyers at that price want to talk to someone before paying.
-2. **A free trial?** For example seven days with a message limit. It costs
-   us AI usage, and every trial still needs a Meta App set up.
-3. **Who does WhatsApp setup by default:** the business on its own with
-   the guide, or always us on a call?
+1. **What the free plan includes.** Proposed: everything unlocked, for 14
+   days or the first 20 verified sales, whichever comes first. A sales
+   limit costs us nothing until the AI is earning them money.
+2. **Who does WhatsApp setup by default:** the business on its own with
+   the guide, or always us on the setup call? Proposed: us, on the call,
+   since there is a call anyway.

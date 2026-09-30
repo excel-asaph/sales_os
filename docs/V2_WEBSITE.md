@@ -25,7 +25,7 @@ the strongest demo we can give, and it runs on the same system.
 | How it works | the full flow with real screenshots: a conversation, a receipt checked, a file delivered, a follow-up |
 | Pricing | ₦300,000 a month and exactly what's included, especially the done-for-you WhatsApp setup |
 | Results | VitalFix's real numbers, with the brother's permission |
-| Sign in, Get started | into the app, at `app.` on the same domain |
+| Sign in, Get started | into the app. On a subdomain (`app.`) once a domain is bought; until then on the same address, by path |
 | Privacy policy, Terms | Meta requires a privacy policy URL on every Meta App, so each client's app points here too |
 
 ## The home page, top to bottom
@@ -61,13 +61,14 @@ the strongest demo we can give, and it runs on the same system.
 ## How it's built
 
 A `(marketing)` section of the same Next.js app: static, fast pages, no
-login. The app moves to `app.` on the same domain. One deployment, one
-codebase. Measurement: the Meta Pixel on the WhatsApp button, so the site
+login. **No domain is owned yet (decided),** so the site takes over `/`
+on the current Railway address and the app keeps its current paths
+(`/home`, `/dashboard` and so on). When a domain is bought, the app moves
+to `app.` on it. One deployment, one codebase. Measurement: the Meta Pixel on the WhatsApp button, so the site
 itself can be advertised later.
 
-## Open questions
+## Decided
 
-1. **Which domain do we own:** antflow.com, antflow.ng, antflow.ai?
-2. **Can we publish VitalFix's real numbers** on the Results page? That
-   needs the brother's permission.
-3. **Design:** Antflow's own look (logo, colours), or do we create one?
+- No domain yet; use the current address (above).
+- VitalFix's real numbers can go on the Results page.
+- We design Antflow's brand ourselves and iterate with the owner.

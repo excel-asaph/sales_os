@@ -19,6 +19,13 @@ the owner makes them; everything else is a proposal to argue with.
 - **How businesses connect WhatsApp: each business uses its own Meta App**
   (see "Connecting WhatsApp without becoming a Tech Provider" below). Tech
   Provider status is put off until sign-ups outgrow hands-on setup.
+- **How a new business starts:** a setup call first, then a free plan, then
+  they pay to continue. Payment never blocks setup or the first sales.
+- **Domain:** none yet. Keep the current Railway address until one is
+  bought; the site and the app share it by path, not by subdomain.
+- **Results page:** VitalFix's real numbers may be published.
+- **Branding:** we design Antflow's own logo, colours and type, and
+  iterate if the owner doesn't like it.
 
 ## The detailed plans
 
