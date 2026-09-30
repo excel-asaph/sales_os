@@ -20,6 +20,15 @@ the owner makes them; everything else is a proposal to argue with.
   (see "Connecting WhatsApp without becoming a Tech Provider" below). Tech
   Provider status is put off until sign-ups outgrow hands-on setup.
 
+## The detailed plans
+
+- [V2_BUILD_PLAN.md](V2_BUILD_PLAN.md): the new data structure, moving
+  VitalFix across safely, and the order of work in five phases.
+- [V2_ONBOARDING.md](V2_ONBOARDING.md): sign-up to first sale, adding
+  products and numbers, and Antflow's own admin view.
+- [V2_WEBSITE.md](V2_WEBSITE.md): the public site, its pages and copy
+  rules, and using Antflow's own AI to sell Antflow.
+
 ## What the owner asked for
 
 - A business can sign up, onboard its own product, and set everything up
