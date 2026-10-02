@@ -103,6 +103,19 @@ Users, memberships and roles; the workspace switcher; channels;
 per-business webhook; the migration and backfill; the platform-admin flag.
 **Done when:** VitalFix runs on v2 in production and nobody notices.
 
+Progress:
+- [x] Migration `20261001090000_v2_people_and_channels`: users, roles,
+  channels, channel-product links, conversation channel and product, and
+  the per-business Meta App fields. Adds only.
+- [x] `scripts/v2-backfill.ts`, with `--dry-run`; tested on local data,
+  and a second run changes nothing.
+- [ ] Login through `User`, the session carrying user and workspace, the
+  workspace switcher
+- [ ] Inbound messages matched to a `Channel`; conversations stamped with
+  channel and product
+- [ ] Per-business webhook `/api/whatsapp/<webhook key>`
+- [ ] Platform-admin access, logged to the event log
+
 ### Phase 2: products run themselves (1 to 2 weeks)
 Product settings with inheritance; FAQ per product; file upload and text
 extraction in the app; routing a conversation to a product (dedicated

@@ -11,7 +11,8 @@
     "worker": "tsx watch src/worker/followup-worker.ts",
     "worker:start": "tsx src/worker/followup-worker.ts",
     "create-admin": "tsx scripts/create-admin.ts",
-    "seed:dev": "tsx scripts/seed-dev.ts"
+    "seed:dev": "tsx scripts/seed-dev.ts",
+    "v2:backfill": "tsx scripts/v2-backfill.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

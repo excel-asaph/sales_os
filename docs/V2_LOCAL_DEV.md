@@ -31,6 +31,7 @@ rehearsal.
 docker compose up -d                 # Postgres (start Docker Desktop first)
 npx prisma migrate deploy            # bring the schema up to date
 npm run seed:dev                     # made-up demo business, once (--reset to rebuild)
+npm run v2:backfill                  # fill the v2 tables from the v1 data (safe to repeat)
 npm run dev                          # the app, http://localhost:3000
 npm run worker                       # follow-ups, in a second terminal
 cloudflared tunnel --url http://localhost:3000   # a third terminal

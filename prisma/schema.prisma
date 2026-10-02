@@ -84,6 +84,56 @@ enum FollowupReason {
   AWAITING_PAYMENT_EVIDENCE
 }
 
+/// A person's role inside one workspace (v2, docs/V2_BUILD_PLAN.md).
+/// OWNER and ADMIN can reach /settings and /manage, as isAdmin did; only an
+/// OWNER can remove other owners or close the workspace. AGENT is the old
+/// non-admin login.
+enum MemberRole {
+  OWNER
+  ADMIN
+  AGENT
+}
+
+enum ChannelStatus {
+  /// Receiving and sending.
+  ACTIVE
+  /// Kept for history (its conversations still point at it) but no longer
+  /// matched for inbound messages or used for sending.
+  DISCONNECTED
+}
+
+// ---------------------------------------------------------------------------
+// People (v2)
+// ---------------------------------------------------------------------------
+
+/// One person, across every workspace they belong to. v1 had no such thing:
+/// a HumanAgent row was both the person and their place in one business, so
+/// someone working for two businesses needed two logins. In v2 HumanAgent
+/// becomes the membership (userId + role) and this holds the login.
+///
+/// Added alongside HumanAgent's own contact/passwordHash rather than
+/// replacing them, so v1's login keeps working until switch-over and can be
+/// rolled back to (docs/V2_BUILD_PLAN.md, "add first, remove last").
+model User {
+  id              String    @id @default(cuid())
+  /// Always stored lowercased, so login is case-insensitive without a
+  /// functional index.
+  email           String    @unique
+  name            String
+  /// Null for someone who only ever signs in with Google.
+  passwordHash    String?   @map("password_hash")
+  googleId        String?   @unique @map("google_id")
+  emailVerifiedAt DateTime? @map("email_verified_at")
+  /// Antflow staff: can open any workspace for support. Every action taken
+  /// inside a workspace that isn't their own is written to the event log.
+  isPlatformAdmin Boolean   @default(false) @map("is_platform_admin")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  memberships HumanAgent[]
+
+  @@map("users")
+}
+
 // ---------------------------------------------------------------------------
 // Business
 // ---------------------------------------------------------------------------
@@ -115,6 +165,7 @@ model Business {
   customers       Customer[]
   humanAgents     HumanAgent[]
   faqEntries      FaqEntry[]
+  channels        Channel[]
 
   @@map("businesses")
 }
@@ -152,9 +203,68 @@ model BusinessMetaConnection {
   /// from connectedAt, which never changes after the initial signup.
   lastVerifiedAt DateTime? @map("last_verified_at")
 
+  // v2: each business brings its own Meta App (docs/V2_REVAMP.md,
+  // "Connecting WhatsApp without becoming a Tech Provider"), which reverses
+  // the note above for these three — the app secret and verify token now
+  // belong to the business, not the platform. Null until the business is
+  // moved onto its own webhook; until then it is served by the shared
+  // /api/whatsapp endpoint and the env-var secret, exactly as in v1.
+  metaAppId                   String? @map("meta_app_id")
+  /// Encrypted the same way as encryptedAccessToken. Checks the
+  /// X-Hub-Signature-256 header on this business's webhook.
+  encryptedAppSecret          String? @map("encrypted_app_secret")
+  /// Encrypted. What Meta sends back when the webhook address is first
+  /// saved in the business's Meta App.
+  encryptedWebhookVerifyToken String? @map("encrypted_webhook_verify_token")
+  /// Random, unguessable, and the only thing in the business's webhook
+  /// address (/api/whatsapp/<webhookKey>), so the address says which secret
+  /// to check a message against without revealing the business's id.
+  webhookKey                  String? @unique @map("webhook_key")
+
   business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   @@map("business_meta_connections")
+}
+
+/// One WhatsApp number a business can be reached on (v2). Replaces
+/// Business.whatsappPhoneNumberId, .additionalWhatsappPhoneNumberIds and
+/// .whatsappPhoneNumberLabels: three fields doing one table's job. Those
+/// stay, unread once v2 switches over, until the clean-up migration.
+model Channel {
+  id            String        @id @default(cuid())
+  businessId    String        @map("business_id")
+  /// Meta's phone_number_id. Unique across the platform: an inbound
+  /// webhook names only this, and it has to resolve to exactly one
+  /// business.
+  phoneNumberId String        @unique @map("phone_number_id")
+  /// The number as people read it, e.g. "+234 810 573 4894".
+  displayNumber String?       @map("display_number")
+  /// The business's own name for it, e.g. "Diabetes ads line".
+  label         String?
+  status        ChannelStatus @default(ACTIVE)
+  createdAt     DateTime      @default(now()) @map("created_at")
+
+  business      Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  products      ChannelProduct[]
+  conversations Conversation[]
+
+  @@index([businessId])
+  @@map("channels")
+}
+
+/// Which products a number sells. One row means a dedicated number, so
+/// every conversation on it is about that product; several means a shared
+/// number, where the ad, the opening message or the AI decides
+/// (docs/V2_REVAMP.md, "One number, several products").
+model ChannelProduct {
+  channelId String @map("channel_id")
+  productId String @map("product_id")
+
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([channelId, productId])
+  @@map("channel_products")
 }
 
 /// Business Rules Engine (PRD 5.10, Module 6) — every business-specific
@@ -270,8 +380,10 @@ model Product {
   category    String?
   available   Boolean @default(true)
 
-  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  orders   Order[]
+  business      Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  orders        Order[]
+  channels      ChannelProduct[]
+  conversations Conversation[]
 
   @@map("products")
 }
@@ -323,11 +435,20 @@ model Conversation {
   /// than fixed columns since it's read-only reference data, not queried
   /// field-by-field.
   referral         Json?
+  /// v2: the number this conversation is on, as a Channel. Supersedes
+  /// whatsappPhoneNumberId above, which stays until the clean-up migration.
+  channelId        String?           @map("channel_id")
+  /// v2: the product this conversation is about. Set from the channel when
+  /// it sells one product, otherwise from the ad or opening message, or by
+  /// the AI once the customer says what they want. Null means not known yet.
+  productId        String?           @map("product_id")
   createdAt        DateTime          @default(now()) @map("created_at")
   updatedAt        DateTime          @updatedAt @map("updated_at")
 
   customer     Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
   assignedTo   HumanAgent?       @relation(fields: [assignedHumanId], references: [id])
+  channel      Channel?          @relation(fields: [channelId], references: [id], onDelete: SetNull)
+  product      Product?          @relation(fields: [productId], references: [id], onDelete: SetNull)
   messages     Message[]
   facts        ConversationFact[]
   orders       Order[]
@@ -442,8 +563,16 @@ model HumanAgent {
   passwordHash String  @map("password_hash")
   isAdmin      Boolean @default(false) @map("is_admin")
   active       Boolean @default(true)
+  /// v2: the person this membership belongs to, and their role in this
+  /// business. Both null on a row the backfill (scripts/v2-backfill.ts)
+  /// hasn't reached yet; such a row still logs in the v1 way via
+  /// contact/passwordHash. `role` replaces isAdmin, which stays until the
+  /// clean-up migration.
+  userId       String?     @map("user_id")
+  role         MemberRole?
 
   business      Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user          User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
   conversations Conversation[]
 
   // Login (src/app/login/actions.ts) looks agents up by contact with
@@ -452,6 +581,8 @@ model HumanAgent {
   // between them unpredictably. Multiple NULLs are still fine under
   // Postgres unique-constraint semantics (NULL is never equal to NULL).
   @@unique([businessId, contact])
+  /// A person has at most one membership per business.
+  @@unique([businessId, userId])
   @@map("human_agents")
 }
 

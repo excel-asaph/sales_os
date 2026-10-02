@@ -138,11 +138,30 @@ followups                 -- Follow-Up Engine (PRD 8.6)
   id, conversation_id, step (1/2/3), scheduled_for, sent (bool), cancelled (bool)
 
 human_agents               -- Human Handoff (PRD 5.9, 8.7)
-  id, business_id, name, whatsapp_or_dashboard_contact, active (bool)
+  id, business_id, name, whatsapp_or_dashboard_contact, active (bool),
+  user_id, role (v2: owner/admin/agent) -- v2: a person's membership of one business
 
 events                    -- Event Engine (PRD Module 2) — append-only, source of truth
   id, conversation_id, type, payload (jsonb), created_at
+
+-- v2 (docs/V2_BUILD_PLAN.md), added alongside v1's fields, which stay until clean-up:
+users                     -- one person across every business they belong to
+  id, email (unique, lowercased), name, password_hash, google_id,
+  email_verified_at, is_platform_admin (bool), created_at
+
+channels                  -- one row per WhatsApp number; replaces the three number fields on businesses
+  id, business_id, phone_number_id (unique), display_number, label,
+  status (active/disconnected), created_at
+
+channel_products          -- which products a number sells (one = dedicated, several = shared)
+  channel_id, product_id
+
+conversations             -- gains channel_id, product_id
+business_meta_connections -- gains meta_app_id, encrypted_app_secret,
+                             encrypted_webhook_verify_token, webhook_key (unique)
 ```
+
+`scripts/v2-backfill.ts` (`npm run v2:backfill -- --dry-run`) fills the v2 tables from v1 data and can be run any number of times.
 
 `conversations.current_stage` is the Workflow Engine's state (PRD 5.4). `conversation_facts` is the flexible part of the Conversation Brain — objections, goals, extracted entities, and outstanding tasks all live here as typed rows rather than one big JSON blob, so querying "which objections are unresolved" stays a real SQL query, not a JSON scan.
 
