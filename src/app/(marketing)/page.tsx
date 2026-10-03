@@ -127,7 +127,7 @@ export default function HomePage() {
             <div className="mt-8 grid gap-6 sm:grid-cols-3">
               <Stat value={RESULTS.conversations.toLocaleString("en-NG")} label="conversations handled" />
               <Stat value={RESULTS.verifiedSales.toLocaleString("en-NG")} label="payments checked and books delivered" />
-              <Stat value={`${RESULTS.nightMessagesPct}%`} label="of customer messages sent between 9pm and 7am" />
+              <Stat value={`${RESULTS.medianFirstReplySeconds} seconds`} label="typical time to the first reply" />
             </div>
             <Link href="/results" className="mt-8 inline-block font-semibold text-(--mk-coral) hover:underline">
               See the full results

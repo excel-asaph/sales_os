@@ -91,8 +91,10 @@ variables):
 - `NEXT_PUBLIC_ANTFLOW_WHATSAPP`: Antflow's own number, answered by
   Antflow's AI. Until it's set the main button goes to the Pricing page.
 - `NEXT_PUBLIC_ANTFLOW_EMAIL`: the contact address in the footer and legal pages.
-- `RESULTS`: VitalFix's real figures from `scripts/site-stats.ts` run
-  against production. Until then the results section and page don't show.
+- `RESULTS`: filled in 2026-10-04 from production (read-only), see
+  `site-config.ts`. Re-run `scripts/site-stats.ts` to refresh them; the
+  command is in its header. VitalFix's revenue was left out until the
+  business agrees to publish it.
 - The privacy policy and terms should be read by a lawyer, and name the
   registered business once there is one.
 - The Meta Pixel (`NEXT_PUBLIC_META_PIXEL_ID`) is configured but not yet

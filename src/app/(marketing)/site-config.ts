@@ -32,4 +32,17 @@ export const RESULTS: null | {
   medianFirstReplySeconds: number;
   /** Share of customer messages sent between 9pm and 7am, 0–100. */
   nightMessagesPct: number;
-} = null;
+} = {
+  // VitalFix in production, counted 2026-10-04 with scripts/site-stats.ts
+  // (read-only): 7,766 conversations, 1,645 verified sales, 402 of them
+  // after a follow-up, first reply median 9 s (90% within 10 s) over 7,691
+  // conversations, 27% of 23,685 customer messages between 9pm and 7am.
+  // Revenue (NGN 16,386,000) deliberately not published without the
+  // business's say-so.
+  since: "September 2026",
+  conversations: 7766,
+  verifiedSales: 1645,
+  salesAfterFollowupPct: 24,
+  medianFirstReplySeconds: 9,
+  nightMessagesPct: 27,
+};

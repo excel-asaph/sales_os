@@ -19,7 +19,7 @@ export default function ResultsPage() {
     { value: r.verifiedSales.toLocaleString("en-NG"), label: "payments checked and books delivered" },
     { value: `${r.salesAfterFollowupPct}%`, label: "of sales came after a follow-up" },
     {
-      value: r.medianFirstReplySeconds < 60 ? `${r.medianFirstReplySeconds}s` : `${Math.round(r.medianFirstReplySeconds / 60)} min`,
+      value: r.medianFirstReplySeconds < 60 ? `${r.medianFirstReplySeconds} seconds` : `${Math.round(r.medianFirstReplySeconds / 60)} minutes`,
       label: "typical time to the first reply",
     },
     { value: `${r.nightMessagesPct}%`, label: "of customer messages sent between 9pm and 7am" },
