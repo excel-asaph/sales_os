@@ -70,10 +70,23 @@ yourself, so it can't reach customers.
    NEXT_PUBLIC_META_APP_ID=...
    META_WHATSAPP_BUSINESS_ACCOUNT_ID=...
    ```
-6. **Webhook:** WhatsApp → Configuration → Edit. Callback URL is the
-   tunnel address plus `/api/whatsapp`; the verify token is the value of
-   `WHATSAPP_WEBHOOK_VERIFY_TOKEN` in `.env`. Then subscribe to the
-   **messages** field.
+6. **Give the demo business its own webhook address** (the v2 way, one
+   per business). Add an encryption key for stored secrets to `.env`,
+   once, and never change it afterwards:
+   ```
+   CREDENTIAL_ENCRYPTION_KEY=<output of: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))">
+   ```
+   Then copy the test app's details from `.env` into the demo business:
+   ```
+   npm run v2:backfill -- --env-credentials-for <demo business id>
+   ```
+   The id is printed by `npm run v2:backfill -- --dry-run`. The script
+   prints the address, `/api/whatsapp/<key>`.
+7. **Webhook:** WhatsApp → Configuration → Edit. Callback URL is the
+   tunnel address plus that `/api/whatsapp/<key>`; the verify token is the
+   value of `WHATSAPP_WEBHOOK_VERIFY_TOKEN` in `.env`. Then subscribe to
+   the **messages** field. (Plain `/api/whatsapp` also still works: that
+   is v1's shared address.)
 
 The temporary token expires daily. Regenerating it on the API Setup page
 is fine for testing; a permanent system-user token is only needed for a

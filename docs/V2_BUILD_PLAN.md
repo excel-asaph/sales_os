@@ -80,6 +80,10 @@ with two purchases, which is already how v1 works.
      `productId` set to Diabetes Fix (VitalFix sells one product)
    - empty `ProductSettings` for Diabetes Fix, so it inherits everything
      VitalFix has today
+   - **Before running it with `--env-credentials-for`:** production
+     must have `CREDENTIAL_ENCRYPTION_KEY` set (64 hex characters), and
+     it must never change afterwards, or every stored secret becomes
+     unreadable. The script prints VitalFix's new webhook address.
 3. **Prove it's the same.** Replay a set of real past conversations
    through both v1 and v2 in staging and compare the system prompt each
    builds. They should be identical apart from the new product section.
@@ -123,7 +127,13 @@ Progress:
 - [ ] The dashboard's number switcher and filters reading `Channel`
   instead of the v1 number fields (needed before the clean-up migration,
   not before switch-over)
-- [ ] Per-business webhook `/api/whatsapp/<webhook key>`
+- [x] Per-business webhook `/api/whatsapp/<webhook key>` (`src/app/api/whatsapp/[key]/route.ts`).
+  Checked against that business's own app secret and verify token, never
+  unsigned, and drops a message for any number that isn't the business's
+  own. The shared `/api/whatsapp` runs the same code
+  (`src/lib/whatsapp-webhook.ts`) and stays as the fallback. Tested with
+  signed fake messages; still to be proven against Meta with the test
+  Meta App.
 - [ ] Platform-admin access, logged to the event log
 
 ### Phase 2: products run themselves (1 to 2 weeks)

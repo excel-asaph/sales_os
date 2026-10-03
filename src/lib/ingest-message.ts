@@ -38,13 +38,21 @@ const CONVERSATION_ENDING_STAGES: ConversationStage[] = [
  */
 export async function ingestInboundMessage(
   value: WhatsAppChangeValue,
-  message: NonNullable<WhatsAppChangeValue["messages"]>[number]
+  message: NonNullable<WhatsAppChangeValue["messages"]>[number],
+  /** Set by a per-business webhook: drop anything for another business's number. */
+  onlyBusinessId?: string
 ) {
   const route = await routeInbound(value.metadata.phone_number_id);
 
   if (!route) {
     console.warn(
       `No business, or only a disconnected channel, for WhatsApp phone_number_id=${value.metadata.phone_number_id}; dropping message ${message.id}`
+    );
+    return;
+  }
+  if (onlyBusinessId && route.businessId !== onlyBusinessId) {
+    console.warn(
+      `Webhook for business ${onlyBusinessId} carried a message for phone_number_id=${value.metadata.phone_number_id}, which belongs to business ${route.businessId}; dropping message ${message.id}`
     );
     return;
   }

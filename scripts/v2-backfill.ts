@@ -230,7 +230,11 @@ async function main() {
           console.log(`${business.name} (${business.id})`);
           console.log(`  logins linked: ${users}, channels created: ${channels}, channel-product links: ${links}`);
           console.log(`  conversations given a channel: ${channelsSet}, given a product: ${productsSet}`);
-          if (envCredentialsFor === business.id) console.log(`  Meta app credentials copied from env, webhook key set`);
+          if (envCredentialsFor === business.id) {
+            const { webhookKey } = await tx.businessMetaConnection.findUniqueOrThrow({ where: { businessId: business.id } });
+            console.log(`  Meta app credentials copied from env. Webhook address, for the Meta App's Callback URL:`);
+            console.log(`    <app address>/api/whatsapp/${webhookKey}`);
+          }
         }
 
         if (dryRun) throw new DryRunRollback();
