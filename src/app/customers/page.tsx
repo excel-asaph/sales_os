@@ -8,7 +8,7 @@ import { stageStyle } from "@/lib/stage-display";
 import { STAGE_VALUES } from "@/lib/tools";
 import type { ConversationStage } from "@/generated/prisma/client";
 import { clampMaxFollowups } from "@/lib/followup-sequence";
-import { getBusinessConfig } from "@/lib/knowledge";
+import { getEffectiveConfig } from "@/lib/knowledge";
 import { getBusinessNumbers } from "@/lib/whatsapp-numbers";
 import { getNumberFilterCookie, resolveEffectiveNumber } from "@/lib/number-filter";
 import { AppShell } from "@/components/app-shell";
@@ -137,7 +137,9 @@ export default async function CustomersPage({
         },
       },
     }),
-    getBusinessConfig(session.businessId),
+    // Business-level: the countdown bars are drawn against the business's
+    // follow-up count, even for a product that overrides it.
+    getEffectiveConfig(session.businessId),
   ]);
   const maxFollowups = clampMaxFollowups(config.maxFollowups);
   const numberLabels = new Map(getBusinessNumbers(business).map((n) => [n.id, n.label]));

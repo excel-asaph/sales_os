@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { executeAction, type ActionContext } from "@/lib/actions";
-import { getBusinessConfig } from "@/lib/knowledge";
+import { getEffectiveConfig } from "@/lib/knowledge";
 
 // The opening turn is the one turn where the AI has no information to
 // reason about: the customer has just arrived, nothing is known about them,
@@ -95,8 +95,10 @@ export async function tryGreetingShortcut(conversationId: string): Promise<boole
   if (!inbound.every((m) => isPlainTextOpener(m.type))) return false;
 
   const businessId = conversation.customer.businessId;
-  const config = await getBusinessConfig(businessId);
-  const playbook = (config.playbook as Record<string, string> | null) ?? {};
+  // On a dedicated number this is the product's own pitch; on a shared
+  // number before the product is known, the business's.
+  const config = await getEffectiveConfig(businessId, conversation.productId);
+  const playbook = config.playbook ?? {};
 
   // Whichever pitch matches this business's payment flow — the same key the
   // model is told to send verbatim rather than retype (system-prompt.ts

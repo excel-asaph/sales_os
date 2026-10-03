@@ -27,6 +27,15 @@ the owner makes them; everything else is a proposal to argue with.
 - **Branding:** we design Antflow's own logo, colours and type, and
   iterate if the owner doesn't like it.
 
+## Decided (2026-10-03)
+
+- **A product's playbook overrides the business's script by script.** A
+  product only sets the scripts it changes, such as its own pitch; every
+  other script still comes from the business.
+- **Bank accounts stay business-wide** for now; per-product accounts can
+  be added later.
+- **One tone of voice per business**, not per product.
+
 ## The detailed plans
 
 - [V2_BUILD_PLAN.md](V2_BUILD_PLAN.md): the new data structure, moving

@@ -8,6 +8,7 @@ import { isWithinCustomerServiceWindow } from "@/lib/whatsapp-window";
 import { FOLLOWUP_SEQUENCE, stepDefinition, clampMaxFollowups } from "@/lib/followup-sequence";
 import { addCustomerTag } from "@/lib/customer-tags";
 import { resolveFallbackMessage } from "@/lib/followups";
+import { getConversationConfig } from "@/lib/knowledge";
 import { formatSystemNote, describeTemplateFallback } from "@/lib/system-notes";
 import type { ConversationStage } from "@/generated/prisma/client";
 
@@ -71,9 +72,9 @@ async function handleFollowup(followupId: string) {
   if (!followup || followup.sent || followup.cancelled) return;
 
   const { conversation } = followup;
-  const config = await prisma.businessConfig.findUnique({
-    where: { businessId: conversation.customer.businessId },
-  });
+  // The conversation's product's settings over the business's (v2): its own
+  // follow-up count and on/off, under the business-wide pause.
+  const config = await getConversationConfig(conversation.id);
 
   // Verified SINCE this follow-up was scheduled, not "ever" — conversations
   // now persist across multiple purchases, so an all-time check would let
@@ -86,7 +87,7 @@ async function handleFollowup(followupId: string) {
   // Business-wide kill switch (Settings) — checked here too, not just in
   // createFollowup, so anything already scheduled before the pause also
   // stops rather than firing anyway.
-  const businessPaused = config?.followupsEnabled === false;
+  const businessPaused = !config.followupsEnabled;
 
   if (orderVerified || stageBlocksFollowup || businessPaused) {
     await prisma.$transaction([
@@ -109,7 +110,7 @@ async function handleFollowup(followupId: string) {
     return;
   }
 
-  const maxSteps = clampMaxFollowups(config?.maxFollowups ?? FOLLOWUP_SEQUENCE.length);
+  const maxSteps = clampMaxFollowups(config.maxFollowups);
 
   // A step beyond the business's configured cap is a silent "did they
   // ever come back?" check scheduled a day after the real sequence's
@@ -258,11 +259,8 @@ async function deliverFollowup(followup: LoadedFollowup): Promise<DeliveryResult
     // which would otherwise be sent to the customer as the whole message
     // (followups.ts).
     console.error(`Follow-up ${followup.id}: AI runtime failed, sending fallback message`, error);
-    const businessConfig = await prisma.businessConfig.findUnique({ where: { businessId } });
-    const fallbackText = resolveFallbackMessage(
-      followup.message,
-      businessConfig?.playbook as Record<string, string> | null
-    );
+    const { playbook } = await getConversationConfig(conversation.id);
+    const fallbackText = resolveFallbackMessage(followup.message, playbook);
     await sendWhatsAppText(businessId, conversation.customer.phoneNumber, fallbackText, phoneNumberId, conversation.id);
     await prisma.message.create({
       data: {
@@ -292,10 +290,7 @@ async function scheduleNext(followup: LoadedFollowup, maxSteps: number) {
     const nextStepDef = stepDefinition(nextStep) ?? FOLLOWUP_SEQUENCE[FOLLOWUP_SEQUENCE.length - 1];
     const scheduledFor = new Date(Date.now() + nextStepDef.deltaHours * 60 * 60 * 1000);
 
-    const config = await prisma.businessConfig.findUnique({
-      where: { businessId: conversation.customer.businessId },
-    });
-    const playbook = (config?.playbook as Record<string, string> | null) ?? {};
+    const playbook = (await getConversationConfig(conversation.id)).playbook ?? {};
     const fallbackMessage = playbook.payment_followup || DEFAULT_FALLBACK_MESSAGE;
 
     const next = await prisma.followup.create({

@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { sendWhatsAppText, sendWhatsAppDocument } from "@/lib/whatsapp-send";
-import { getPaymentAccounts, getBusinessConfig, searchProducts } from "@/lib/knowledge";
+import { getPaymentAccounts, getEffectiveConfig, getConversationConfig, searchProducts } from "@/lib/knowledge";
 import { downloadWhatsAppMedia, persistMediaFile, readPersistedMedia } from "@/lib/media-storage";
 import { verifyReceiptContent, type ReceiptExtraction, type PaymentAccountRef } from "@/lib/receipt-verification";
 import { getBoss, FOLLOWUP_QUEUE } from "@/lib/queue";
@@ -90,8 +90,9 @@ async function sendMessage(ctx: ActionContext, text: string) {
  * string and sends it through the same path as sendMessage, byte-for-byte.
  */
 async function sendTemplateMessage(ctx: ActionContext, templateKey: string) {
-  const config = await getBusinessConfig(ctx.businessId);
-  const playbook = (config.playbook as Record<string, string> | null) ?? {};
+  // The conversation's product's scripts, falling back to the business's.
+  const config = await getConversationConfig(ctx.conversationId);
+  const playbook = config.playbook ?? {};
   const text = playbook[templateKey];
   if (!text) {
     return { sent: false, reason: `No template found for key "${templateKey}".` };
@@ -102,7 +103,9 @@ async function sendTemplateMessage(ctx: ActionContext, templateKey: string) {
 async function sendProduct(ctx: ActionContext, productId: string, resend = false) {
   const [product, config] = await Promise.all([
     prisma.product.findUnique({ where: { id: productId } }),
-    getBusinessConfig(ctx.businessId),
+    // The settings of the product being sent, not the conversation's, in
+    // case the customer is buying something else from a shared number.
+    getEffectiveConfig(ctx.businessId, productId),
   ]);
   if (!product) return { delivered: false, reason: "product not found" };
 
@@ -266,7 +269,8 @@ async function requestPaymentVerification(ctx: ActionContext, productId: string,
   }
 
   const [config, paymentAccounts] = await Promise.all([
-    getBusinessConfig(ctx.businessId),
+    // The settings of the product being paid for.
+    getEffectiveConfig(ctx.businessId, productId),
     getPaymentAccounts(ctx.businessId),
   ]);
 
@@ -832,7 +836,7 @@ async function createFollowup(
   // Business-wide kill switch (Settings) — refuse to start a new sequence
   // at all while paused, so nothing accumulates that the worker would just
   // have to cancel again on its own once it fires.
-  const config = await getBusinessConfig(ctx.businessId);
+  const config = await getConversationConfig(ctx.conversationId);
   if (!config.followupsEnabled) {
     return { scheduled: false, paused: true };
   }
@@ -881,7 +885,7 @@ async function createFollowup(
   // bare key would reach the customer as the entire message (followups.ts).
   // The worker resolves it again on the way out, covering rows written
   // before this did.
-  const fallbackMessage = resolveFallbackMessage(message, config.playbook as Record<string, string> | null);
+  const fallbackMessage = resolveFallbackMessage(message, config.playbook);
 
   const scheduledFor = new Date(Date.now() + hours * 60 * 60 * 1000);
   const followup = await prisma.followup.create({

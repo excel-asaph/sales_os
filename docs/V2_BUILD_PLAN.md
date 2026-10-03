@@ -154,6 +154,16 @@ to your own AI before going live.
 **Done when:** the brother adds his second ebook and sells it without us
 touching code.
 
+Progress:
+- [x] `ProductSettings` and per-product FAQ (migration
+  `20261003150000_v2_product_settings`), merged over the business's
+  settings by `getEffectiveConfig` in `src/lib/knowledge.ts`, the only
+  place the merge happens. The AI turn, greeting, delivery, receipt
+  checks and follow-ups all use it. A product with no settings sells
+  exactly as the business does (tested). The business's follow-up pause
+  always wins over a product.
+- [ ] Editing a product's sales settings and FAQ in the app
+
 ### Phase 3: onboarding (1 to 2 weeks)
 Sign-up, the setup checklist, the "Ebook seller" starting template, the
 guided WhatsApp connection with a live connection check, team invites, and

@@ -4,7 +4,7 @@ import { buildSystemPrompt, buildProductContentBlock } from "@/lib/system-prompt
 import { actionContractTools } from "@/lib/tools";
 import { executeAction, type ActionContext } from "@/lib/actions";
 import { loadConversationBrain, renderConversationBrain } from "@/lib/conversation-brain";
-import { getBusinessConfig, getFaqEntries } from "@/lib/knowledge";
+import { getEffectiveConfig, getFaqEntries } from "@/lib/knowledge";
 import { prisma } from "@/lib/prisma";
 
 // A single rich turn (search a product, send 2-3 short messages, update
@@ -85,14 +85,6 @@ async function loadDeliveredProductContent(
   conversationId: string,
   businessId: string
 ): Promise<{ name: string; contentText: string } | null> {
-  // Settings → General can switch this off without deleting the text, so a
-  // business can flip it while watching the claim-filter card and flip back.
-  const config = await prisma.businessConfig.findUnique({
-    where: { businessId },
-    select: { productContentEnabled: true },
-  });
-  if (config && !config.productContentEnabled) return null;
-
   const delivered = await prisma.event.findFirst({
     where: { conversationId, type: "PRODUCT_DELIVERED" },
     orderBy: { createdAt: "desc" },
@@ -100,6 +92,12 @@ async function loadDeliveredProductContent(
   });
   const productId = (delivered?.payload as { productId?: string } | null)?.productId;
   if (!productId) return null;
+
+  // Settings → General can switch this off without deleting the text, so a
+  // business can flip it while watching the claim-filter card and flip back.
+  // The delivered product's own setting wins, falling back to the business's.
+  const config = await getEffectiveConfig(businessId, productId);
+  if (!config.productContentEnabled) return null;
 
   const product = await prisma.product.findUnique({
     where: { id: productId },
@@ -139,15 +137,15 @@ export async function runAIEmployeeTurn(
 
   const [brain, config, faq, productContent] = await Promise.all([
     loadConversationBrain(conversationId),
-    getBusinessConfig(businessId),
-    getFaqEntries(businessId),
+    getEffectiveConfig(businessId, conversation.productId),
+    getFaqEntries(businessId, conversation.productId),
     loadDeliveredProductContent(conversationId, businessId),
   ]);
 
   const system = buildSystemPrompt({
     name: conversation.customer.business.name,
     deliverBeforePayment: config.deliverBeforePayment,
-    playbook: config.playbook as Record<string, string> | null,
+    playbook: config.playbook,
     faq,
   });
 

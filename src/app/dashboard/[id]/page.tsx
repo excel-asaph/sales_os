@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { getNumberFilterCookie, resolveEffectiveNumber } from "@/lib/number-filter";
 import { Check, ExternalLink, FileText, AlertTriangle, UserX2, UserRound, Info } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { getConversationConfig } from "@/lib/knowledge";
 import { formatNaira } from "@/lib/currency";
 import type { ConversationStage, MessageType } from "@/generated/prisma/client";
 import { AppShell } from "@/components/app-shell";
@@ -32,7 +33,7 @@ import {
   PIPELINE_MILESTONES,
   milestoneIndexForStage,
 } from "@/lib/stage-display";
-import { clampMaxFollowups, FOLLOWUP_SEQUENCE } from "@/lib/followup-sequence";
+import { clampMaxFollowups } from "@/lib/followup-sequence";
 import { isSystemNote, stripSystemNotePrefix } from "@/lib/system-notes";
 import { sendHumanReply } from "./actions";
 
@@ -85,10 +86,9 @@ export default async function ConversationReviewPage({
     redirect("/dashboard");
   }
 
-  const businessConfig = await prisma.businessConfig.findUnique({
-    where: { businessId: session.businessId },
-  });
-  const maxFollowups = clampMaxFollowups(businessConfig?.maxFollowups ?? FOLLOWUP_SEQUENCE.length);
+  // This conversation's product's follow-up count, falling back to the business's.
+  const { maxFollowups: configuredFollowups } = await getConversationConfig(conversation.id);
+  const maxFollowups = clampMaxFollowups(configuredFollowups);
   // The step beyond maxFollowups is an internal "did they come back?"
   // check with no real content (src/worker/followup-worker.ts) — nothing
   // a human needs to see.

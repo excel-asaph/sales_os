@@ -333,12 +333,16 @@ model BusinessConfig {
 model FaqEntry {
   id         String   @id @default(cuid())
   businessId String   @map("business_id")
+  /// v2: set for a question about one product only. Null means it applies
+  /// to every product, which is every v1 entry.
+  productId  String?  @map("product_id")
   question   String
   answer     String
   order      Int      @default(0)
   createdAt  DateTime @default(now()) @map("created_at")
 
   business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  product  Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("faq_entries")
 }
@@ -384,8 +388,41 @@ model Product {
   orders        Order[]
   channels      ChannelProduct[]
   conversations Conversation[]
+  settings      ProductSettings?
+  faqEntries    FaqEntry[]
 
   @@map("products")
+}
+
+/// v2: one product's own sales settings (docs/V2_BUILD_PLAN.md, Phase 2).
+/// Every field is optional, and an empty one uses the business's
+/// BusinessConfig value, so a product with no row here, or an empty row,
+/// sells exactly as the business does. The merge lives in one place,
+/// getEffectiveConfig in src/lib/knowledge.ts; nothing else should read
+/// these fields directly.
+///
+/// Tone of voice and bank accounts are deliberately business-wide (owner's
+/// decision, 2026-10-03).
+model ProductSettings {
+  id        String @id @default(cuid())
+  productId String @unique @map("product_id")
+  /// Overrides the business playbook script by script: a key set here
+  /// replaces that one script, and every other script still comes from the
+  /// business. Its pitch scripts (payment_first_pitch, delivery_first_pitch)
+  /// are the product's own opening message.
+  playbook               Json?
+  deliverBeforePayment   Boolean? @map("deliver_before_payment")
+  /// Can only switch this product's follow-ups off. The business's own
+  /// switch is a pause on everything and always wins.
+  followupsEnabled       Boolean? @map("followups_enabled")
+  maxFollowups           Int?     @map("max_followups")
+  aiHandlesReceiptIssues Boolean? @map("ai_handles_receipt_issues")
+  productContentEnabled  Boolean? @map("product_content_enabled")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_settings")
 }
 
 // ---------------------------------------------------------------------------
