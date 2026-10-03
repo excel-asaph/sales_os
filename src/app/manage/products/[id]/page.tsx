@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdminPage } from "@/lib/viewer";
 import { getEffectiveConfig } from "@/lib/knowledge";
 import { AppShell } from "@/components/app-shell";
+import { ProductFileUpload } from "@/components/product-file-upload";
 import { SubmitButton } from "@/components/submit-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -114,6 +115,38 @@ export default async function ProductSalesSettingsPage({ params }: { params: Pro
       }
     >
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Product file</CardTitle>
+            <CardDescription>
+              The PDF the AI sends a customer, and whose text it answers questions from after delivery.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4 text-sm">
+            {product.fileUrl ? (
+              <div className="flex flex-col gap-1">
+                <a href={product.fileUrl} target="_blank" rel="noreferrer" className="w-fit font-medium underline underline-offset-4">
+                  Open the current file
+                </a>
+                <span className="text-muted-foreground">
+                  {product.contentText
+                    ? `The AI can read ${product.contentText.split(/\s+/).length.toLocaleString()} words of it.`
+                    : "The AI has no text from this file, so it can't answer questions from it."}
+                </span>
+              </div>
+            ) : (
+              <p className="text-muted-foreground">No file yet. Customers can&apos;t be sent this product until there is one.</p>
+            )}
+            <div>
+              <ProductFileUpload productId={product.id} hasFile={Boolean(product.fileUrl)} />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              PDF only, up to 50 MB. A new version replaces the text the AI reads; customers who already have the old
+              one keep it.
+            </p>
+          </CardContent>
+        </Card>
+
         {/* keepMounted: switching tabs mustn't throw away a script half-typed
             in another one. */}
         <Tabs defaultValue="general">

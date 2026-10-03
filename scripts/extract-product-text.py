@@ -1,4 +1,7 @@
 """
+v2: superseded by uploading the PDF in the app, which extracts the text the
+same way (src/lib/product-file.ts). Kept as the fallback.
+
 Extract a product's text from its PDF so the AI can answer content questions
 without a retrieval layer (see docs/EBOOK_KNOWLEDGE.md).
 

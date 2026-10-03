@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
@@ -123,6 +124,49 @@ export async function persistMediaFile(buffer: Buffer, mimeType: string, mediaId
   await fs.mkdir(RECEIPT_STORAGE_DIR, { recursive: true });
   await fs.writeFile(path.join(RECEIPT_STORAGE_DIR, filename), buffer);
   return `/api/media/receipts/${filename}`;
+}
+
+const PRODUCT_STORAGE_DIR = path.join(process.cwd(), "storage", "products");
+
+/**
+ * Stores a product file uploaded in the app (v2, src/app/api/products/[id]/file)
+ * and returns the address the AI sends customers. Same two backends as
+ * persistMediaFile. The key carries a random part, so the address can't be
+ * guessed from the product, and never overwrites: an old address may still
+ * be in past customers' chats.
+ *
+ * The local-disk fallback is for development only. WhatsApp fetches the file
+ * from its address itself, which it can't do from this computer, so local
+ * products can't actually be delivered.
+ */
+export async function persistProductFile(buffer: Buffer, businessId: string, originalName: string): Promise<string> {
+  const safeName = (originalName.replace(/\.pdf$/i, "").replace(/[^a-zA-Z0-9._-]+/g, "-").slice(0, 80) || "product") + ".pdf";
+  const filename = `${crypto.randomUUID()}-${safeName}`;
+
+  const objectStorage = getObjectStorageConfig();
+  if (objectStorage) {
+    const key = `products/${businessId}/${filename}`;
+    await getS3Client(objectStorage).send(
+      new PutObjectCommand({
+        Bucket: objectStorage.bucket,
+        Key: key,
+        Body: buffer,
+        ContentType: "application/pdf",
+        // Customers see this name when WhatsApp shows the document.
+        ContentDisposition: `inline; filename="${safeName}"`,
+      })
+    );
+    return `${objectStorage.publicBaseUrl.replace(/\/$/, "")}/${key}`;
+  }
+
+  console.warn(`[media-storage:local-disk] STORAGE_* not fully configured — saving product file ${filename} to local disk`);
+  await fs.mkdir(PRODUCT_STORAGE_DIR, { recursive: true });
+  await fs.writeFile(path.join(PRODUCT_STORAGE_DIR, filename), buffer);
+  return `/api/media/products/${filename}`;
+}
+
+export function productStorageDir(): string {
+  return PRODUCT_STORAGE_DIR;
 }
 
 export function receiptStorageDir(): string {

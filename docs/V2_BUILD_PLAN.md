@@ -166,7 +166,13 @@ Progress:
   (`/manage/products/<id>`, "Sales settings" on the Products page). Each
   setting starts on "Use business setting" and shows what that currently
   is; an empty script shows the business's script and uses it.
-- [ ] File upload and text extraction in the app
+- [x] File upload and text extraction in the app: "Product file" on the
+  product's Sales settings page (`src/app/api/products/[id]/file`,
+  `src/lib/product-file.ts`, using `unpdf`). PDF only, up to 50 MB.
+  Stored in R2 under `products/<business>/`; a new version replaces the
+  text but leaves the old file, which past chats still link to. Warns
+  when pages have no readable text. Matches the old Python extraction
+  (11,390 vs 11,400 words on Pressure Down).
 - [ ] Routing a shared number's conversation to a product (ad, opening
   message, or the AI asking)
 - [ ] Test chat: talk to your own AI before going live

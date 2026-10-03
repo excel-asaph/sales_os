@@ -5,11 +5,12 @@ import { prisma } from "@/lib/prisma";
 // Loads a product's extracted text into Product.contentText, which is what
 // lets the AI answer "what does the book actually say" (docs/EBOOK_KNOWLEDGE.md).
 //
+// v2: uploading the PDF on the product's Sales settings page now does this
+// automatically (src/app/api/products/[id]/file/route.ts). This script stays
+// as the fallback, and for --list and --clear.
+//
 // Run against production the same way create-admin.ts is — locally with a
-// production DATABASE_URL, or via `railway run`. There is no UI for this
-// deliberately: the text is ~29,000 characters, which is not something anyone
-// should be pasting into a form, and it changes about as often as the product
-// itself does.
+// production DATABASE_URL, or via `railway run`.
 //
 //   python scripts/extract-product-text.py ebook.pdf --out ebook.txt
 //   npx tsx scripts/set-product-text.ts --product-id <id> --file ebook.txt
