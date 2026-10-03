@@ -205,6 +205,20 @@ access). See [V2_ONBOARDING.md](V2_ONBOARDING.md).
 **Done when:** a new business goes from sign-up to live without a
 developer.
 
+Progress:
+- [x] Plans (`src/lib/workspace-plan.ts`): free for 14 days or 20 verified
+  sales, the days counted from the first real customer conversation;
+  paid until a date; suspended. Existing businesses are paid with no end
+  date. With no active plan the AI stops but no customer is left in
+  silence: each conversation is handed to the team, and due follow-ups
+  are cancelled. A notice under the page header says where the plan
+  stands. Staff mark a month paid (extends from the current end), suspend
+  or lift a suspension on /admin, each logged.
+- [ ] WhatsApp connection form with Check connection
+- [ ] Setup checklist on Home, "Ebook seller" template, AI-drafted
+  product description and questions from the PDF
+- [ ] Self-serve sign-up and team invites (waiting on the email decision)
+
 ### Phase 4: website and billing (1 week)
 The public site, ₦300,000 monthly billing through Paystack, AI usage
 counted per workspace. See [V2_WEBSITE.md](V2_WEBSITE.md).

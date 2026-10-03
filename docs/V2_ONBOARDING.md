@@ -101,11 +101,15 @@ For the Antflow team only:
   visible to the business)
 - suspend a workspace, for example for non-payment or a policy problem
 
-## Open questions
+## Decided (2026-10-03)
 
-1. **What the free plan includes.** Proposed: everything unlocked, for 14
-   days or the first 20 verified sales, whichever comes first. A sales
-   limit costs us nothing until the AI is earning them money.
-2. **Who does WhatsApp setup by default:** the business on its own with
-   the guide, or always us on the setup call? Proposed: us, on the call,
-   since there is a call anyway.
+1. **The free plan:** everything unlocked, for 14 days or the first 20
+   verified sales, whichever comes first. The 14 days count from the
+   business's first real customer conversation, not from sign-up, so time
+   spent on setup doesn't use them up.
+2. **WhatsApp setup is done by us, on the setup call.** The guided
+   connection form still exists, for us to use on the call and for any
+   business that wants to do it alone.
+3. **Email (confirmations, invites): decided later.** Until then new
+   businesses are created by staff (`npm run create-admin`).
+4. **Google sign-in: later.** Email and password first.

@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { openBusiness } from "./actions";
+import { openBusiness, markPaidForMonth, suspendWorkspace, unsuspendWorkspace } from "./actions";
+import { getWorkspaceStatus, type WorkspaceStatus } from "@/lib/workspace-plan";
+import { Input } from "@/components/ui/input";
 
 const ERRORS: Record<string, string> = {
   "not-staff": "Only Antflow staff can open other businesses.",
@@ -49,7 +51,26 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   ]);
 
   const conversationsByBusiness = new Map(recentConversations.map((r) => [r.business_id, Number(r.count)]));
+  const statuses = new Map(
+    await Promise.all(businesses.map(async (b) => [b.id, await getWorkspaceStatus(b.id)] as const))
+  );
   const nameById = new Map(businesses.map((b) => [b.id, b.name]));
+
+  function planLabel(status: WorkspaceStatus): { label: string; variant: "default" | "secondary" | "outline" | "destructive" } {
+    const date = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    switch (status.state) {
+      case "paid":
+        return { label: status.until ? `Paid to ${date(status.until)}` : "Paid, no end date", variant: "default" };
+      case "free":
+        return { label: status.daysLeft === null ? "Free, not started" : `Free: ${status.daysLeft}d / ${status.salesLeft} sales`, variant: "secondary" };
+      case "free_ended":
+        return { label: "Free plan ended", variant: "destructive" };
+      case "payment_lapsed":
+        return { label: `Lapsed ${date(status.since)}`, variant: "destructive" };
+      case "suspended":
+        return { label: "Suspended", variant: "destructive" };
+    }
+  }
 
   function whatsappStatus(business: (typeof businesses)[number]) {
     if (business.metaConnection?.webhookKey) return { label: "Own Meta App", variant: "default" as const };
@@ -70,6 +91,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               <TableRow>
                 <TableHead>Business</TableHead>
                 <TableHead>WhatsApp</TableHead>
+                <TableHead>Plan</TableHead>
                 <TableHead className="text-right">Numbers</TableHead>
                 <TableHead className="text-right">Products</TableHead>
                 <TableHead className="text-right">Team</TableHead>
@@ -80,6 +102,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             <TableBody>
               {businesses.map((business) => {
                 const status = whatsappStatus(business);
+                const planState = statuses.get(business.id);
+                const plan = planState ? planLabel(planState) : { label: "?", variant: "outline" as const };
                 return (
                   <TableRow key={business.id}>
                     <TableCell>
@@ -91,17 +115,49 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                     <TableCell>
                       <Badge variant={status.variant}>{status.label}</Badge>
                     </TableCell>
+                    <TableCell>
+                      <Badge variant={plan.variant}>{plan.label}</Badge>
+                      {planState?.state === "suspended" && planState.reason && (
+                        <div className="mt-1 max-w-40 text-xs text-muted-foreground">{planState.reason}</div>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">{business._count.channels}</TableCell>
                     <TableCell className="text-right">{business._count.products}</TableCell>
                     <TableCell className="text-right">{business._count.humanAgents}</TableCell>
                     <TableCell className="text-right">{conversationsByBusiness.get(business.id) ?? 0}</TableCell>
                     <TableCell className="text-right">
-                      <form action={openBusiness}>
-                        <input type="hidden" name="businessId" value={business.id} />
-                        <Button type="submit" variant="outline" size="sm">
-                          Open
-                        </Button>
-                      </form>
+                      <div className="flex flex-col items-end gap-1.5">
+                        <form action={openBusiness}>
+                          <input type="hidden" name="businessId" value={business.id} />
+                          <Button type="submit" variant="outline" size="sm">
+                            Open
+                          </Button>
+                        </form>
+                        {!(planState?.state === "paid" && !planState.until) && (
+                          <form action={markPaidForMonth}>
+                            <input type="hidden" name="businessId" value={business.id} />
+                            <Button type="submit" variant="outline" size="sm">
+                              Mark paid, 1 month
+                            </Button>
+                          </form>
+                        )}
+                        {planState?.state === "suspended" ? (
+                          <form action={unsuspendWorkspace}>
+                            <input type="hidden" name="businessId" value={business.id} />
+                            <Button type="submit" variant="outline" size="sm">
+                              Lift suspension
+                            </Button>
+                          </form>
+                        ) : (
+                          <form action={suspendWorkspace} className="flex gap-1.5">
+                            <input type="hidden" name="businessId" value={business.id} />
+                            <Input name="reason" placeholder="Reason" className="h-8 w-28 text-xs" />
+                            <Button type="submit" variant="destructive" size="sm">
+                              Suspend
+                            </Button>
+                          </form>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 );

@@ -54,6 +54,7 @@ function describeFollowupEnd(type: string, payload: unknown): string {
   if (reason === "customer_replied") return "Stopped — customer replied";
   if (reason === "order_already_verified") return "Stopped — payment already verified";
   if (reason === "business_paused") return "Stopped — follow-ups paused";
+  if (reason === "plan_inactive") return "Stopped — AI paused (plan not active)";
   if (reason?.startsWith("conversation_stage_")) {
     const stage = reason.slice("conversation_stage_".length).replaceAll("_", " ").toLowerCase();
     return `Stopped — moved to ${stage}`;

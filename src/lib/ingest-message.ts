@@ -13,6 +13,7 @@ import { scheduleDebounced } from "@/lib/message-debounce";
 import { sendTypingIndicator } from "@/lib/whatsapp-send";
 import { routeInbound, type InboundRoute } from "@/lib/channels";
 import { routeNewConversation } from "@/lib/product-routing";
+import { aiIsActive, getWorkspaceStatus, startFreePlanClock } from "@/lib/workspace-plan";
 
 // Media worth saving so a human reviewing the conversation later can
 // actually see it, not just a WhatsApp media reference that expires.
@@ -145,6 +146,7 @@ async function processInboundMessage(
   // WhatsApp link text, or a number that sells one product
   // (src/lib/product-routing.ts). Worked out before the transaction since
   // it only reads.
+  const isNewConversation = !conversation;
   const routed = conversation
     ? null
     : await routeNewConversation({
@@ -258,6 +260,18 @@ async function processInboundMessage(
     } catch (error) {
       console.error(`Failed to record opt-out for conversation ${conversation!.id}`, error);
     }
+  }
+
+  // v2 plans: a new real conversation starts the free plan's 14 days (a
+  // no-op on any other plan, or once started). And with no active plan the
+  // AI doesn't reply: the conversation goes to the business's team, so the
+  // customer is answered by a person rather than left in silence
+  // (src/lib/workspace-plan.ts).
+  if (isNewConversation) await startFreePlanClock(businessId);
+  const plan = await getWorkspaceStatus(businessId);
+  if (!aiIsActive(plan)) {
+    await handToTeamForPlan(conversation!.id, plan.state);
+    return;
   }
 
   // Show "typing…" as early as possible — a reply is coming (Meta's own
@@ -380,6 +394,26 @@ async function processInboundMessage(
       }
     })
   );
+}
+
+/**
+ * The plan isn't active, so this conversation goes to the business's team
+ * instead of the AI. Done once: a conversation already with a person stays
+ * as it is.
+ */
+async function handToTeamForPlan(conversationId: string, planState: string) {
+  const { count } = await prisma.conversation.updateMany({
+    where: { id: conversationId, currentStage: { notIn: ["HUMAN_REVIEW_REQUIRED", "HUMAN_ASSIGNED"] } },
+    data: {
+      currentStage: "HUMAN_REVIEW_REQUIRED",
+      summary: "The AI is paused for this business (its plan isn't active), so a person needs to reply.",
+    },
+  });
+  if (count > 0) {
+    await prisma.event.create({
+      data: { conversationId, type: "HUMAN_ASSIGNED", payload: { reason: "plan_inactive", planState } },
+    });
+  }
 }
 
 function normalizeContent(

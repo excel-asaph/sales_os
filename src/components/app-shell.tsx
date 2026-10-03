@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getViewerContext } from "@/lib/viewer";
+import { describeStatus, getWorkspaceStatus } from "@/lib/workspace-plan";
 import { stageStyle } from "@/lib/stage-display";
 import type { ConversationStage } from "@/generated/prisma/client";
 import { getBusinessNumbers } from "@/lib/whatsapp-numbers";
@@ -101,6 +102,7 @@ export async function AppShell({
     },
   });
   const numbers = getBusinessNumbers(business);
+  const planNotice = describeStatus(await getWorkspaceStatus(session.businessId));
   // A cookie, not a page-passed prop — the selection has to survive
   // ordinary navigation between tabs, not just persist within one page's
   // own URL (see number-filter.ts).
@@ -406,6 +408,13 @@ export async function AppShell({
           {actions}
           <NotificationBell conversations={awaitingHuman} count={awaitingHumanCount} />
         </header>
+        {planNotice && (
+          <div
+            className={`shrink-0 border-b px-6 py-2 text-xs ${planNotice.urgent ? "bg-destructive/10 font-medium text-destructive" : "bg-muted/50 text-muted-foreground"}`}
+          >
+            {planNotice.text}
+          </div>
+        )}
         {/* Never let staff forget they're inside someone else's business. */}
         {isSupport && (
           <div className="flex shrink-0 items-center gap-2 border-b bg-muted px-6 py-2 text-xs">

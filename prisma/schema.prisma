@@ -88,6 +88,11 @@ enum FollowupReason {
 /// OWNER and ADMIN can reach /settings and /manage, as isAdmin did; only an
 /// OWNER can remove other owners or close the workspace. AGENT is the old
 /// non-admin login.
+enum WorkspacePlan {
+  FREE
+  PAID
+}
+
 enum MemberRole {
   OWNER
   ADMIN
@@ -157,6 +162,21 @@ model Business {
   whatsappPhoneNumberLabels Json? @map("whatsapp_phone_number_labels")
   timezone              String   @default("Africa/Lagos")
   createdAt             DateTime @default(now()) @map("created_at")
+
+  // v2 plans (docs/V2_ONBOARDING.md, decided 2026-10-03); the rules that
+  // read these are all in src/lib/workspace-plan.ts.
+  /// FREE: 14 days or 20 verified sales, whichever comes first. PAID: until
+  /// paidUntil, or for good when that is empty, which is how businesses
+  /// from before v2 are marked so nothing changes for them.
+  plan            WorkspacePlan @default(FREE)
+  /// When the free plan's 14 days began: the first real customer
+  /// conversation, not sign-up, so setup doesn't use them up.
+  freeStartedAt   DateTime? @map("free_started_at")
+  paidUntil       DateTime? @map("paid_until")
+  /// Set by Antflow staff (non-payment, a policy problem). The AI stops
+  /// selling, exactly as when a plan runs out.
+  suspendedAt     DateTime? @map("suspended_at")
+  suspendedReason String?   @map("suspended_reason")
 
   config          BusinessConfig?
   metaConnection  BusinessMetaConnection?

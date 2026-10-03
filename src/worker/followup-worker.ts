@@ -9,6 +9,7 @@ import { FOLLOWUP_SEQUENCE, stepDefinition, clampMaxFollowups } from "@/lib/foll
 import { addCustomerTag } from "@/lib/customer-tags";
 import { resolveFallbackMessage } from "@/lib/followups";
 import { getConversationConfig } from "@/lib/knowledge";
+import { aiIsActive, getWorkspaceStatus } from "@/lib/workspace-plan";
 import { formatSystemNote, describeTemplateFallback } from "@/lib/system-notes";
 import type { ConversationStage } from "@/generated/prisma/client";
 
@@ -87,7 +88,10 @@ async function handleFollowup(followupId: string) {
   // Business-wide kill switch (Settings) — checked here too, not just in
   // createFollowup, so anything already scheduled before the pause also
   // stops rather than firing anyway.
-  const businessPaused = !config.followupsEnabled;
+  // v2: with no active plan the AI doesn't sell, follow-ups included
+  // (src/lib/workspace-plan.ts); cancelled here like a business pause.
+  const planInactive = !aiIsActive(await getWorkspaceStatus(conversation.customer.businessId));
+  const businessPaused = !config.followupsEnabled || planInactive;
 
   if (orderVerified || stageBlocksFollowup || businessPaused) {
     await prisma.$transaction([
@@ -100,7 +104,9 @@ async function handleFollowup(followupId: string) {
             followupId: followup.id,
             reason: orderVerified
               ? "order_already_verified"
-              : businessPaused
+              : planInactive
+                ? "plan_inactive"
+                : businessPaused
                 ? "business_paused"
                 : `conversation_stage_${conversation.currentStage}`,
           },
