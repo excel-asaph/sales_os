@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { registerChannel } from "@/lib/channels";
 import { requireAdminSession } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { encryptSecret } from "@/lib/credential-crypto";
@@ -62,9 +63,9 @@ export async function completeEmbeddedSignup(result: { code: string; wabaId?: st
       },
     });
 
-    // Stamp the phone number id onto Business too — this is the field
-    // ingest-message.ts actually routes inbound webhooks by, unrelated to
-    // credential storage. Primary if unset, otherwise added to the
+    // Stamp the phone number id onto Business too — v1 routed inbound
+    // webhooks by these fields, and v2 still falls back to them for a
+    // number with no Channel row. Primary if unset, otherwise added to the
     // additional-numbers list (same "up to 20 numbers per WABA" pattern
     // already supported).
     const business = await tx.business.findUniqueOrThrow({ where: { id: session.businessId } });
@@ -82,6 +83,11 @@ export async function completeEmbeddedSignup(result: { code: string; wabaId?: st
         data: { additionalWhatsappPhoneNumberIds: { push: result.phoneNumberId! } },
       });
     }
+
+    // v2: inbound messages are routed by Channel (src/lib/channels.ts).
+    // The v1 fields above stay filled in too, for the dashboard's number
+    // switcher and for rolling back, until the clean-up migration.
+    await registerChannel(tx, session.businessId, result.phoneNumberId!);
   });
 
   // Step 2, automatically: dataset creation is idempotent and cheap enough

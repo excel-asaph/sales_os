@@ -115,8 +115,14 @@ Progress:
   nobody is locked out between deploying and running the backfill. Adding
   a teammate creates or links their User; role and isAdmin change
   together so v1 still works on rollback.
-- [ ] Inbound messages matched to a `Channel`; conversations stamped with
-  channel and product
+- [x] Inbound messages matched to a `Channel`; conversations stamped with
+  channel and product (`src/lib/channels.ts`). A disconnected channel
+  drops its messages; a number with no channel row falls back to the v1
+  fields until the backfill has run. The WhatsApp connection wizard now
+  creates the channel too.
+- [ ] The dashboard's number switcher and filters reading `Channel`
+  instead of the v1 number fields (needed before the clean-up migration,
+  not before switch-over)
 - [ ] Per-business webhook `/api/whatsapp/<webhook key>`
 - [ ] Platform-admin access, logged to the event log
 

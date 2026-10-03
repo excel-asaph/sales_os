@@ -11,6 +11,7 @@ import { downloadWhatsAppMedia, persistMediaFile } from "@/lib/media-storage";
 import { withCustomerLock } from "@/lib/customer-lock";
 import { scheduleDebounced } from "@/lib/message-debounce";
 import { sendTypingIndicator } from "@/lib/whatsapp-send";
+import { routeInbound, type InboundRoute } from "@/lib/channels";
 
 // Media worth saving so a human reviewing the conversation later can
 // actually see it, not just a WhatsApp media reference that expires.
@@ -39,18 +40,11 @@ export async function ingestInboundMessage(
   value: WhatsAppChangeValue,
   message: NonNullable<WhatsAppChangeValue["messages"]>[number]
 ) {
-  const business = await prisma.business.findFirst({
-    where: {
-      OR: [
-        { whatsappPhoneNumberId: value.metadata.phone_number_id },
-        { additionalWhatsappPhoneNumberIds: { has: value.metadata.phone_number_id } },
-      ],
-    },
-  });
+  const route = await routeInbound(value.metadata.phone_number_id);
 
-  if (!business) {
+  if (!route) {
     console.warn(
-      `No business configured for WhatsApp phone_number_id=${value.metadata.phone_number_id}; dropping message ${message.id}`
+      `No business, or only a disconnected channel, for WhatsApp phone_number_id=${value.metadata.phone_number_id}; dropping message ${message.id}`
     );
     return;
   }
@@ -65,12 +59,12 @@ export async function ingestInboundMessage(
   const customer = await prisma.customer.upsert({
     where: {
       businessId_phoneNumber: {
-        businessId: business.id,
+        businessId: route.businessId,
         phoneNumber: message.from,
       },
     },
     create: {
-      businessId: business.id,
+      businessId: route.businessId,
       phoneNumber: message.from,
       name: contactName,
     },
@@ -78,16 +72,18 @@ export async function ingestInboundMessage(
   });
 
   await withCustomerLock(customer.id, () =>
-    processInboundMessage(business.id, customer.id, message, value.metadata.phone_number_id)
+    processInboundMessage(route, customer.id, message, value.metadata.phone_number_id)
   );
 }
 
 async function processInboundMessage(
-  businessId: string,
+  route: InboundRoute,
   customerId: string,
   message: NonNullable<WhatsAppChangeValue["messages"]>[number],
   phoneNumberId: string
 ) {
+  const { businessId } = route;
+
   // A WhatsApp webhook redelivery of a message already fully processed
   // (Meta retries when it doesn't get a fast 200 — the turn below can
   // easily run long enough to trigger that, especially one involving a
@@ -141,6 +137,12 @@ async function processInboundMessage(
           // every reply in this thread goes out on whichever of the
           // business's numbers started it.
           whatsappPhoneNumberId: phoneNumberId,
+          // v2: the same number as a Channel, and the product when the
+          // number sells only one (src/lib/channels.ts). Stamped once, like
+          // the two above; a later message on another number doesn't move
+          // the conversation.
+          channelId: route.channelId,
+          productId: route.productId,
         },
       });
     }
