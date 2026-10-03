@@ -47,8 +47,8 @@ export default async function LoginPage({
             <form action={login} className="flex flex-col gap-4">
               <input type="hidden" name="next" value={next} />
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="contact">Login</Label>
-                <Input id="contact" name="contact" type="text" required autoFocus />
+                <Label htmlFor="contact">Email</Label>
+                <Input id="contact" name="contact" type="email" autoComplete="username" required autoFocus />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="password">Password</Label>

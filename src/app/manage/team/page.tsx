@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { isAdminMembership } from "@/lib/workspaces";
 import { AppShell } from "@/components/app-shell";
 import { SubmitButton } from "@/components/submit-button";
 import { Badge } from "@/components/ui/badge";
@@ -38,7 +39,7 @@ export default async function TeamPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Login</TableHead>
+                <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -47,6 +48,7 @@ export default async function TeamPage() {
             <TableBody>
               {agents.map((agent) => {
                 const isSelf = agent.id === session.agentId;
+                const isAdmin = isAdminMembership(agent);
                 return (
                   <TableRow key={agent.id}>
                     <TableCell className="font-medium">
@@ -55,8 +57,8 @@ export default async function TeamPage() {
                     </TableCell>
                     <TableCell className="text-muted-foreground">{agent.contact ?? "—"}</TableCell>
                     <TableCell>
-                      <Badge variant={agent.isAdmin ? "default" : "secondary"}>
-                        {agent.isAdmin ? "Admin" : "Member"}
+                      <Badge variant={isAdmin ? "default" : "secondary"}>
+                        {agent.role === "OWNER" ? "Owner" : isAdmin ? "Admin" : "Member"}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -72,9 +74,9 @@ export default async function TeamPage() {
                             variant="outline"
                             size="sm"
                             pendingLabel="Updating…"
-                            successMessage={agent.isAdmin ? "Made a member" : "Made an admin"}
+                            successMessage={isAdmin ? "Made a member" : "Made an admin"}
                           >
-                            {agent.isAdmin ? "Make member" : "Make admin"}
+                            {isAdmin ? "Make member" : "Make admin"}
                           </SubmitButton>
                         </form>
                         <form action={toggleAgentActive}>
@@ -109,13 +111,16 @@ export default async function TeamPage() {
                   <Input id="name" name="name" required />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="contact">Login</Label>
-                  <Input id="contact" name="contact" required placeholder="Whatever they'll sign in with" />
+                  <Label htmlFor="contact">Email</Label>
+                  <Input id="contact" name="contact" type="email" required placeholder="What they'll sign in with" />
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="password">Password</Label>
                 <Input id="password" name="password" type="password" required />
+                <p className="text-xs text-muted-foreground">
+                  If this email already signs in to Antflow for another business, they keep their own password.
+                </p>
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label>Role</Label>

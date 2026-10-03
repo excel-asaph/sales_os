@@ -109,8 +109,12 @@ Progress:
   the per-business Meta App fields. Adds only.
 - [x] `scripts/v2-backfill.ts`, with `--dry-run`; tested on local data,
   and a second run changes nothing.
-- [ ] Login through `User`, the session carrying user and workspace, the
-  workspace switcher
+- [x] Login through `User`, the session carrying user and workspace, the
+  workspace switcher (`src/lib/workspaces.ts`, `/api/workspace`). Login
+  falls back to v1's lookup only for a login not yet linked to a User, so
+  nobody is locked out between deploying and running the backfill. Adding
+  a teammate creates or links their User; role and isAdmin change
+  together so v1 still works on rollback.
 - [ ] Inbound messages matched to a `Channel`; conversations stamped with
   channel and product
 - [ ] Per-business webhook `/api/whatsapp/<webhook key>`

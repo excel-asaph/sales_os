@@ -1,9 +1,7 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import { verifyPassword, createSessionToken, newSessionExpiry, SESSION_COOKIE } from "@/lib/auth";
+import { authenticate, startSession } from "@/lib/workspaces";
 
 // In-memory brute-force guard, keyed by login identifier. Deliberately not
 // DB-backed — this is a single-instance deployment (Railway, one sales_os
@@ -44,32 +42,16 @@ export async function login(formData: FormData) {
     redirect(`/login?error=2&next=${encodeURIComponent(next)}`);
   }
 
-  const agent = contact
-    ? await prisma.humanAgent.findFirst({ where: { contact, active: true } })
-    : null;
+  const membership = contact ? await authenticate(contact, password) : null;
 
-  if (!agent || !(await verifyPassword(password, agent.passwordHash))) {
+  if (!membership) {
     if (contact) recordFailedAttempt(attemptKey);
     redirect(`/login?error=1&next=${encodeURIComponent(next)}`);
   }
 
   loginAttempts.delete(attemptKey);
+  await startSession(membership);
 
-  const token = createSessionToken({
-    agentId: agent.id,
-    businessId: agent.businessId,
-    isAdmin: agent.isAdmin,
-    exp: newSessionExpiry(),
-  });
-
-  const store = await cookies();
-  store.set(SESSION_COOKIE, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 30 * 24 * 60 * 60,
-  });
-
-  redirect(next.startsWith("/") ? next : "/home");
+  // "//host" also starts with "/" but is another site to a browser.
+  redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/home");
 }

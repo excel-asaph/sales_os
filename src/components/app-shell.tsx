@@ -85,7 +85,7 @@ export async function AppShell({
   const viewer = await getViewerContext();
   if (!viewer) return null;
 
-  const { session, businessName, agentName } = viewer;
+  const { session, businessName, agentName, workspaces } = viewer;
 
   const business = await prisma.business.findUniqueOrThrow({
     where: { id: session.businessId },
@@ -198,20 +198,56 @@ export async function AppShell({
 
   const activeHref = navItems.find((item) => item.key === active)?.href ?? "/dashboard";
   const showNumberSwitcher = numbers.length > 1;
+  // Only someone in more than one business gets a switcher; for everyone
+  // else the header looks exactly as it did in v1.
+  const showWorkspaceSwitcher = workspaces.length > 1;
+  const brand = (
+    <>
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground group-data-[collapsible=icon]:size-8">
+        {businessName.slice(0, 1).toUpperCase()}
+      </div>
+      <div className="flex min-w-0 flex-col leading-tight group-data-[collapsible=icon]:hidden">
+        <span className="truncate text-sm font-semibold">{businessName}</span>
+        <span className="text-xs text-muted-foreground">Sales OS</span>
+      </div>
+    </>
+  );
 
   return (
     <SidebarProvider>
       <Sidebar collapsible="icon">
         <SidebarHeader className="h-16 shrink-0 justify-center px-4 py-0 group-data-[collapsible=icon]:px-2">
-          <div className="flex items-center gap-3">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground group-data-[collapsible=icon]:size-8">
-              {businessName.slice(0, 1).toUpperCase()}
-            </div>
-            <div className="flex min-w-0 flex-col leading-tight group-data-[collapsible=icon]:hidden">
-              <span className="truncate text-sm font-semibold">{businessName}</span>
-              <span className="text-xs text-muted-foreground">Sales OS</span>
-            </div>
-          </div>
+          {showWorkspaceSwitcher ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <button
+                    type="button"
+                    className="-mx-1.5 flex items-center gap-3 rounded-lg px-1.5 py-1 text-left outline-none hover:bg-sidebar-accent group-data-[collapsible=icon]:mx-0 group-data-[collapsible=icon]:p-0"
+                  />
+                }
+              >
+                {brand}
+                <ChevronsUpDown className="ml-auto size-3.5 shrink-0 text-muted-foreground group-data-[collapsible=icon]:hidden" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-64">
+                {/* A plain <a>, not <Link>, for the same reason as the
+                    number switcher below: the route sets a cookie. */}
+                {workspaces.map((workspace) => (
+                  <DropdownMenuItem
+                    key={workspace.businessId}
+                    className="justify-between"
+                    render={<a href={`/api/workspace?id=${encodeURIComponent(workspace.businessId)}`} />}
+                  >
+                    <span className="truncate">{workspace.name}</span>
+                    {workspace.businessId === session.businessId && <Check className="size-3.5 shrink-0" />}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex items-center gap-3">{brand}</div>
+          )}
         </SidebarHeader>
         {showNumberSwitcher && (
           <div className="px-3 pb-2 group-data-[collapsible=icon]:px-2">

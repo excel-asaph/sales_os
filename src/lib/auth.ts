@@ -8,9 +8,16 @@ export const SESSION_COOKIE = "antflow_session";
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 export interface SessionPayload {
+  /// The membership (HumanAgent) this session is working as. With
+  /// businessId and isAdmin, it means exactly what it did in v1, so every
+  /// page and action that reads these is unchanged by v2.
   agentId: string;
   businessId: string;
   isAdmin: boolean;
+  /// v2: the person behind the membership, which the workspace switcher
+  /// needs. Absent on cookies issued before switch-over and on a v1-style
+  /// login (src/lib/workspaces.ts), so never assume it is set.
+  userId?: string;
   exp: number;
 }
 
@@ -78,6 +85,15 @@ export function verifySessionToken(token: string | undefined | null): SessionPay
 export function newSessionExpiry(): number {
   return Date.now() + SESSION_TTL_MS;
 }
+
+/** The Set-Cookie attributes every session cookie is written with. */
+export const SESSION_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax" as const,
+  path: "/",
+  maxAge: SESSION_TTL_MS / 1000,
+};
 
 /** Read-only session access for Server Components. */
 export async function getSession(): Promise<SessionPayload | null> {

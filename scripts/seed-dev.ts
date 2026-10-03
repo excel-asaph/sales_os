@@ -86,10 +86,17 @@ async function main() {
   ]);
   const account = await prisma.paymentAccount.findFirstOrThrow({ where: { businessId: business.id } });
 
+  // The person outlives a --reset of the business, so upsert.
+  const passwordHash = await hashPassword(ADMIN_PASSWORD);
+  const admin = await prisma.user.upsert({
+    where: { email: ADMIN_LOGIN },
+    create: { email: ADMIN_LOGIN, name: "Demo Admin", passwordHash },
+    update: { passwordHash },
+  });
   await prisma.humanAgent.create({
     data: {
       businessId: business.id, name: "Demo Admin", contact: ADMIN_LOGIN,
-      passwordHash: await hashPassword(ADMIN_PASSWORD), isAdmin: true,
+      passwordHash, isAdmin: true, role: "OWNER", userId: admin.id,
     },
   });
 

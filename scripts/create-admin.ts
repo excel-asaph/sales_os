@@ -40,12 +40,27 @@ async function main() {
       })
     ).id;
 
-  const passwordHash = await hashPassword(password);
+  // v2: the login is a User (one per email, across businesses) and this
+  // row is their membership. An email that already signs in elsewhere
+  // keeps its own password; the one given here is then ignored.
+  const email = contact.toLowerCase();
+  const user = await prisma.user.findUnique({ where: { email } });
+  const passwordHash = user?.passwordHash ?? (await hashPassword(password));
+  const role = asAgent ? "AGENT" : businessId ? "ADMIN" : "OWNER";
   const agent = await prisma.humanAgent.create({
-    data: { businessId: resolvedBusinessId, name, contact, passwordHash, isAdmin: !asAgent },
+    data: {
+      business: { connect: { id: resolvedBusinessId } },
+      name,
+      contact: email,
+      passwordHash,
+      isAdmin: !asAgent,
+      role,
+      user: user ? { connect: { id: user.id } } : { create: { email, name, passwordHash } },
+    },
   });
+  if (user) console.log(`${email} already had a login; they keep their existing password.`);
 
-  console.log(`Created ${agent.isAdmin ? "admin" : "agent"} login for business ${resolvedBusinessId}`);
+  console.log(`Created ${role.toLowerCase()} login for business ${resolvedBusinessId}`);
   console.log(`  Login: ${contact}`);
   console.log(`  Agent id: ${agent.id}`);
 
