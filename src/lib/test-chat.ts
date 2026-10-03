@@ -60,6 +60,8 @@ export async function sendTestMessage(input: {
   });
   // A real customer's row can never be taken over: only ever a test one.
   if (!customer.isTest) throw new Error("Test chat customer is not marked as a test");
+  // A setup checklist step (src/lib/setup-checklist.ts).
+  await prisma.business.updateMany({ where: { id: businessId, testChatUsedAt: null }, data: { testChatUsedAt: new Date() } });
 
   await withCustomerLock(customer.id, async () => {
     let conversation = await prisma.conversation.findFirst({

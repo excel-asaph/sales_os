@@ -177,6 +177,12 @@ model Business {
   /// selling, exactly as when a plan runs out.
   suspendedAt     DateTime? @map("suspended_at")
   suspendedReason String?   @map("suspended_reason")
+  /// v2 onboarding: when someone first used the test chat, one of the
+  /// setup checklist's steps (src/lib/setup-checklist.ts).
+  testChatUsedAt  DateTime? @map("test_chat_used_at")
+  /// The owner hid the setup checklist on Home. Set for every business that
+  /// already had customers when the checklist was added.
+  setupChecklistHiddenAt DateTime? @map("setup_checklist_hidden_at")
 
   config          BusinessConfig?
   metaConnection  BusinessMetaConnection?

@@ -4,6 +4,7 @@ import { Wallet, ShoppingBag, UserPlus, Percent, ExternalLink } from "lucide-rea
 import { prisma } from "@/lib/prisma";
 import { formatNaira } from "@/lib/currency";
 import { AppShell } from "@/components/app-shell";
+import { SetupChecklist } from "@/components/setup-checklist";
 import { getNumberFilterCookie, resolveEffectiveNumber } from "@/lib/number-filter";
 import { getDateRangeFilterCookie, resolveDateRange } from "@/lib/date-range-filter";
 import { conversionBadge } from "@/lib/meta-conversions";
@@ -110,6 +111,7 @@ export default async function HomePage() {
   return (
     <AppShell active="home" title="Home" description="How the business is doing, at a glance">
       <div className="mx-auto flex max-w-5xl flex-col gap-8">
+        {session.isAdmin && <SetupChecklist businessId={session.businessId} />}
         {/* Scopes Revenue/Orders/New leads/Conversion rate and "Where
             leads come from" below — NOT the trend chart (its own fixed
             window, see chartStart above) or Recent orders (a live feed,

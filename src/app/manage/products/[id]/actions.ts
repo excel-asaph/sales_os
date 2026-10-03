@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/lib/auth";
 import { PLAYBOOK_SCHEMA } from "@/lib/playbook-schema";
 import { clampMaxFollowups } from "@/lib/followup-sequence";
+import { getEffectiveConfig } from "@/lib/knowledge";
+import { draftProductCopy, DraftError, type ProductDraft } from "@/lib/product-draft";
 
 // One product's own sales settings (ProductSettings) and FAQ. Every value
 // here is an override: "inherit" stores null, which getEffectiveConfig
@@ -138,4 +140,84 @@ export async function updateProductChannels(formData: FormData) {
     }),
   ]);
   revalidatePath(`/manage/products/${productId}`);
+}
+
+/**
+ * Drafts the product's sales copy from its text with the AI
+ * (src/lib/product-draft.ts). Returns the draft for the owner to edit;
+ * nothing is saved until saveProductCopy.
+ */
+export async function draftProductCopyAction(
+  productId: string
+): Promise<{ ok: true; draft: ProductDraft } | { ok: false; error: string }> {
+  try {
+    const { product } = await requireOwnedProduct(productId);
+    if (!product.contentText?.trim()) {
+      return { ok: false, error: "Upload the product's PDF first: the draft is written from what's inside it." };
+    }
+    const draft = await draftProductCopy({
+      name: product.name,
+      price: product.price.toString(),
+      currency: product.currency,
+      format: product.format,
+      contentText: product.contentText,
+    });
+    return { ok: true, draft };
+  } catch (error) {
+    if (error instanceof DraftError) return { ok: false, error: error.message };
+    console.error(`Drafting copy failed for product ${productId}`, error);
+    return { ok: false, error: "Drafting failed. Try again in a minute." };
+  }
+}
+
+/**
+ * Saves the parts of a draft the owner kept: the description (with who it's
+ * for and the selling points, so the AI sees them when it looks the product
+ * up), the questions as this product's own FAQ, and the pitch as this
+ * product's opening script.
+ */
+export async function saveProductCopy(
+  productId: string,
+  copy: {
+    description?: string;
+    questions?: { question: string; answer: string }[];
+    pitch?: string;
+  }
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const { session } = await requireOwnedProduct(productId);
+
+  if (copy.description?.trim()) {
+    await prisma.product.update({ where: { id: productId }, data: { description: copy.description.trim() } });
+  }
+
+  const questions = (copy.questions ?? []).filter((q) => q.question.trim() && q.answer.trim());
+  if (questions.length) {
+    const start = await prisma.faqEntry.count({ where: { productId } });
+    await prisma.faqEntry.createMany({
+      data: questions.map((q, i) => ({
+        businessId: session.businessId,
+        productId,
+        question: q.question.trim(),
+        answer: q.answer.trim(),
+        order: start + i,
+      })),
+    });
+  }
+
+  if (copy.pitch?.trim()) {
+    // The pitch goes in whichever opening script this product's delivery
+    // order uses (src/lib/greeting-shortcut.ts picks between the two).
+    const { deliverBeforePayment } = await getEffectiveConfig(session.businessId, productId);
+    const key = deliverBeforePayment ? "delivery_first_pitch" : "payment_first_pitch";
+    const existing = await prisma.productSettings.findUnique({ where: { productId } });
+    const playbook = { ...((existing?.playbook as Record<string, string> | null) ?? {}), [key]: copy.pitch.trim() };
+    await prisma.productSettings.upsert({
+      where: { productId },
+      create: { productId, playbook },
+      update: { playbook },
+    });
+  }
+
+  revalidatePath(`/manage/products/${productId}`);
+  return { ok: true };
 }

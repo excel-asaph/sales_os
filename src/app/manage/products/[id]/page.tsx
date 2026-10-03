@@ -5,6 +5,7 @@ import { requireAdminPage } from "@/lib/viewer";
 import { getEffectiveConfig } from "@/lib/knowledge";
 import { AppShell } from "@/components/app-shell";
 import { ProductFileUpload } from "@/components/product-file-upload";
+import { ProductCopyDrafter } from "@/components/product-copy-drafter";
 import { SubmitButton } from "@/components/submit-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -161,6 +162,23 @@ export default async function ProductSalesSettingsPage({ params }: { params: Pro
               PDF only, up to 50 MB. A new version replaces the text the AI reads; customers who already have the old
               one keep it.
             </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Sales copy</CardTitle>
+            <CardDescription>
+              {product.description
+                ? "The description the AI uses when a customer asks about this product. Draft again any time; you choose what replaces what."
+                : "No description yet. The AI needs one to talk about this product properly."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4 text-sm">
+            {product.description && (
+              <p className="whitespace-pre-wrap rounded-lg bg-muted/50 p-3 text-muted-foreground">{product.description}</p>
+            )}
+            <ProductCopyDrafter productId={product.id} hasText={Boolean(product.contentText?.trim())} />
           </CardContent>
         </Card>
 

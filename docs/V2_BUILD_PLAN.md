@@ -226,8 +226,19 @@ Progress:
   stays for when Antflow is a Tech Provider (postponed by the owner,
   2026-10-04).
 - [ ] A "Check connection" button for an already-connected business
-- [ ] Setup checklist on Home, "Ebook seller" template, AI-drafted
-  product description and questions from the PDF
+- [x] Setup checklist on Home (`src/lib/setup-checklist.ts`): eight steps
+  worked out from what the business has done, from first product to
+  first real customer; hideable; hidden from the start for businesses
+  that already had customers. "Ebook seller" starter scripts
+  (`src/lib/starter-scripts.ts`), filled in with the business's own bank
+  accounts and never overwriting a script the owner wrote; written in the
+  house voice, as VitalFix's own wording is only in production
+  (`npm run export-playbook` copies it out). AI-drafted sales copy from
+  the product's PDF (`src/lib/product-draft.ts`, Claude Opus 5.5 with
+  refusal fallbacks): description, who it's for, selling points, eight
+  questions answered from the book, and a pitch, edited and approved part
+  by part on the product page. Tested end to end with a new business and
+  the live AI.
 - [ ] Self-serve sign-up and team invites (waiting on the email decision)
 
 ### Phase 4: website and billing (1 week)
