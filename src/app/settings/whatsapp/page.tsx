@@ -7,7 +7,8 @@ import { SubmitButton } from "@/components/submit-button";
 import { CopyField } from "@/components/copy-field";
 import { WizardStepper, type WizardStep } from "@/components/wizard-stepper";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { ConnectStep } from "./connect-step";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { retrySetupConversionsDataset, refreshBusinessVerificationStatus, submitReengagementTemplate } from "./actions";
 import type { BusinessVerificationStatus } from "@/lib/meta-business-verification";
 
@@ -75,6 +76,8 @@ export default async function ConnectWhatsAppPage() {
   }
 
   const connected = Boolean(connection);
+  // Connected through the wizard: the business's own Meta App and webhook.
+  const wizardConnected = Boolean(connection?.webhookKey && connection.metaAppId);
   const datasetReady = Boolean(connection?.conversionsDatasetId);
   const verificationStatus = (connection?.businessVerificationStatus ?? "NOT_STARTED") as BusinessVerificationStatus;
   const templateSubmitted = Boolean(connection?.followupTemplateName);
@@ -101,13 +104,30 @@ export default async function ConnectWhatsAppPage() {
         <Card>
           <CardHeader>
             <CardTitle>1. Connect WhatsApp</CardTitle>
+            {/* Meta's one-click popup (./connect-step.tsx) needs Antflow to be
+                a Meta Tech Provider, which is postponed (owner, 2026-10-04);
+                it can sit beside the wizard once it is. */}
             <CardDescription>
-              Log into your own Facebook account — Meta handles creating or selecting your WhatsApp Business Account
-              and verifying your number, right here, without leaving this page.
+              Through a Meta App in your own Meta business account: copy two things from Meta, and Antflow fills in the
+              rest.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <ConnectStep alreadyConnected={connected} wabaId={connection?.wabaId ?? null} />
+          <CardContent className="flex flex-wrap items-center gap-3">
+            {wizardConnected ? (
+              <StatusChip
+                tone={connection!.lastWebhookAt ? "good" : "pending"}
+                label={connection!.lastWebhookAt ? "Connected, messages arriving" : "Connected, webhook not finished"}
+              />
+            ) : connected ? (
+              <StatusChip tone="good" label={`Connected — account ${connection!.wabaId}`} />
+            ) : null}
+            <Button
+              variant={wizardConnected ? "outline" : "default"}
+              nativeButton={false}
+              render={<Link href="/settings/whatsapp/connect" />}
+            >
+              {wizardConnected ? "Open the connection wizard" : "Start the connection wizard"}
+            </Button>
           </CardContent>
         </Card>
 

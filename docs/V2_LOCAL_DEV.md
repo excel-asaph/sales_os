@@ -91,3 +91,19 @@ yourself, so it can't reach customers.
 The temporary token expires daily. Regenerating it on the API Setup page
 is fine for testing; a permanent system-user token is only needed for a
 real business.
+
+## Testing the connection wizard without Meta
+
+`scripts/fake-meta.mjs` answers the calls the WhatsApp connection wizard
+makes, so the whole wizard can be clicked through locally:
+
+```
+node scripts/fake-meta.mjs                       # a stand-in Meta on :4555
+META_GRAPH_BASE_URL=http://localhost:4555 npm run dev
+```
+
+`.env` needs a `CREDENTIAL_ENCRYPTION_KEY` (see step 6 above). The script's
+header lists the token and secret it accepts. The webhook step can't
+complete against the stand-in, because nothing calls the webhook; do it by
+hand with `curl` against the address the wizard shows, or with the real
+test Meta App through the tunnel.

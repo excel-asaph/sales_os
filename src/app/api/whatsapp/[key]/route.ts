@@ -41,6 +41,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     search.get("hub.mode") === "subscribe" &&
     safeEqual(search.get("hub.verify_token") ?? "", decryptSecret(connection.encryptedWebhookVerifyToken!))
   ) {
+    // The connection wizard is watching for this: it means the owner has
+    // saved the address in their Meta App and Meta can reach us.
+    await prisma.businessMetaConnection.update({ where: { webhookKey: key }, data: { webhookVerifiedAt: new Date() } });
     return new NextResponse(search.get("hub.challenge"), { status: 200 });
   }
   return new NextResponse("Forbidden", { status: 403 });
@@ -65,6 +68,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   } catch {
     return new NextResponse("Invalid JSON", { status: 400 });
   }
+
+  // For the wizard and Check connection: messages are arriving. At most
+  // once a minute, not a write per message.
+  await prisma.businessMetaConnection.updateMany({
+    where: { webhookKey: key, OR: [{ lastWebhookAt: null }, { lastWebhookAt: { lt: new Date(Date.now() - 60_000) } }] },
+    data: { lastWebhookAt: new Date() },
+  });
 
   await processWebhookPayload(payload, connection.businessId);
   return NextResponse.json({ received: true });

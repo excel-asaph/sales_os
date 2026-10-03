@@ -187,6 +187,7 @@ model Business {
   faqEntries      FaqEntry[]
   channels        Channel[]
   adProducts      AdProduct[]
+  metaConnectionDraft MetaConnectionDraft?
 
   @@map("businesses")
 }
@@ -241,10 +242,35 @@ model BusinessMetaConnection {
   /// address (/api/whatsapp/<webhookKey>), so the address says which secret
   /// to check a message against without revealing the business's id.
   webhookKey                  String? @unique @map("webhook_key")
+  /// When Meta last completed the verification handshake on this
+  /// business's webhook address: the moment the owner saved it in their
+  /// Meta App. The connection wizard watches for it.
+  webhookVerifiedAt           DateTime? @map("webhook_verified_at")
+  /// When a correctly signed webhook last arrived on that address, so the
+  /// wizard and the Check connection button can say messages are arriving.
+  lastWebhookAt               DateTime? @map("last_webhook_at")
 
   business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   @@map("business_meta_connections")
+}
+
+/// v2: a WhatsApp connection in progress in the connection wizard
+/// (/settings/whatsapp/connect, src/lib/meta-setup.ts), so an owner can stop
+/// half-way and come back. Becomes the BusinessMetaConnection once a number
+/// is chosen, and is deleted then. Secrets encrypted as on that table.
+model MetaConnectionDraft {
+  id                   String   @id @default(cuid())
+  businessId           String   @unique @map("business_id")
+  encryptedAccessToken String?  @map("encrypted_access_token")
+  /// From the token, never typed: the app it belongs to.
+  metaAppId            String?  @map("meta_app_id")
+  encryptedAppSecret   String?  @map("encrypted_app_secret")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("meta_connection_drafts")
 }
 
 /// One WhatsApp number a business can be reached on (v2). Replaces

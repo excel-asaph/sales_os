@@ -92,47 +92,27 @@ one that doesn't.
 4. The owner copies the token **straight into Antflow's connection form**
    (below). Meta never shows it again.
 
-## 6. Put the details into Antflow (Phase 1)
+## 6–9. The connection wizard in Antflow
 
-In Antflow: **Settings → WhatsApp → Connect a number**. The owner pastes:
+In Antflow: **Settings → WhatsApp → Start the connection wizard**
+(`/settings/whatsapp/connect`). It walks through the rest, and the owner
+copies only two things:
 
-| Field | Where it is |
-|---|---|
-| App ID | the app → App settings → Basic |
-| App Secret | same page, "Show" |
-| WhatsApp Business Account ID | WhatsApp → API Setup |
-| Phone number ID | WhatsApp → API Setup, under the number |
-| Access token | from step 5 |
+| Step | The owner | Antflow, by itself |
+|---|---|---|
+| Access token | copies the permanent token from step 5 | recognises it on the clipboard when they come back to the tab, finds the app, and refuses a temporary token or one missing a WhatsApp permission |
+| App secret | copies it from App settings → Basic → Show | checks it belongs to the app |
+| Number | ticks the number(s); picks a 6-digit PIN if Meta hasn't registered the number | lists every number the token reaches, registers it, subscribes the app to the WhatsApp account, sets up sales tracking, saves a channel per number |
+| Webhook | pastes the Callback URL and Verify token shown (copy buttons) into **WhatsApp → Configuration**, subscribes to **messages**, and switches the app to **Live** (needs a privacy policy URL under App settings → Basic) | ticks the step itself the moment Meta verifies the address |
+| Test message | sends a WhatsApp message to the number from their own phone | ticks it when the message arrives |
 
-Antflow then shows the **webhook address** for this business (its own,
-`/api/whatsapp/<key>`) and a **verify token**, each with a copy button.
+Meta only allows the webhook to be set in the app's own dashboard, which
+is why that one step is by hand. A half-finished wizard is saved, so the
+call can pause and pick up again. **Connect another number** later reuses
+the saved token.
 
-## 7. Point the app's webhook at Antflow
-
-The app → **WhatsApp → Configuration → Webhook → Edit**:
-- Callback URL: the address from step 6
-- Verify token: the token from step 6
-- Save, then under **Webhook fields**, subscribe to **messages**.
-
-## 8. Make the app Live
-
-The app → **App settings → Basic**: add a privacy policy URL (the
-business's own if it has one), save, then switch the app from
-*Development* to **Live** at the top of the page.
-
-## 9. Check it in Antflow (Phase 1)
-
-Press **Check connection**. Antflow:
-- confirms the token works and can see the number
-- registers the number for the Cloud API if Meta hasn't yet
-- submits the follow-up message template for Meta's review (the same one
-  the existing wizard submits, with a STOP button as the opt-out)
-- creates the ad-reporting dataset for the WhatsApp account (see
-  [META_CONVERSIONS_SETUP.md](META_CONVERSIONS_SETUP.md))
-- asks the owner to send a WhatsApp message to the number, and confirms it
-  arrived
-
-Then choose which product(s) this number sells.
+Then choose which product(s) each number sells, on each product's Sales
+settings page.
 
 ## 10. After the call
 

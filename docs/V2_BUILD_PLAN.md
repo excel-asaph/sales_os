@@ -214,7 +214,18 @@ Progress:
   are cancelled. A notice under the page header says where the plan
   stands. Staff mark a month paid (extends from the current end), suspend
   or lift a suspension on /admin, each logged.
-- [ ] WhatsApp connection form with Check connection
+- [x] WhatsApp connection wizard (`/settings/whatsapp/connect`,
+  `src/lib/meta-setup.ts`). The owner copies two things (permanent token,
+  app secret); Antflow finds the app, account and numbers, registers
+  unregistered numbers with the owner's PIN, subscribes the app, saves
+  channels and sales tracking. The webhook is pasted by hand (Meta allows
+  it only in the app dashboard) and the wizard ticks itself when Meta
+  verifies it and when the first message arrives. Saved half-way, and
+  "Connect another number" reuses the token. Tested end to end against
+  `scripts/fake-meta.mjs`; not yet against real Meta. Embedded Signup
+  stays for when Antflow is a Tech Provider (postponed by the owner,
+  2026-10-04).
+- [ ] A "Check connection" button for an already-connected business
 - [ ] Setup checklist on Home, "Ebook seller" template, AI-drafted
   product description and questions from the PDF
 - [ ] Self-serve sign-up and team invites (waiting on the email decision)
