@@ -69,6 +69,31 @@ itself can be advertised later.
 
 ## Decided
 
+- **Brand (2026-10-04): direction B "Colony"**, ink #121614 and coral
+  #FF6A4D on chalk #F5F6F4, Sora headings and Manrope text, and its logo:
+  a chat bubble whose "typing…" dots are an ant's body. Headline and
+  subheadline from direction A: "A WhatsApp sales rep for your ebook,
+  working day and night." The three directions are on the canvas
+  "Antflow brand directions" (claude.ai artifact).
 - No domain yet; use the current address (above).
 - VitalFix's real numbers can go on the Results page.
 - We design Antflow's brand ourselves and iterate with the owner.
+
+## Built (2026-10-04)
+
+`src/app/(marketing)`: Home, How it works, Pricing, Results, and
+Antflow's own privacy policy and terms at `/legal/privacy` and
+`/legal/terms`. VitalFix's own policy stays at `/privacy`, where its Meta
+App points. `/` is now the home page instead of a redirect into the app.
+
+Still to fill in (`src/app/(marketing)/site-config.ts` and Railway
+variables):
+- `NEXT_PUBLIC_ANTFLOW_WHATSAPP`: Antflow's own number, answered by
+  Antflow's AI. Until it's set the main button goes to the Pricing page.
+- `NEXT_PUBLIC_ANTFLOW_EMAIL`: the contact address in the footer and legal pages.
+- `RESULTS`: VitalFix's real figures from `scripts/site-stats.ts` run
+  against production. Until then the results section and page don't show.
+- The privacy policy and terms should be read by a lawyer, and name the
+  registered business once there is one.
+- The Meta Pixel (`NEXT_PUBLIC_META_PIXEL_ID`) is configured but not yet
+  wired to the button.
