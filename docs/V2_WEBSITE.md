@@ -90,6 +90,12 @@ Still to fill in (`src/app/(marketing)/site-config.ts` and Railway
 variables):
 - `NEXT_PUBLIC_ANTFLOW_WHATSAPP`: Antflow's own number, answered by
   Antflow's AI. Until it's set the main button goes to the Pricing page.
+  **Postponed by the owner (2026-10-04).** Needs a number for Antflow
+  itself (a new SIM, not VitalFix's or a personal one: a number on the AI
+  can't also be used in the WhatsApp app) and Antflow set up as a business
+  inside Antflow, with its plan as the "product" and scripts that end in
+  booking a setup call. Stopgap if wanted sooner: any existing number,
+  answered by a person.
 - Contact email: `info@antflow.io` (owner, 2026-10-04), the default in
   `site-config.ts`. Mail to it can't arrive until the antflow.io domain
   is bought and a mailbox set up.
