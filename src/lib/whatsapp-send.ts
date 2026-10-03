@@ -4,6 +4,16 @@ import { CLAIM_FILTER_ENFORCE, findClaims, recordClaimHits } from "@/lib/claim-f
 const GRAPH_API_VERSION = "v21.0";
 
 /**
+ * v2: test-chat customers (Customer.isTest, src/lib/test-chat.ts) have the
+ * number "test-<member id>". Every sender here stops for one, whatever
+ * calls it, so a test chat can never reach WhatsApp: not from the AI, a
+ * follow-up or a person replying from the dashboard.
+ */
+export function isTestRecipient(to: string): boolean {
+  return to.startsWith("test-");
+}
+
+/**
  * Thrown instead of sending when the claim filter is enforcing. Distinct from
  * a network failure so callers can escalate to a human rather than retry —
  * retrying would produce the same text and the same block.
@@ -43,6 +53,7 @@ export async function sendWhatsAppText(
     }
   }
 
+  if (isTestRecipient(to)) return;
   const credentials = await getMetaCredentials(businessId);
 
   if (!credentials || !phoneNumberId) {
@@ -88,6 +99,7 @@ export async function sendWhatsAppTemplate(
   languageCode: string,
   phoneNumberId: string
 ): Promise<void> {
+  if (isTestRecipient(to)) return;
   const credentials = await getMetaCredentials(businessId);
 
   if (!credentials || !phoneNumberId) {
@@ -135,6 +147,7 @@ export async function sendWhatsAppDocument(
   filename: string,
   phoneNumberId: string
 ): Promise<void> {
+  if (isTestRecipient(to)) return;
   const credentials = await getMetaCredentials(businessId);
 
   if (!credentials || !phoneNumberId) {

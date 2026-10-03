@@ -70,6 +70,7 @@ export async function tryGreetingShortcut(conversationId: string): Promise<boole
           id: true,
           businessId: true,
           phoneNumber: true,
+          isTest: true,
           _count: { select: { conversations: true } },
         },
       },
@@ -125,6 +126,7 @@ export async function tryGreetingShortcut(conversationId: string): Promise<boole
     businessId,
     customerPhoneNumber: conversation.customer.phoneNumber,
     whatsappPhoneNumberId: conversation.whatsappPhoneNumberId ?? "",
+    isTest: conversation.customer.isTest,
   };
 
   // Every gate has passed, so this conversation is definitely being handled

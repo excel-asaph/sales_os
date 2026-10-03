@@ -101,6 +101,7 @@ export default async function CustomersPage({
     prisma.customer.findMany({
       where: {
         businessId: session.businessId,
+        isTest: false,
         ...(query
           ? {
               OR: [

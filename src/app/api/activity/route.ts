@@ -24,7 +24,7 @@ export async function GET() {
   const session = await getSession();
   if (!session) return new Response(null, { status: 401 });
 
-  const scope = { customer: { businessId: session.businessId } };
+  const scope = { customer: { businessId: session.businessId, isTest: false } };
 
   const [newestMessage, newestConversation] = await Promise.all([
     prisma.message.findFirst({

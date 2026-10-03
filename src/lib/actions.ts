@@ -15,6 +15,13 @@ export interface ActionContext {
   businessId: string;
   customerPhoneNumber: string;
   whatsappPhoneNumberId: string;
+  /**
+   * v2: a test-chat conversation (Customer.isTest). Everything runs as for a
+   * real customer and is stored, so the test chat can show it, but nothing
+   * leaves the platform: no WhatsApp message, no follow-up job, no sale
+   * reported to Meta.
+   */
+  isTest?: boolean;
 }
 
 /**
@@ -67,6 +74,8 @@ export async function executeAction(
 }
 
 async function sendMessage(ctx: ActionContext, text: string) {
+  // Called for test chats too, so they meet the same claim filter a real
+  // customer would; sendWhatsAppText itself never sends to a test number.
   await sendWhatsAppText(ctx.businessId, ctx.customerPhoneNumber, text, ctx.whatsappPhoneNumberId, ctx.conversationId);
   await prisma.$transaction([
     prisma.message.create({
@@ -215,7 +224,9 @@ async function sendProduct(ctx: ActionContext, productId: string, resend = false
   }
 
   const filename = `${product.name}.pdf`;
-  await sendWhatsAppDocument(ctx.businessId, ctx.customerPhoneNumber, product.fileUrl, filename, ctx.whatsappPhoneNumberId);
+  if (!ctx.isTest) {
+    await sendWhatsAppDocument(ctx.businessId, ctx.customerPhoneNumber, product.fileUrl, filename, ctx.whatsappPhoneNumberId);
+  }
   await prisma.$transaction([
     prisma.message.create({
       data: {
@@ -888,6 +899,14 @@ async function createFollowup(
   const config = await getConversationConfig(ctx.conversationId);
   if (!config.followupsEnabled) {
     return { scheduled: false, paused: true };
+  }
+  // A test chat shows the follow-up the AI wanted (it's in the turn's
+  // events) but never queues one: nobody is waiting on the other end.
+  if (ctx.isTest) {
+    await prisma.event.create({
+      data: { conversationId: ctx.conversationId, type: "FOLLOWUP_SCHEDULED", payload: { hours, message, testOnly: true } },
+    });
+    return { scheduled: true, note: "Test chat: recorded, not actually scheduled." };
   }
 
   // A customer already tagged "Uninterested" (an explicit past decline, or

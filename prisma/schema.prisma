@@ -468,6 +468,12 @@ model Customer {
   lifetimePurchases Int      @default(0) @map("lifetime_purchases")
   customerSince     DateTime @default(now()) @map("customer_since")
   tags              Json?
+  /// v2: a team member trying the AI from the test chat (/manage/test-chat,
+  /// src/lib/test-chat.ts), not a real customer. Their phone number is
+  /// "test-<member id>". Nothing is sent to WhatsApp, no follow-up is
+  /// scheduled and no sale is reported to Meta for them, and every dashboard
+  /// list, count and trend leaves them out.
+  isTest            Boolean  @default(false) @map("is_test")
 
   business      Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
   conversations Conversation[]

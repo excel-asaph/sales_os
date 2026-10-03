@@ -2,7 +2,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { claude, CLAUDE_MODEL } from "@/lib/claude";
 import { buildSystemPrompt, buildProductContentBlock } from "@/lib/system-prompt";
 import { actionContractTools, chooseProductTool } from "@/lib/tools";
-import { needsProductChoice, PRODUCT_CHOICE_NOTE } from "@/lib/product-routing";
+import { productTurnContext } from "@/lib/product-routing";
 import { executeAction, type ActionContext } from "@/lib/actions";
 import { loadConversationBrain, renderConversationBrain } from "@/lib/conversation-brain";
 import { getEffectiveConfig, getFaqEntries } from "@/lib/knowledge";
@@ -134,14 +134,15 @@ export async function runAIEmployeeTurn(
     // before multi-number support existed, which never got one stamped.
     whatsappPhoneNumberId:
       conversation.whatsappPhoneNumberId ?? conversation.customer.business.whatsappPhoneNumberId ?? "",
+    isTest: conversation.customer.isTest,
   };
 
-  const [brain, config, faq, productContent, askForProduct] = await Promise.all([
+  const [brain, config, faq, productContent, productTurn] = await Promise.all([
     loadConversationBrain(conversationId),
     getEffectiveConfig(businessId, conversation.productId),
     getFaqEntries(businessId, conversation.productId),
     loadDeliveredProductContent(conversationId, businessId),
-    needsProductChoice(businessId, conversation.productId),
+    productTurnContext(businessId, conversation.productId),
   ]);
 
   const system = buildSystemPrompt({
@@ -151,14 +152,14 @@ export async function runAIEmployeeTurn(
     faq,
   });
 
-  // v2: on a multi-product business with the product still unknown, the
-  // AI is told to find out and given choose_product. In the turn's own
-  // message, not the system prompt, so the cached system prompt stays the
-  // same for every conversation of the business.
-  const brainContent = [renderConversationBrain(brain), followupNote, askForProduct ? PRODUCT_CHOICE_NOTE : null]
+  // v2: on a multi-product business the AI is told which product the
+  // customer came for, or to find out (and given choose_product). In the
+  // turn's own message, not the system prompt, so the cached system prompt
+  // stays the same for every conversation of the business.
+  const brainContent = [renderConversationBrain(brain), followupNote, productTurn.note]
     .filter(Boolean)
     .join("\n\n");
-  const tools = askForProduct ? [...actionContractTools, chooseProductTool] : actionContractTools;
+  const tools = productTurn.askForProduct ? [...actionContractTools, chooseProductTool] : actionContractTools;
 
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: brainContent }];
   let hasMessagedCustomer = false;

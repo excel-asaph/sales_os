@@ -59,7 +59,7 @@ export default async function DashboardPage({
   // with each other once a number is selected — filtering the list alone
   // and leaving the tiles business-wide would make them contradict it.
   const businessScope = {
-    customer: { businessId: session.businessId },
+    customer: { businessId: session.businessId, isTest: false },
     ...(effectiveNumber ? { whatsappPhoneNumberId: effectiveNumber } : {}),
   };
 

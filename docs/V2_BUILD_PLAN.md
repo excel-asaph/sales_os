@@ -183,7 +183,19 @@ Progress:
   number; Products page: map ads customers came from to products. A new
   product is added to the business's number automatically when it has
   only one. Tested end to end, including the live AI asking and choosing.
-- [ ] Test chat: talk to your own AI before going live
+- [x] Test chat (`/manage/test-chat`, `src/lib/test-chat.ts`): the real AI
+  with the real settings, scripts and FAQ, as a test customer
+  (`Customer.isTest`, number `test-<member id>`). Every WhatsApp sender
+  refuses a `test-` number (after the claim filter, so tests still meet
+  it); follow-ups are recorded, never queued; every dashboard list, count
+  and trend filters test customers out; "Start over" deletes it.
+- [x] On a multi-product business the AI is told which product the
+  customer came for (or to find out), in the turn's message, so single-
+  product businesses keep the same prompt. Found by the test chat: before
+  this, a routed conversation still opened with "which book?".
+
+**Phase 2's code is complete.** Its "done when" (a second ebook sold
+without us touching code) is ready to be tried for real once v2 is live.
 
 ### Phase 3: onboarding (1 to 2 weeks)
 Sign-up, the setup checklist, the "Ebook seller" starting template, the

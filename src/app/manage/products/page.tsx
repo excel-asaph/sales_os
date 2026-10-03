@@ -43,7 +43,7 @@ export default async function ProductsPage() {
       SELECT v.referral->>'source_id' AS ad_id, MAX(v.referral->>'headline') AS headline,
              COUNT(*) AS chats, MAX(v.created_at) AS last_seen
       FROM conversations v JOIN customers c ON c.id = v.customer_id
-      WHERE c.business_id = ${session.businessId}
+      WHERE c.business_id = ${session.businessId} AND NOT c.is_test
         AND v.referral->>'source_type' = 'ad' AND v.referral->>'source_id' IS NOT NULL
       GROUP BY 1 ORDER BY last_seen DESC LIMIT 30`,
     prisma.adProduct.findMany({ where: { businessId: session.businessId } }),

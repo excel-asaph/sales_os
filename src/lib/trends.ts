@@ -37,7 +37,7 @@ export async function getFunnelBreakdown(businessId: string, effectiveNumber?: s
   const grouped = await prisma.conversation.groupBy({
     by: ["currentStage"],
     where: {
-      customer: { businessId },
+      customer: { businessId, isTest: false },
       ...(effectiveNumber ? { whatsappPhoneNumberId: effectiveNumber } : {}),
     },
     _count: true,
@@ -122,6 +122,7 @@ export async function getFollowupStepPerformance(
     JOIN conversations c ON c.id = f.conversation_id
     JOIN customers cu ON cu.id = c.customer_id
     WHERE cu.business_id = ${businessId}
+    AND NOT cu.is_test
     AND f.sent = true
     AND f.step <= ${maxSteps}
     ${effectiveNumber ? Prisma.sql`AND c.whatsapp_phone_number_id = ${effectiveNumber}` : Prisma.empty}
@@ -155,7 +156,7 @@ const CONVERTED_STAGES: ConversationStage[] = ["PAYMENT_VERIFIED", "PRODUCT_DELI
 // fix, not an ongoing state worth reproducing as a standing metric.
 export async function getConversionAttribution(businessId: string, effectiveNumber?: string): Promise<AttributionData> {
   const converted = {
-    customer: { businessId },
+    customer: { businessId, isTest: false },
     ...(effectiveNumber ? { whatsappPhoneNumberId: effectiveNumber } : {}),
     currentStage: { in: CONVERTED_STAGES },
   };
@@ -165,7 +166,7 @@ export async function getConversionAttribution(businessId: string, effectiveNumb
     prisma.conversation.count({ where: { ...converted, followups: { some: { sent: true } } } }),
     prisma.conversation.count({
       where: {
-        customer: { businessId },
+        customer: { businessId, isTest: false },
         ...(effectiveNumber ? { whatsappPhoneNumberId: effectiveNumber } : {}),
         currentStage: { in: ["PRODUCT_DELIVERED", "SALE_COMPLETED"] },
         orders: { none: { status: "VERIFIED" } },
@@ -288,7 +289,7 @@ async function cohortSnapshot(
   end: Date
 ): Promise<PeriodSnapshot> {
   const scope = {
-    customer: { businessId },
+    customer: { businessId, isTest: false },
     ...(effectiveNumber ? { whatsappPhoneNumberId: effectiveNumber } : {}),
   };
   // Excludes the worker's silent give-up row the same way
@@ -323,6 +324,7 @@ async function cohortSnapshot(
       JOIN conversations c ON c.id = f.conversation_id
       JOIN customers cu ON cu.id = c.customer_id
       WHERE cu.business_id = ${businessId}
+      AND NOT cu.is_test
       AND f.sent = true
       AND f.step <= ${maxSteps}
       AND f.scheduled_for >= ${start}
@@ -424,7 +426,7 @@ export async function getClaimFilterHits(
     type: "CLAIM_FILTER_HIT",
     createdAt: { gte: since },
     conversation: {
-      customer: { businessId },
+      customer: { businessId, isTest: false },
       ...(effectiveNumber ? { whatsappPhoneNumberId: effectiveNumber } : {}),
     },
   };

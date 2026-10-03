@@ -43,7 +43,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     prisma.$queryRaw<Array<{ business_id: string; count: bigint }>>`
       SELECT c.business_id, COUNT(*) AS count
       FROM conversations v JOIN customers c ON c.id = v.customer_id
-      WHERE v.created_at > NOW() - INTERVAL '7 days'
+      WHERE v.created_at > NOW() - INTERVAL '7 days' AND NOT c.is_test
       GROUP BY c.business_id`,
     prisma.event.findMany({ where: { type: SUPPORT_ACCESS_EVENT }, orderBy: { createdAt: "desc" }, take: 15 }),
   ]);

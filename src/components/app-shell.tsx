@@ -15,6 +15,7 @@ import {
   Phone,
   TrendingUp,
   ShieldCheck,
+  FlaskConical,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getViewerContext } from "@/lib/viewer";
@@ -58,7 +59,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type NavKey = "home" | "conversations" | "customers" | "trends" | "products" | "payment-accounts" | "team" | "settings" | "manage" | "admin";
+type NavKey = "home" | "conversations" | "customers" | "trends" | "products" | "payment-accounts" | "team" | "settings" | "manage" | "admin" | "test-chat";
 
 const HUMAN_STAGES = ["HUMAN_REVIEW_REQUIRED", "HUMAN_ASSIGNED"] as const;
 
@@ -119,7 +120,7 @@ export async function AppShell({
   const selectedNumber = effectiveNumberId ? numbers.find((n) => n.id === effectiveNumberId) : undefined;
 
   const awaitingHumanWhere = {
-    customer: { businessId: session.businessId },
+    customer: { businessId: session.businessId, isTest: false },
     currentStage: { in: Array.from(HUMAN_STAGES) },
     ...(effectiveNumberId ? { whatsappPhoneNumberId: effectiveNumberId } : {}),
   };
@@ -189,6 +190,13 @@ export async function AppShell({
       href: "/manage/team",
       label: "Team",
       icon: Users,
+      adminOnly: true,
+    },
+    {
+      key: "test-chat",
+      href: "/manage/test-chat",
+      label: "Test chat",
+      icon: FlaskConical,
       adminOnly: true,
     },
     {

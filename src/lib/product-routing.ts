@@ -82,3 +82,31 @@ export const PRODUCT_CHOICE_NOTE =
   "Find out the way a shop assistant would (use search_products to see what is on offer), and as soon as the customer " +
   "has made clear which product they mean, call choose_product with its id before pitching or quoting it. " +
   "From then on this conversation uses that product's own scripts.";
+
+/**
+ * What the AI is told about the product in this turn, on a business selling
+ * more than one: which product the customer came for, or that it needs to
+ * find out (and so gets choose_product). Nothing on a single-product
+ * business, whose turns stay exactly as they were.
+ */
+export async function productTurnContext(
+  businessId: string,
+  productId: string | null
+): Promise<{ askForProduct: boolean; note: string | null }> {
+  if (!(await needsProductChoice(businessId, productId))) {
+    if (!productId) return { askForProduct: false, note: null };
+    const [product, available] = await Promise.all([
+      prisma.product.findUnique({ where: { id: productId }, select: { name: true } }),
+      prisma.product.count({ where: { businessId, available: true } }),
+    ]);
+    if (!product || available <= 1) return { askForProduct: false, note: null };
+    return {
+      askForProduct: false,
+      note:
+        `Platform note: this customer came for "${product.name}" (from the ad, link or number they used). ` +
+        "Unless they ask about something else, that is the product to talk about; look it up with search_products " +
+        "as usual before quoting its details, and don't ask which product they want.",
+    };
+  }
+  return { askForProduct: true, note: PRODUCT_CHOICE_NOTE };
+}

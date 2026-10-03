@@ -64,7 +64,7 @@ export default async function HomePage() {
   const { start: rangeStart, end: rangeEnd, label: rangeLabel } = resolveDateRange(dateRangeCookie, "thismonth");
 
   const conversationScope = {
-    customer: { businessId: session.businessId },
+    customer: { businessId: session.businessId, isTest: false },
     ...(effectiveNumber ? { whatsappPhoneNumberId: effectiveNumber } : {}),
   };
   const orderBusinessScope = { conversation: conversationScope };
