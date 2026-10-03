@@ -164,3 +164,31 @@ export async function registerNumber(token: string, phoneNumberId: string, pin: 
     body: JSON.stringify({ messaging_product: "whatsapp", pin }),
   });
 }
+
+/** Whether this app is still subscribed to the WhatsApp account's webhooks (it can be removed in Meta without anyone noticing). */
+export async function isAppSubscribed(token: string, wabaId: string, appId: string): Promise<boolean> {
+  const { data } = await graph<{ data: { whatsapp_business_api_data?: { id?: string } }[] }>(`/${wabaId}/subscribed_apps`, { token });
+  return data.some((app) => app.whatsapp_business_api_data?.id === appId);
+}
+
+export interface NumberStatus {
+  id: string;
+  displayNumber: string;
+  registered: boolean;
+  /** Meta's GREEN / YELLOW / RED, or UNKNOWN before it has rated the number. */
+  quality: string;
+}
+
+/** Current state of one number, as Meta sees it. */
+export async function fetchNumberStatus(token: string, phoneNumberId: string): Promise<NumberStatus> {
+  const n = await graph<{ id: string; display_phone_number?: string; platform_type?: string; quality_rating?: string }>(
+    `/${phoneNumberId}?fields=id,display_phone_number,platform_type,quality_rating`,
+    { token }
+  );
+  return {
+    id: n.id,
+    displayNumber: n.display_phone_number ?? phoneNumberId,
+    registered: n.platform_type === "CLOUD_API",
+    quality: n.quality_rating ?? "UNKNOWN",
+  };
+}

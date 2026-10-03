@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CopyField } from "@/components/copy-field";
+import { CheckConnection } from "./check-connection";
 import type { WhatsAppNumber } from "@/lib/meta-setup";
 import {
   submitAccessToken,
@@ -180,6 +181,7 @@ export function ConnectWizard(props: {
             <Button variant="outline" disabled={pending} onClick={() => run(startAddingNumber)}>
               Connect another number
             </Button>
+            <CheckConnection />
           </CardContent>
         </Card>
       )}

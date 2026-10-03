@@ -16,8 +16,11 @@ import {
   listNumbers,
   registerNumber,
   subscribeAppToAccount,
+  isAppSubscribed,
+  fetchNumberStatus,
   type WhatsAppNumber,
 } from "@/lib/meta-setup";
+import { relativeTime } from "@/lib/relative-time";
 
 // The WhatsApp connection wizard (page.tsx beside this), one action per
 // step. Each returns { ok } or { error } in words the owner can act on,
@@ -244,6 +247,94 @@ export async function startAddingNumber(): Promise<Result> {
     });
     revalidatePath("/settings/whatsapp/connect");
     return { ok: true };
+  } catch (error) {
+    return failure(error);
+  }
+}
+
+export interface CheckItem {
+  label: string;
+  /** null: nothing to judge yet (e.g. no message has ever arrived). */
+  ok: boolean | null;
+  detail: string;
+}
+
+/**
+ * Check connection: asks Meta, live, whether everything the business's
+ * WhatsApp needs still holds. Each problem comes back in words the owner
+ * can act on, rather than stopping at the first one.
+ */
+export async function checkConnection(): Promise<{ ok: true; items: CheckItem[] } | { ok: false; error: string }> {
+  try {
+    const session = await requireAdminSession();
+    const connection = await prisma.businessMetaConnection.findUnique({ where: { businessId: session.businessId } });
+    if (!connection) return { ok: false, error: "WhatsApp isn't connected yet. Start the connection wizard." };
+
+    const token = decryptSecret(connection.encryptedAccessToken);
+    const appSecret = connection.encryptedAppSecret ? decryptSecret(connection.encryptedAppSecret) : null;
+    const items: CheckItem[] = [];
+    const attempt = async (label: string, run: () => Promise<string>) => {
+      try {
+        items.push({ label, ok: true, detail: await run() });
+      } catch (error) {
+        items.push({ label, ok: false, detail: error instanceof MetaSetupError ? error.message : "Couldn't check this." });
+      }
+    };
+
+    if (connection.metaAppId && appSecret) {
+      const appId = connection.metaAppId;
+      await attempt("App secret", async () => {
+        await checkAppSecret(appId, appSecret);
+        return "Correct, so messages from Meta can be verified.";
+      });
+      await attempt("Access token", async () => {
+        const info = await inspectToken(token, `${appId}|${appSecret}`);
+        if (!info.wabaIds.includes(connection.wabaId)) {
+          throw new MetaSetupError("The token can no longer reach this WhatsApp account. Give the system user access again.");
+        }
+        return "Works, never expires, and has both WhatsApp permissions.";
+      });
+      await attempt("App subscribed to your WhatsApp account", async () => {
+        if (!(await isAppSubscribed(token, connection.wabaId, appId))) {
+          throw new MetaSetupError("Your app isn't receiving this account's messages any more. Run the connection wizard's number step again to fix it.");
+        }
+        return "Yes.";
+      });
+    } else {
+      await attempt("Access token", async () => {
+        const { appName } = await identifyApp(token);
+        return `Works (app: ${appName}). Connect through the wizard to also check its expiry and permissions.`;
+      });
+    }
+
+    const channels = await prisma.channel.findMany({ where: { businessId: session.businessId, status: "ACTIVE" } });
+    for (const channel of channels) {
+      await attempt(`Number ${channel.displayNumber ?? channel.phoneNumberId}`, async () => {
+        const status = await fetchNumberStatus(token, channel.phoneNumberId);
+        if (!status.registered) throw new MetaSetupError("Not registered with Meta, so it can't send. Run the wizard's number step to register it.");
+        if (status.quality === "RED") {
+          throw new MetaSetupError("Meta rates this number's quality as low (red): too many customers blocked or reported it. Sending may be limited.");
+        }
+        return status.quality === "UNKNOWN" ? "Registered. Meta hasn't rated its quality yet." : `Registered. Quality: ${status.quality.toLowerCase()}.`;
+      });
+    }
+
+    if (connection.webhookKey) {
+      items.push({
+        label: "Messages arriving",
+        ok: connection.lastWebhookAt ? true : connection.webhookVerifiedAt ? null : false,
+        detail: connection.lastWebhookAt
+          ? `Last one ${relativeTime(connection.lastWebhookAt)}.`
+          : connection.webhookVerifiedAt
+            ? "Meta has verified the address, but no message has arrived yet. Send one from your phone to check."
+            : "Meta hasn't verified the webhook address yet. Finish the wizard's webhook step.",
+      });
+    }
+
+    if (items.every((item) => item.ok !== false)) {
+      await prisma.businessMetaConnection.update({ where: { businessId: session.businessId }, data: { lastVerifiedAt: new Date() } });
+    }
+    return { ok: true, items };
   } catch (error) {
     return failure(error);
   }

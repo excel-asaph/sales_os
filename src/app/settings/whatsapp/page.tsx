@@ -8,6 +8,7 @@ import { CopyField } from "@/components/copy-field";
 import { WizardStepper, type WizardStep } from "@/components/wizard-stepper";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import Link from "next/link";
+import { CheckConnection } from "./connect/check-connection";
 import { Button } from "@/components/ui/button";
 import { retrySetupConversionsDataset, refreshBusinessVerificationStatus, submitReengagementTemplate } from "./actions";
 import type { BusinessVerificationStatus } from "@/lib/meta-business-verification";
@@ -128,6 +129,7 @@ export default async function ConnectWhatsAppPage() {
             >
               {wizardConnected ? "Open the connection wizard" : "Start the connection wizard"}
             </Button>
+            {connected && <CheckConnection />}
           </CardContent>
         </Card>
 

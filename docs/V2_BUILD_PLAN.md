@@ -225,7 +225,12 @@ Progress:
   `scripts/fake-meta.mjs`; not yet against real Meta. Embedded Signup
   stays for when Antflow is a Tech Provider (postponed by the owner,
   2026-10-04).
-- [ ] A "Check connection" button for an already-connected business
+- [x] "Check connection" on the Connect WhatsApp page and the wizard's
+  last screen: app secret, token (permanent, permissions, still reaches
+  the account), app still subscribed to the account, each number
+  registered and its quality rating, and when messages last arrived;
+  each problem with what to do. Tested against `scripts/fake-meta.mjs`
+  including simulated failures (`/__break`).
 - [x] Setup checklist on Home (`src/lib/setup-checklist.ts`): eight steps
   worked out from what the business has done, from first product to
   first real customer; hideable; hidden from the start for businesses
