@@ -5,7 +5,8 @@
 
 /** Antflow's own WhatsApp number, digits only with country code (e.g. 2348012345678). Its chat is answered by Antflow's own AI. */
 export const ANTFLOW_WHATSAPP = process.env.NEXT_PUBLIC_ANTFLOW_WHATSAPP?.replace(/\D/g, "") || null;
-export const ANTFLOW_EMAIL = process.env.NEXT_PUBLIC_ANTFLOW_EMAIL || null;
+/** info@antflow.io until the domain is bought (owner, 2026-10-04); mail to it can't arrive before then. */
+export const ANTFLOW_EMAIL = process.env.NEXT_PUBLIC_ANTFLOW_EMAIL || "info@antflow.io";
 /** For later: the Meta Pixel on the WhatsApp button, so the site can be advertised. */
 export const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID || null;
 

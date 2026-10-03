@@ -90,12 +90,14 @@ Still to fill in (`src/app/(marketing)/site-config.ts` and Railway
 variables):
 - `NEXT_PUBLIC_ANTFLOW_WHATSAPP`: Antflow's own number, answered by
   Antflow's AI. Until it's set the main button goes to the Pricing page.
-- `NEXT_PUBLIC_ANTFLOW_EMAIL`: the contact address in the footer and legal pages.
+- Contact email: `info@antflow.io` (owner, 2026-10-04), the default in
+  `site-config.ts`. Mail to it can't arrive until the antflow.io domain
+  is bought and a mailbox set up.
 - `RESULTS`: filled in 2026-10-04 from production (read-only), see
   `site-config.ts`. Re-run `scripts/site-stats.ts` to refresh them; the
   command is in its header. VitalFix's revenue was left out until the
   business agrees to publish it.
-- The privacy policy and terms should be read by a lawyer, and name the
-  registered business once there is one.
+- The privacy policy and terms should name the registered business once
+  there is one. (No legal review planned: owner's decision, 2026-10-04.)
 - The Meta Pixel (`NEXT_PUBLIC_META_PIXEL_ID`) is configured but not yet
   wired to the button.
