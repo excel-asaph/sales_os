@@ -104,3 +104,38 @@ export async function deleteProductFaq(formData: FormData) {
   await prisma.faqEntry.deleteMany({ where: { id, productId } });
   revalidatePath(`/manage/products/${productId}`);
 }
+
+export async function updateProductOpeningText(formData: FormData) {
+  const productId = String(formData.get("productId") ?? "");
+  const text = String(formData.get("whatsappOpeningText") ?? "").trim();
+  await requireOwnedProduct(productId);
+
+  await prisma.product.update({ where: { id: productId }, data: { whatsappOpeningText: text || null } });
+  revalidatePath(`/manage/products/${productId}`);
+}
+
+/**
+ * Which of the business's numbers sell this product. One product on a
+ * number makes it a dedicated number for routing (src/lib/product-routing.ts);
+ * several make it shared.
+ */
+export async function updateProductChannels(formData: FormData) {
+  const productId = String(formData.get("productId") ?? "");
+  const { session } = await requireOwnedProduct(productId);
+  const chosen = new Set(formData.getAll("channelId").map(String));
+
+  // Only this business's own numbers, whatever the form says.
+  const channels = await prisma.channel.findMany({ where: { businessId: session.businessId }, select: { id: true } });
+  const wanted = channels.filter((c) => chosen.has(c.id)).map((c) => c.id);
+
+  await prisma.$transaction([
+    prisma.channelProduct.deleteMany({
+      where: { productId, channel: { businessId: session.businessId }, channelId: { notIn: wanted } },
+    }),
+    prisma.channelProduct.createMany({
+      data: wanted.map((channelId) => ({ channelId, productId })),
+      skipDuplicates: true,
+    }),
+  ]);
+  revalidatePath(`/manage/products/${productId}`);
+}

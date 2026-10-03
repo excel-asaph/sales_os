@@ -59,6 +59,8 @@ export async function executeAction(
       return escalateToHuman(ctx, input.reason as string, input.summary as string);
     case "tag_customer":
       return tagCustomer(ctx, input.tag as string);
+    case "choose_product":
+      return chooseProduct(ctx, input.product_id as string);
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }
@@ -100,6 +102,51 @@ async function sendTemplateMessage(ctx: ActionContext, templateKey: string) {
   return sendMessage(ctx, text);
 }
 
+/**
+ * v2: records which product the conversation is about (the choose_product
+ * tool). Only sets it while unknown: routing at the start of the
+ * conversation (src/lib/product-routing.ts) knew better than a guess
+ * mid-way, and a customer buying a second product doesn't make the
+ * conversation about something else.
+ */
+async function chooseProduct(ctx: ActionContext, productId: string) {
+  const product = await prisma.product.findFirst({
+    where: { id: productId, businessId: ctx.businessId, available: true },
+    select: { id: true, name: true },
+  });
+  if (!product) return { chosen: false, reason: "No available product with that id. Use search_products to find it." };
+
+  const { count } = await prisma.conversation.updateMany({
+    where: { id: ctx.conversationId, productId: null },
+    data: { productId: product.id },
+  });
+  if (count === 0) return { chosen: false, reason: "This conversation's product was already set." };
+  await prisma.event.create({
+    data: { conversationId: ctx.conversationId, type: "PRODUCT_ROUTED", payload: { productId: product.id, via: "ai" } },
+  });
+  return { chosen: true, product: product.name };
+}
+
+/**
+ * Sending or taking payment for a product settles what the conversation is
+ * about if nothing has yet, so its follow-ups and scripts are that
+ * product's even if choose_product was never called.
+ */
+async function recordProductIfUnknown(ctx: ActionContext, productId: string) {
+  // The id comes from the model: only ever this business's own product.
+  const owned = await prisma.product.count({ where: { id: productId, businessId: ctx.businessId } });
+  if (!owned) return;
+  const { count } = await prisma.conversation.updateMany({
+    where: { id: ctx.conversationId, productId: null, customer: { businessId: ctx.businessId } },
+    data: { productId },
+  });
+  if (count > 0) {
+    await prisma.event.create({
+      data: { conversationId: ctx.conversationId, type: "PRODUCT_ROUTED", payload: { productId, via: "sale" } },
+    });
+  }
+}
+
 async function sendProduct(ctx: ActionContext, productId: string, resend = false) {
   const [product, config] = await Promise.all([
     prisma.product.findUnique({ where: { id: productId } }),
@@ -108,6 +155,7 @@ async function sendProduct(ctx: ActionContext, productId: string, resend = false
     getEffectiveConfig(ctx.businessId, productId),
   ]);
   if (!product) return { delivered: false, reason: "product not found" };
+  await recordProductIfUnknown(ctx, productId);
 
   // Don't send a file the customer already has. Enforced here rather than
   // only in the prompt for the same reason createFollowup checks opt-out in
@@ -245,6 +293,7 @@ const RECEIPT_RETRY_LIMIT = 3;
 const MIN_PLAUSIBLE_RECEIPT_TEXT_LENGTH = 40;
 
 async function requestPaymentVerification(ctx: ActionContext, productId: string, expectedAmount: number) {
+  await recordProductIfUnknown(ctx, productId);
   const [attachmentMessage, textMessage] = await Promise.all([
     prisma.message.findFirst({
       where: { conversationId: ctx.conversationId, direction: "INBOUND", type: { in: ["IMAGE", "DOCUMENT"] } },

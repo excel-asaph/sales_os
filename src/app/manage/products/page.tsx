@@ -5,7 +5,7 @@ import { AppShell } from "@/components/app-shell";
 import { SubmitButton } from "@/components/submit-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { createProduct, toggleProductAvailable, deleteProduct, updateProduct } from "./actions";
+import { createProduct, toggleProductAvailable, deleteProduct, updateProduct, mapAdToProduct } from "./actions";
 
 export default async function ProductsPage() {
   const session = await requireAdminPage();
@@ -34,6 +34,21 @@ export default async function ProductsPage() {
     orderBy: { name: "asc" },
     include: { settings: true, _count: { select: { faqEntries: true } } },
   });
+
+  // v2: the Click-to-WhatsApp ads customers have arrived from (Meta's
+  // referral, kept on each conversation), newest first, so each can be
+  // pointed at the product it sells (src/lib/product-routing.ts).
+  const [ads, adLinks] = await Promise.all([
+    prisma.$queryRaw<Array<{ ad_id: string; headline: string | null; chats: bigint; last_seen: Date }>>`
+      SELECT v.referral->>'source_id' AS ad_id, MAX(v.referral->>'headline') AS headline,
+             COUNT(*) AS chats, MAX(v.created_at) AS last_seen
+      FROM conversations v JOIN customers c ON c.id = v.customer_id
+      WHERE c.business_id = ${session.businessId}
+        AND v.referral->>'source_type' = 'ad' AND v.referral->>'source_id' IS NOT NULL
+      GROUP BY 1 ORDER BY last_seen DESC LIMIT 30`,
+    prisma.adProduct.findMany({ where: { businessId: session.businessId } }),
+  ]);
+  const productForAd = new Map(adLinks.map((link) => [link.adId, link.productId]));
 
   // Whether a product sells differently from the business in any way.
   const hasOwnSettings = (product: (typeof products)[number]) => {
@@ -172,6 +187,48 @@ export default async function ProductsPage() {
             </Table>
           )}
         </Card>
+
+        {ads.length > 0 && products.length > 1 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Ads</CardTitle>
+              <CardDescription>
+                Click-to-WhatsApp ads customers have come from. Say which product each one sells, and chats from it
+                start on that product, even on a number that sells several.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-3 text-sm">
+              {ads.map((ad) => (
+                <form key={ad.ad_id} action={mapAdToProduct} className="flex flex-wrap items-center gap-3 rounded-lg border p-3">
+                  <input type="hidden" name="adId" value={ad.ad_id} />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-medium">{ad.headline ?? `Ad ${ad.ad_id}`}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {Number(ad.chats)} chat{Number(ad.chats) === 1 ? "" : "s"}, last{" "}
+                      {ad.last_seen.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                    </div>
+                  </div>
+                  <select
+                    name="productId"
+                    defaultValue={productForAd.get(ad.ad_id) ?? ""}
+                    className="h-9 rounded-md border bg-background px-2"
+                    aria-label="Product this ad sells"
+                  >
+                    <option value="">Not set: the AI asks</option>
+                    {products.map((product) => (
+                      <option key={product.id} value={product.id}>
+                        {product.name}
+                      </option>
+                    ))}
+                  </select>
+                  <SubmitButton size="sm" variant="outline" pendingLabel="Saving…" successMessage="Ad saved">
+                    Save
+                  </SubmitButton>
+                </form>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>

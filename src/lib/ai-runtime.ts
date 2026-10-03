@@ -1,7 +1,8 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { claude, CLAUDE_MODEL } from "@/lib/claude";
 import { buildSystemPrompt, buildProductContentBlock } from "@/lib/system-prompt";
-import { actionContractTools } from "@/lib/tools";
+import { actionContractTools, chooseProductTool } from "@/lib/tools";
+import { needsProductChoice, PRODUCT_CHOICE_NOTE } from "@/lib/product-routing";
 import { executeAction, type ActionContext } from "@/lib/actions";
 import { loadConversationBrain, renderConversationBrain } from "@/lib/conversation-brain";
 import { getEffectiveConfig, getFaqEntries } from "@/lib/knowledge";
@@ -135,11 +136,12 @@ export async function runAIEmployeeTurn(
       conversation.whatsappPhoneNumberId ?? conversation.customer.business.whatsappPhoneNumberId ?? "",
   };
 
-  const [brain, config, faq, productContent] = await Promise.all([
+  const [brain, config, faq, productContent, askForProduct] = await Promise.all([
     loadConversationBrain(conversationId),
     getEffectiveConfig(businessId, conversation.productId),
     getFaqEntries(businessId, conversation.productId),
     loadDeliveredProductContent(conversationId, businessId),
+    needsProductChoice(businessId, conversation.productId),
   ]);
 
   const system = buildSystemPrompt({
@@ -149,9 +151,14 @@ export async function runAIEmployeeTurn(
     faq,
   });
 
-  const brainContent = followupNote
-    ? `${renderConversationBrain(brain)}\n\n${followupNote}`
-    : renderConversationBrain(brain);
+  // v2: on a multi-product business with the product still unknown, the
+  // AI is told to find out and given choose_product. In the turn's own
+  // message, not the system prompt, so the cached system prompt stays the
+  // same for every conversation of the business.
+  const brainContent = [renderConversationBrain(brain), followupNote, askForProduct ? PRODUCT_CHOICE_NOTE : null]
+    .filter(Boolean)
+    .join("\n\n");
+  const tools = askForProduct ? [...actionContractTools, chooseProductTool] : actionContractTools;
 
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: brainContent }];
   let hasMessagedCustomer = false;
@@ -195,7 +202,7 @@ export async function runAIEmployeeTurn(
             }]
           : []),
       ],
-      tools: actionContractTools,
+      tools,
       // Automatic caching: the API places (and moves) this breakpoint on
       // the last cacheable block itself as `messages` grows across this
       // loop's iterations, so the turn's own tool-calling history is

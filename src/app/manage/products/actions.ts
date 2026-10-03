@@ -17,8 +17,17 @@ export async function createProduct(formData: FormData) {
   const price = Number(formData.get("price"));
   if (!name || !Number.isFinite(price)) return;
 
+  // A business on one number almost always sells the new product on it
+  // too, so it's added there; with several numbers, which ones sell it is
+  // chosen on the product's own page.
+  const channels = await prisma.channel.findMany({
+    where: { businessId: session.businessId, status: "ACTIVE" },
+    select: { id: true },
+  });
+
   await prisma.product.create({
     data: {
+      ...(channels.length === 1 ? { channels: { create: { channelId: channels[0].id } } } : {}),
       businessId: session.businessId,
       name,
       description: String(formData.get("description") ?? "").trim() || null,
@@ -81,5 +90,29 @@ export async function deleteProduct(formData: FormData) {
   }
 
   await prisma.product.delete({ where: { id: productId } });
+  revalidatePath("/manage/products");
+}
+
+/**
+ * v2: which product a Click-to-WhatsApp ad sells (AdProduct), so a
+ * conversation starting from it begins on that product
+ * (src/lib/product-routing.ts). An empty product clears the link.
+ */
+export async function mapAdToProduct(formData: FormData) {
+  const session = await requireAdminSession();
+  const adId = String(formData.get("adId") ?? "").trim();
+  const productId = String(formData.get("productId") ?? "");
+  if (!adId) return;
+
+  if (!productId) {
+    await prisma.adProduct.deleteMany({ where: { businessId: session.businessId, adId } });
+  } else {
+    await requireOwnedProduct(productId, session.businessId);
+    await prisma.adProduct.upsert({
+      where: { businessId_adId: { businessId: session.businessId, adId } },
+      create: { businessId: session.businessId, adId, productId },
+      update: { productId },
+    });
+  }
   revalidatePath("/manage/products");
 }

@@ -12,6 +12,7 @@ import { withCustomerLock } from "@/lib/customer-lock";
 import { scheduleDebounced } from "@/lib/message-debounce";
 import { sendTypingIndicator } from "@/lib/whatsapp-send";
 import { routeInbound, type InboundRoute } from "@/lib/channels";
+import { routeNewConversation } from "@/lib/product-routing";
 
 // Media worth saving so a human reviewing the conversation later can
 // actually see it, not just a WhatsApp media reference that expires.
@@ -55,6 +56,16 @@ export async function ingestInboundMessage(
       `Webhook for business ${onlyBusinessId} carried a message for phone_number_id=${value.metadata.phone_number_id}, which belongs to business ${route.businessId}; dropping message ${message.id}`
     );
     return;
+  }
+
+  // Meta names the number as people dial it on every message; keep it on
+  // the channel the first time, for each product's WhatsApp link
+  // (src/app/manage/products/[id]). A no-op once it's set.
+  if (route.channelId && value.metadata.display_phone_number) {
+    await prisma.channel.updateMany({
+      where: { id: route.channelId, displayNumber: null },
+      data: { displayNumber: value.metadata.display_phone_number },
+    });
   }
 
   const contactName = value.contacts?.find((c) => c.wa_id === message.from)
@@ -130,6 +141,19 @@ async function processInboundMessage(
   const isReaction = message.type === "reaction";
   let inboundMessageId: string | null = null;
 
+  // v2: a new conversation's product, from the ad, the product's own
+  // WhatsApp link text, or a number that sells one product
+  // (src/lib/product-routing.ts). Worked out before the transaction since
+  // it only reads.
+  const routed = conversation
+    ? null
+    : await routeNewConversation({
+        businessId,
+        channelProductId: route.productId,
+        referral: message.referral,
+        firstMessageText: message.type === "text" ? content : null,
+      });
+
   await prisma.$transaction(async (tx) => {
     if (!conversation) {
       conversation = await tx.conversation.create({
@@ -145,14 +169,18 @@ async function processInboundMessage(
           // every reply in this thread goes out on whichever of the
           // business's numbers started it.
           whatsappPhoneNumberId: phoneNumberId,
-          // v2: the same number as a Channel, and the product when the
-          // number sells only one (src/lib/channels.ts). Stamped once, like
-          // the two above; a later message on another number doesn't move
-          // the conversation.
+          // v2: the same number as a Channel, and the product worked out
+          // above. Stamped once, like the two above; a later message on
+          // another number doesn't move the conversation.
           channelId: route.channelId,
-          productId: route.productId,
+          productId: routed?.productId ?? null,
         },
       });
+      if (routed) {
+        await tx.event.create({
+          data: { conversationId: conversation.id, type: "PRODUCT_ROUTED", payload: routed },
+        });
+      }
     }
 
     const inboundMessage = await tx.message.create({

@@ -166,6 +166,7 @@ model Business {
   humanAgents     HumanAgent[]
   faqEntries      FaqEntry[]
   channels        Channel[]
+  adProducts      AdProduct[]
 
   @@map("businesses")
 }
@@ -383,6 +384,11 @@ model Product {
   format      String?
   category    String?
   available   Boolean @default(true)
+  /// v2: the message this product's WhatsApp link fills in for the customer,
+  /// e.g. "Hi, I want the Fat-Burning Switch". A first message containing it
+  /// starts the conversation on this product, which is how one number can
+  /// sell several products (src/lib/product-routing.ts).
+  whatsappOpeningText String? @map("whatsapp_opening_text")
 
   business      Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
   orders        Order[]
@@ -390,8 +396,28 @@ model Product {
   conversations Conversation[]
   settings      ProductSettings?
   faqEntries    FaqEntry[]
+  ads           AdProduct[]
 
   @@map("products")
+}
+
+/// v2: which product a Click-to-WhatsApp ad sells, set by the business on
+/// the Products page. Meta names the ad (referral.source_id) on the first
+/// message from it, which is the most reliable way to know what a customer
+/// on a shared number came for (src/lib/product-routing.ts).
+model AdProduct {
+  id         String   @id @default(cuid())
+  businessId String   @map("business_id")
+  /// Meta's ad id, as sent in the webhook's referral.source_id.
+  adId       String   @map("ad_id")
+  productId  String   @map("product_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, adId])
+  @@map("ad_products")
 }
 
 /// v2: one product's own sales settings (docs/V2_BUILD_PLAN.md, Phase 2).

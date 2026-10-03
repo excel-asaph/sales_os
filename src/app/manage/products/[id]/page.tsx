@@ -21,6 +21,8 @@ import {
   addProductFaq,
   updateProductFaq,
   deleteProductFaq,
+  updateProductOpeningText,
+  updateProductChannels,
 } from "./actions";
 
 // One product's own sales settings (v2, docs/V2_BUILD_PLAN.md Phase 2).
@@ -97,7 +99,22 @@ export default async function ProductSalesSettingsPage({ params }: { params: Pro
   });
   if (!product) notFound();
 
-  const business = await getEffectiveConfig(session.businessId);
+  const [business, channels] = await Promise.all([
+    getEffectiveConfig(session.businessId),
+    prisma.channel.findMany({
+      where: { businessId: session.businessId },
+      orderBy: { createdAt: "asc" },
+      include: { products: { select: { productId: true } } },
+    }),
+  ]);
+  const soldOn = channels.filter((c) => c.products.some((p) => p.productId === product.id));
+  const numberName = (c: (typeof channels)[number]) => c.label ?? c.displayNumber ?? `Number ${c.phoneNumberId}`;
+  // wa.me wants the number as digits only, country code first.
+  const waLink = (c: (typeof channels)[number]) => {
+    const digits = c.displayNumber?.replace(/\D/g, "");
+    if (!digits) return null;
+    return `https://wa.me/${digits}${product.whatsappOpeningText ? `?text=${encodeURIComponent(product.whatsappOpeningText)}` : ""}`;
+  };
   const settings = product.settings;
   const productPlaybook = (settings?.playbook as Record<string, string> | null) ?? {};
   const ownScripts = Object.keys(productPlaybook).length;
@@ -144,6 +161,104 @@ export default async function ProductSalesSettingsPage({ params }: { params: Pro
               PDF only, up to 50 MB. A new version replaces the text the AI reads; customers who already have the old
               one keep it.
             </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>WhatsApp numbers and link</CardTitle>
+            <CardDescription>
+              Which numbers sell this product, and the link that starts a chat about it. On a number that sells
+              several products, the link&apos;s opening message tells the AI which one the customer came for.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-6 text-sm">
+            {channels.length === 0 ? (
+              <p className="text-muted-foreground">
+                No WhatsApp number is connected yet.{" "}
+                <Link href="/settings/whatsapp" className="underline underline-offset-4">
+                  Connect one
+                </Link>
+                .
+              </p>
+            ) : (
+              <form action={updateProductChannels} className="flex flex-col gap-3">
+                <input type="hidden" name="productId" value={product.id} />
+                <span className="font-medium">Sold on</span>
+                {channels.map((channel) => {
+                  const others = channel.products.filter((p) => p.productId !== product.id).length;
+                  return (
+                    <label key={channel.id} className="flex items-start gap-3 rounded-lg border p-3">
+                      <input
+                        type="checkbox"
+                        name="channelId"
+                        value={channel.id}
+                        defaultChecked={soldOn.includes(channel)}
+                        className="mt-0.5 size-4 accent-primary"
+                      />
+                      <span className="flex flex-col gap-0.5">
+                        <span className="font-medium">
+                          {numberName(channel)}
+                          {channel.status !== "ACTIVE" && <span className="ml-1.5 text-muted-foreground">(disconnected)</span>}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {soldOn.includes(channel)
+                            ? others === 0
+                              ? "Only this product, so every chat on it is about this product"
+                              : `Shared with ${others} other product${others === 1 ? "" : "s"}`
+                            : others === 0
+                              ? "Sells nothing yet"
+                              : `Sells ${others} other product${others === 1 ? "" : "s"}; ticking this makes it shared`}
+                        </span>
+                      </span>
+                    </label>
+                  );
+                })}
+                <SubmitButton size="sm" className="self-start" pendingLabel="Saving…" successMessage="Numbers saved">
+                  Save numbers
+                </SubmitButton>
+              </form>
+            )}
+
+            <form action={updateProductOpeningText} className="flex flex-col gap-1.5">
+              <input type="hidden" name="productId" value={product.id} />
+              <Label htmlFor="whatsappOpeningText">Opening message</Label>
+              <Input
+                id="whatsappOpeningText"
+                name="whatsappOpeningText"
+                defaultValue={product.whatsappOpeningText ?? ""}
+                placeholder={`e.g. Hi, I want ${product.name}`}
+              />
+              <span className="text-xs text-muted-foreground">
+                What the link types in for the customer. If their first message contains it (capitals and punctuation
+                don&apos;t matter), the chat starts on this product. Make it at least a few words long and different from
+                your other products&apos;.
+              </span>
+              <SubmitButton size="sm" className="mt-1.5 self-start" pendingLabel="Saving…" successMessage="Opening message saved">
+                Save opening message
+              </SubmitButton>
+            </form>
+
+            {soldOn.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <span className="font-medium">Links to share</span>
+                {soldOn.map((channel) => {
+                  const link = waLink(channel);
+                  return (
+                    <div key={channel.id} className="flex flex-col gap-0.5">
+                      <span className="text-muted-foreground">{numberName(channel)}</span>
+                      {link ? (
+                        <code className="break-all rounded bg-muted px-2 py-1 text-xs select-all">{link}</code>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">
+                          The link appears once this number has received its first message.
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
 

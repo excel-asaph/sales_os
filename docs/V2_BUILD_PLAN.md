@@ -173,8 +173,16 @@ Progress:
   text but leaves the old file, which past chats still link to. Warns
   when pages have no readable text. Matches the old Python extraction
   (11,390 vs 11,400 words on Pressure Down).
-- [ ] Routing a shared number's conversation to a product (ad, opening
-  message, or the AI asking)
+- [x] Routing a new conversation to a product (`src/lib/product-routing.ts`):
+  a mapped ad, then the product's WhatsApp opening message, then a
+  number selling one product. Otherwise the AI is told to find out and
+  given `choose_product` (only then, so single-product businesses keep
+  the same prompt and tools); sending or taking payment for a product
+  also records it. Each routing is a `PRODUCT_ROUTED` event. Product page:
+  which numbers sell it, its opening message, and its wa.me link per
+  number; Products page: map ads customers came from to products. A new
+  product is added to the business's number automatically when it has
+  only one. Tested end to end, including the live AI asking and choosing.
 - [ ] Test chat: talk to your own AI before going live
 
 ### Phase 3: onboarding (1 to 2 weeks)

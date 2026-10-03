@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { executeAction, type ActionContext } from "@/lib/actions";
 import { getEffectiveConfig } from "@/lib/knowledge";
+import { needsProductChoice } from "@/lib/product-routing";
 
 // The opening turn is the one turn where the AI has no information to
 // reason about: the customer has just arrived, nothing is known about them,
@@ -95,6 +96,9 @@ export async function tryGreetingShortcut(conversationId: string): Promise<boole
   if (!inbound.every((m) => isPlainTextOpener(m.type))) return false;
 
   const businessId = conversation.customer.businessId;
+  // v2: which product's pitch? Unknown on a multi-product business, so the
+  // AI finds out first instead of pitching one at random.
+  if (await needsProductChoice(businessId, conversation.productId)) return false;
   // On a dedicated number this is the product's own pitch; on a shared
   // number before the product is known, the business's.
   const config = await getEffectiveConfig(businessId, conversation.productId);

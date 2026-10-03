@@ -194,8 +194,10 @@ export const actionContractTools: Anthropic.Tool[] = [
       },
       required: ["tag"],
     },
-    // This tool list is 100% static — identical on every single request,
-    // for every business. Marking a cache breakpoint on the last entry
+    // This tool list is static — identical on every request, for every
+    // business. (chooseProductTool below is appended after it only while a
+    // multi-product conversation's product is unknown, so it never moves
+    // this breakpoint.) Marking a cache breakpoint on the last entry
     // caches the whole list (prompt caching is a prefix match: tools
     // render before system/messages, ARCHITECTURE-level detail worth
     // knowing before moving this breakpoint), so it's reused across every
@@ -208,3 +210,22 @@ export const actionContractTools: Anthropic.Tool[] = [
     cache_control: { type: "ephemeral", ttl: "1h" },
   },
 ];
+
+/**
+ * v2: offered only while a conversation's product is unknown on a business
+ * selling more than one (needsProductChoice, src/lib/product-routing.ts), so
+ * single-product businesses see exactly the tools they always have.
+ */
+export const chooseProductTool: Anthropic.Tool = {
+  name: "choose_product",
+  description:
+    "Record which product this conversation is about, once the customer has made clear which one they want. " +
+    "Use the product id from search_products. After this, scripted messages use that product's own scripts.",
+  input_schema: {
+    type: "object",
+    properties: {
+      product_id: { type: "string", description: "The id of the product, from search_products." },
+    },
+    required: ["product_id"],
+  },
+};
