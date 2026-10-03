@@ -1,7 +1,7 @@
 import Link from "next/link";
+import { requirePageSession } from "@/lib/viewer";
 import { Wallet, ShoppingBag, UserPlus, Percent, ExternalLink } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
 import { formatNaira } from "@/lib/currency";
 import { AppShell } from "@/components/app-shell";
 import { getNumberFilterCookie, resolveEffectiveNumber } from "@/lib/number-filter";
@@ -29,8 +29,7 @@ const CHART_DAYS = 14;
 // verification, Conversation.referral from the WhatsApp webhook) — this
 // page is aggregation, not new tracking.
 export default async function HomePage() {
-  const session = await getSession();
-  if (!session) return null;
+  const session = await requirePageSession();
 
   const now = new Date();
   // Deliberately its own fixed trailing window, independent of the date-

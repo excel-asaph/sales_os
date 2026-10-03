@@ -50,7 +50,13 @@ export async function authenticate(login: string, password: string): Promise<Mem
     if (user.memberships.length === 0) return null;
     const store = await cookies();
     const last = store.get(LAST_WORKSPACE_COOKIE)?.value;
-    return user.memberships.find((m) => m.businessId === last) ?? user.memberships[0];
+    // Back to wherever they last were, support access included; otherwise
+    // one of their own businesses before any they only support.
+    return (
+      user.memberships.find((m) => m.businessId === last) ??
+      user.memberships.find((m) => !m.support) ??
+      user.memberships[0]
+    );
   }
 
   const agent = await prisma.humanAgent.findFirst({ where: { contact: login, active: true, userId: null } });
@@ -79,11 +85,13 @@ export async function startSession(membership: Membership): Promise<void> {
 /**
  * Every business this session's person can switch to, current one
  * included, oldest first. Empty for a session with no person behind it.
+ * Businesses opened only as Antflow support are left out: staff reach
+ * those from /admin, and a list of every client would swamp the switcher.
  */
 export async function listWorkspaces(session: SessionPayload): Promise<Array<{ businessId: string; name: string }>> {
   if (!session.userId) return [];
   const memberships = await prisma.humanAgent.findMany({
-    where: { userId: session.userId, active: true },
+    where: { userId: session.userId, active: true, support: false },
     select: { businessId: true, business: { select: { name: true } } },
     orderBy: { business: { createdAt: "asc" } },
   });
@@ -97,7 +105,7 @@ export async function listWorkspaces(session: SessionPayload): Promise<Array<{ b
 export async function switchWorkspace(session: SessionPayload, businessId: string): Promise<boolean> {
   if (!session.userId) return false;
   const membership = await prisma.humanAgent.findFirst({
-    where: { userId: session.userId, businessId, active: true },
+    where: { userId: session.userId, businessId, active: true, support: false },
   });
   if (!membership) return false;
   await startSession(membership);

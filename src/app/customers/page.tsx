@@ -1,7 +1,7 @@
 import Link from "next/link";
+import { requirePageSession } from "@/lib/viewer";
 import { Search } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
 import { formatNaira } from "@/lib/currency";
 import { relativeTime } from "@/lib/relative-time";
 import { stageStyle } from "@/lib/stage-display";
@@ -70,8 +70,7 @@ export default async function CustomersPage({
 }: {
   searchParams: Promise<{ q?: string; stage?: string; tag?: string }>;
 }) {
-  const session = await getSession();
-  if (!session) return null;
+  const session = await requirePageSession();
 
   const { q, stage: stageParam, tag: tagParam } = await searchParams;
   const query = q?.trim();

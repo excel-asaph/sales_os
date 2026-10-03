@@ -570,6 +570,13 @@ model HumanAgent {
   /// clean-up migration.
   userId       String?     @map("user_id")
   role         MemberRole?
+  /// v2: Antflow staff (User.isPlatformAdmin) working inside a business
+  /// they don't belong to, created when they open it from /admin
+  /// (src/lib/support-access.ts). Gives them the same footing as an ADMIN,
+  /// so taking over a chat or sending a message records who did it, but is
+  /// left out of the business's own team list, its last-admin rule and the
+  /// person's workspace switcher.
+  support      Boolean     @default(false)
 
   business      Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
   user          User?          @relation(fields: [userId], references: [id], onDelete: Cascade)

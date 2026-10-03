@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   LayoutDashboard,
   MessagesSquare,
@@ -13,6 +14,7 @@ import {
   ChevronsUpDown,
   Phone,
   TrendingUp,
+  ShieldCheck,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getViewerContext } from "@/lib/viewer";
@@ -56,7 +58,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type NavKey = "home" | "conversations" | "customers" | "trends" | "products" | "payment-accounts" | "team" | "settings" | "manage";
+type NavKey = "home" | "conversations" | "customers" | "trends" | "products" | "payment-accounts" | "team" | "settings" | "manage" | "admin";
 
 const HUMAN_STAGES = ["HUMAN_REVIEW_REQUIRED", "HUMAN_ASSIGNED"] as const;
 
@@ -82,10 +84,12 @@ export async function AppShell({
   actions?: React.ReactNode;
   children: React.ReactNode;
 }) {
+  // No viewer with a cookie still present means the session was ended
+  // server-side (deactivated, or staff access removed): clear it.
   const viewer = await getViewerContext();
-  if (!viewer) return null;
+  if (!viewer) redirect("/logout");
 
-  const { session, businessName, agentName, workspaces } = viewer;
+  const { session, businessName, agentName, workspaces, isSupport, isPlatformAdmin } = viewer;
 
   const business = await prisma.business.findUniqueOrThrow({
     where: { id: session.businessId },
@@ -334,6 +338,20 @@ export async function AppShell({
         <Separator />
         <SidebarFooter className="p-3">
           <SidebarMenu>
+            {/* Antflow staff only; the page itself re-checks from the database. */}
+            {isPlatformAdmin && (
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={active === "admin"}
+                  tooltip="Antflow admin"
+                  className="h-10 gap-3 px-3"
+                  render={<Link href="/admin" />}
+                >
+                  <ShieldCheck />
+                  <span>Antflow admin</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )}
             <SidebarMenuItem>
               <SidebarMenuButton
                 size="lg"
@@ -380,6 +398,18 @@ export async function AppShell({
           {actions}
           <NotificationBell conversations={awaitingHuman} count={awaitingHumanCount} />
         </header>
+        {/* Never let staff forget they're inside someone else's business. */}
+        {isSupport && (
+          <div className="flex shrink-0 items-center gap-2 border-b bg-muted px-6 py-2 text-xs">
+            <ShieldCheck className="size-3.5 shrink-0" />
+            <span className="min-w-0 flex-1">
+              You&apos;re in <strong>{businessName}</strong> as Antflow support. Each visit is shown on their Team page.
+            </span>
+            <Link href="/admin" className="font-medium underline-offset-4 hover:underline">
+              Back to admin
+            </Link>
+          </div>
+        )}
         <div className="min-h-0 flex-1 overflow-auto p-6 md:p-8">{children}</div>
         {/* Mounted once here rather than per page, so every signed-in view
             picks up new customer messages: the conversation thread, the

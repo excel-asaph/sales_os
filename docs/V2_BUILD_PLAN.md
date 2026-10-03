@@ -134,7 +134,17 @@ Progress:
   (`src/lib/whatsapp-webhook.ts`) and stays as the fallback. Tested with
   signed fake messages; still to be proven against Meta with the test
   Meta App.
-- [ ] Platform-admin access, logged to the event log
+- [x] Platform-admin access (`src/lib/support-access.ts`, `/admin`).
+  Granted only by `npm run platform-admin -- --email ...`. Opening a
+  business creates a support membership (`HumanAgent.support`), kept out
+  of the business's team list, last-admin rule and switcher; every
+  opening is an event, shown to the business on its Team page and to
+  staff on /admin. Actions inside are attributed to the support
+  membership; not every settings change writes an event yet.
+- [x] Sessions checked against the database on every page and action
+  (`getSession` in `src/lib/auth.ts`): a deactivated teammate, a demoted
+  admin or a revoked staff member loses access at once, not when the
+  30-day cookie expires. This also closes a v1 gap.
 
 ### Phase 2: products run themselves (1 to 2 weeks)
 Product settings with inheritance; FAQ per product; file upload and text

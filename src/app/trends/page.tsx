@@ -1,6 +1,6 @@
 import { Funnel, MessageCircleReply, PackageCheck, TrendingUp } from "lucide-react";
+import { requirePageSession } from "@/lib/viewer";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { getNumberFilterCookie, resolveEffectiveNumber } from "@/lib/number-filter";
 import { getBusinessNumbers } from "@/lib/whatsapp-numbers";
@@ -19,8 +19,7 @@ import { ClaimFilterCard } from "@/components/claim-filter-card";
 // follow-ups actually work, and an honest read on number health straight
 // from Meta rather than an invented "risk score."
 export default async function TrendsPage() {
-  const session = await getSession();
-  if (!session) return null;
+  const session = await requirePageSession();
 
   const [business, numberFilter] = await Promise.all([
     prisma.business.findUniqueOrThrow({

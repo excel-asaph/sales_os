@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { requireAdminPage } from "@/lib/viewer";
 import { isAdminMembership } from "@/lib/workspaces";
+import { SUPPORT_ACCESS_EVENT } from "@/lib/support-access";
 import { AppShell } from "@/components/app-shell";
 import { SubmitButton } from "@/components/submit-button";
 import { Badge } from "@/components/ui/badge";
@@ -23,13 +24,22 @@ import { createAgent, toggleAgentActive, toggleAgentAdmin } from "./actions";
 // gap. No public sign-up route still exists on purpose (see
 // login/actions.ts); an admin has to provision every login from here.
 export default async function TeamPage() {
-  const session = await getSession();
-  if (!session?.isAdmin) return null;
+  const session = await requireAdminPage();
 
-  const agents = await prisma.humanAgent.findMany({
-    where: { businessId: session.businessId },
-    orderBy: { name: "asc" },
-  });
+  const [agents, supportVisits, business] = await Promise.all([
+    prisma.humanAgent.findMany({
+      where: { businessId: session.businessId, support: false },
+      orderBy: { name: "asc" },
+    }),
+    // Every time Antflow staff opened this business (src/lib/support-access.ts),
+    // shown here so the business can always see when we've been in.
+    prisma.event.findMany({
+      where: { type: SUPPORT_ACCESS_EVENT, payload: { path: ["businessId"], equals: session.businessId } },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
+    prisma.business.findUniqueOrThrow({ where: { id: session.businessId }, select: { timezone: true } }),
+  ]);
 
   return (
     <AppShell active="team" title="Team" description="Who can log in to this dashboard">
@@ -98,6 +108,25 @@ export default async function TeamPage() {
             </TableBody>
           </Table>
         </Card>
+
+        {supportVisits.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Antflow support access</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-1.5 text-sm">
+              <p className="text-muted-foreground">
+                The last times Antflow staff opened this workspace to help with setup or support.
+              </p>
+              {supportVisits.map((visit) => (
+                <div key={visit.id} className="flex justify-between gap-4">
+                  <span>{(visit.payload as { email?: string } | null)?.email ?? "Antflow staff"}</span>
+                  <span className="text-muted-foreground">{visit.createdAt.toLocaleString("en-GB", { timeZone: business.timezone })}</span>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>

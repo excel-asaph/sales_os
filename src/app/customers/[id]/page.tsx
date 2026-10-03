@@ -1,8 +1,8 @@
 import Link from "next/link";
+import { requirePageSession } from "@/lib/viewer";
 import { notFound } from "next/navigation";
 import { Wallet, ShoppingBag, MessagesSquare, CalendarDays } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
 import { formatNaira } from "@/lib/currency";
 import { relativeTime } from "@/lib/relative-time";
 import { AppShell } from "@/components/app-shell";
@@ -35,8 +35,7 @@ export default async function CustomerProfilePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const session = await getSession();
-  if (!session) return null;
+  const session = await requirePageSession();
 
   const { id } = await params;
 

@@ -1,14 +1,13 @@
 import Link from "next/link";
+import { requireAdminPage } from "@/lib/viewer";
 import { Package, Landmark, Users, ChevronRight } from "lucide-react";
-import { getSession } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
 
 // Dashboard "Manage" surface (ARCHITECTURE.md §10), MVP-light per PRD 13.6:
 // direct CRUD on products and payment accounts, no workflow-builder UI.
 export default async function ManagePage() {
-  const session = await getSession();
-  if (!session?.isAdmin) return null;
+  await requireAdminPage();
 
   const items = [
     {

@@ -47,5 +47,7 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/home/:path*", "/dashboard/:path*", "/settings/:path*", "/manage/:path*"],
+  // /admin needs a session here; whether the person is Antflow staff is
+  // checked by the page itself, from the database (src/lib/support-access.ts).
+  matcher: ["/home/:path*", "/dashboard/:path*", "/settings/:path*", "/manage/:path*", "/admin/:path*"],
 };

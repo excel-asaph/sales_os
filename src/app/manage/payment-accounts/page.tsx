@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { requireAdminPage } from "@/lib/viewer";
 import { AppShell } from "@/components/app-shell";
 import { SubmitButton } from "@/components/submit-button";
 import { Badge } from "@/components/ui/badge";
@@ -31,8 +31,7 @@ import {
 } from "./actions";
 
 export default async function PaymentAccountsPage() {
-  const session = await getSession();
-  if (!session?.isAdmin) return null;
+  const session = await requireAdminPage();
 
   const accounts = await prisma.paymentAccount.findMany({
     where: { businessId: session.businessId },

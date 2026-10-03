@@ -1,7 +1,7 @@
 import Link from "next/link";
+import { requirePageSession } from "@/lib/viewer";
 import { MessageCircleMore, UserRound, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { StatTile } from "@/components/stat-tile";
 import { DateRangePicker } from "@/components/date-range-picker";
@@ -29,8 +29,7 @@ export default async function DashboardPage({
 }: {
   searchParams: Promise<{ stage?: string }>;
 }) {
-  const session = await getSession();
-  if (!session) return null;
+  const session = await requirePageSession();
 
   // A page-local, shareable/bookmarkable filter — unlike the number and
   // date-range filters below, this doesn't need to "agree" with anything

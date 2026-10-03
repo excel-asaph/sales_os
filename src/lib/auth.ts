@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { promisify } from "node:util";
+import { cache } from "react";
 import { cookies } from "next/headers";
 
 const scryptAsync = promisify(crypto.scrypt);
@@ -95,11 +96,34 @@ export const SESSION_COOKIE_OPTIONS = {
   maxAge: SESSION_TTL_MS / 1000,
 };
 
-/** Read-only session access for Server Components. */
-export async function getSession(): Promise<SessionPayload | null> {
+/**
+ * The signed-in session, for Server Components, Server Actions and Route
+ * Handlers. The cookie says who someone is; the database says whether they
+ * still may be here. A membership that has been deactivated, or a support
+ * visit by someone no longer Antflow staff, ends at once rather than when
+ * the 30-day cookie expires, and admin rights are the membership's current
+ * ones, not whatever they were at login. (src/proxy.ts still reads only the
+ * cookie, to stay free of database work; this is the check that counts.)
+ *
+ * Cached per request, since a page and its app shell both ask. Prisma is
+ * imported lazily so that src/proxy.ts, which imports this file for
+ * verifySessionToken, never loads it.
+ */
+export const getSession = cache(async (): Promise<SessionPayload | null> => {
   const store = await cookies();
-  return verifySessionToken(store.get(SESSION_COOKIE)?.value);
-}
+  const payload = verifySessionToken(store.get(SESSION_COOKIE)?.value);
+  if (!payload) return null;
+
+  const { prisma } = await import("@/lib/prisma");
+  const membership = await prisma.humanAgent.findUnique({
+    where: { id: payload.agentId },
+    select: { active: true, isAdmin: true, role: true, support: true, user: { select: { isPlatformAdmin: true } } },
+  });
+  if (!membership?.active) return null;
+  if (membership.support && !membership.user?.isPlatformAdmin) return null;
+
+  return { ...payload, isAdmin: membership.role ? membership.role !== "AGENT" : membership.isAdmin };
+});
 
 /**
  * For Server Actions and Route Handlers. src/proxy.ts already redirects

@@ -1,6 +1,6 @@
 import Link from "next/link";
+import { requireAdminPage } from "@/lib/viewer";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { SubmitButton } from "@/components/submit-button";
 import { Button } from "@/components/ui/button";
@@ -36,8 +36,7 @@ function formatDuration(hours: number): string {
 // send_template_message). Scripts closes a real gap: before this, editing
 // a script meant a one-off DB script, not anything reachable from the app.
 export default async function SettingsPage() {
-  const session = await getSession();
-  if (!session?.isAdmin) return null;
+  const session = await requireAdminPage();
 
   const [business, faqEntries, metaConnection, productsWithText] = await Promise.all([
     prisma.business.findUnique({

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { requireAdminPage } from "@/lib/viewer";
 import { HelpCircle } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,8 +59,7 @@ function HelpTooltip({ children }: { children: string }) {
 // automated — needs a human on the *other* Business Manager), live
 // Business Verification status, and re-engagement template submission.
 export default async function ConnectWhatsAppPage() {
-  const session = await getSession();
-  if (!session?.isAdmin) return null;
+  const session = await requireAdminPage();
 
   const [business, connection] = await Promise.all([
     prisma.business.findUnique({ where: { id: session.businessId } }),

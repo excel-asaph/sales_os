@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { requireAdminPage } from "@/lib/viewer";
 import { AppShell } from "@/components/app-shell";
 import { SubmitButton } from "@/components/submit-button";
 import { Badge } from "@/components/ui/badge";
@@ -26,8 +26,7 @@ import {
 import { createProduct, toggleProductAvailable, deleteProduct, updateProduct } from "./actions";
 
 export default async function ProductsPage() {
-  const session = await getSession();
-  if (!session?.isAdmin) return null;
+  const session = await requireAdminPage();
 
   const products = await prisma.product.findMany({
     where: { businessId: session.businessId },

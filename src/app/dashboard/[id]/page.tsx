@@ -1,10 +1,10 @@
 import Link from "next/link";
+import { requirePageSession } from "@/lib/viewer";
 import type { ReactNode } from "react";
 import { notFound, redirect } from "next/navigation";
 import { getNumberFilterCookie, resolveEffectiveNumber } from "@/lib/number-filter";
 import { Check, ExternalLink, FileText, AlertTriangle, UserX2, UserRound, Info } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
 import { formatNaira } from "@/lib/currency";
 import type { ConversationStage, MessageType } from "@/generated/prisma/client";
 import { AppShell } from "@/components/app-shell";
@@ -45,8 +45,7 @@ export default async function ConversationReviewPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const session = await getSession();
-  if (!session) return null;
+  const session = await requirePageSession();
 
   const { id } = await params;
 

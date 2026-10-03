@@ -20,7 +20,9 @@ async function requireOwnedAgent(agentId: string, businessId: string) {
 async function assertNotLastActiveAdmin(agent: HumanAgent) {
   if (!agent.isAdmin || !agent.active) return;
   const otherActiveAdmins = await prisma.humanAgent.count({
-    where: { businessId: agent.businessId, isAdmin: true, active: true, id: { not: agent.id } },
+    // Antflow support doesn't count: the business must be able to run
+    // itself without us.
+    where: { businessId: agent.businessId, isAdmin: true, active: true, support: false, id: { not: agent.id } },
   });
   if (otherActiveAdmins === 0) {
     throw new Error("Can't remove the last active admin — promote someone else first.");
