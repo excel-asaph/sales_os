@@ -43,7 +43,8 @@ export default async function SettingsPage() {
       where: { id: session.businessId },
       include: { config: true },
     }),
-    prisma.faqEntry.findMany({ where: { businessId: session.businessId }, orderBy: { order: "asc" } }),
+    // Business-wide questions only; a product's own are on its page.
+    prisma.faqEntry.findMany({ where: { businessId: session.businessId, productId: null }, orderBy: { order: "asc" } }),
     prisma.businessMetaConnection.findUnique({ where: { businessId: session.businessId } }),
     // Count only. Selecting contentText itself would pull ~30KB per product
     // into a page render that never displays it.

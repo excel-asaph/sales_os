@@ -117,7 +117,7 @@ export async function addFaqEntry(formData: FormData) {
   const answer = String(formData.get("answer") ?? "").trim();
   if (!question || !answer) return;
 
-  const count = await prisma.faqEntry.count({ where: { businessId: session.businessId } });
+  const count = await prisma.faqEntry.count({ where: { businessId: session.businessId, productId: null } });
   await prisma.faqEntry.create({
     data: { businessId: session.businessId, question, answer, order: count },
   });

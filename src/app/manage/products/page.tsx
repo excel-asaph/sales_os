@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireAdminPage } from "@/lib/viewer";
 import { AppShell } from "@/components/app-shell";
@@ -31,7 +32,22 @@ export default async function ProductsPage() {
   const products = await prisma.product.findMany({
     where: { businessId: session.businessId },
     orderBy: { name: "asc" },
+    include: { settings: true, _count: { select: { faqEntries: true } } },
   });
+
+  // Whether a product sells differently from the business in any way.
+  const hasOwnSettings = (product: (typeof products)[number]) => {
+    const s = product.settings;
+    const scripts = Object.keys((s?.playbook as Record<string, string> | null) ?? {}).length;
+    return (
+      product._count.faqEntries > 0 ||
+      scripts > 0 ||
+      (s != null &&
+        [s.deliverBeforePayment, s.followupsEnabled, s.maxFollowups, s.aiHandlesReceiptIssues, s.productContentEnabled].some(
+          (v) => v != null
+        ))
+    );
+  };
 
   return (
     <AppShell active="products" title="Products" description="What the AI can sell">
@@ -55,7 +71,12 @@ export default async function ProductsPage() {
               <TableBody>
                 {products.map((product) => (
                   <TableRow key={product.id}>
-                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell className="font-medium">
+                      {product.name}
+                      {hasOwnSettings(product) && (
+                        <span className="ml-1.5 text-xs font-normal text-muted-foreground">own settings</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       {product.currency} {product.price.toString()}
                     </TableCell>
@@ -67,6 +88,14 @@ export default async function ProductsPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          nativeButton={false}
+                          render={<Link href={`/manage/products/${product.id}`} />}
+                        >
+                          Sales settings
+                        </Button>
                         <Dialog>
                           <DialogTrigger render={<Button variant="outline" size="sm" />}>Edit</DialogTrigger>
                           <DialogContent>

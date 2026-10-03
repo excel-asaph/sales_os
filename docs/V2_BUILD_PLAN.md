@@ -162,7 +162,14 @@ Progress:
   checks and follow-ups all use it. A product with no settings sells
   exactly as the business does (tested). The business's follow-up pause
   always wins over a product.
-- [ ] Editing a product's sales settings and FAQ in the app
+- [x] Editing a product's sales settings, scripts and FAQ in the app
+  (`/manage/products/<id>`, "Sales settings" on the Products page). Each
+  setting starts on "Use business setting" and shows what that currently
+  is; an empty script shows the business's script and uses it.
+- [ ] File upload and text extraction in the app
+- [ ] Routing a shared number's conversation to a product (ad, opening
+  message, or the AI asking)
+- [ ] Test chat: talk to your own AI before going live
 
 ### Phase 3: onboarding (1 to 2 weeks)
 Sign-up, the setup checklist, the "Ebook seller" starting template, the
