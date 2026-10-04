@@ -23,7 +23,9 @@ Their phone numbers start 2340000, which no network issues. The script
 refuses to run against any database that isn't on this computer. Log in
 with `admin@antflow.test` / `antflow-dev`. Real data is only ever
 copied inside Railway, with names and numbers scrambled, for the move
-rehearsal.
+rehearsal. (Exception, owner's decision 2026-10-04: the switch-over
+rehearsal ran here on an unscrambled copy, in a throwaway container that
+was deleted afterwards. See V2_BUILD_PLAN.md, "Switch-over rehearsal".)
 
 ## Starting a session
 

@@ -93,6 +93,45 @@ with two purchases, which is already how v1 works.
 5. **Clean up** (a later migration, weeks after): drop the old number
    fields and `isAdmin`.
 
+## Switch-over rehearsal (2026-10-04)
+
+Run on this computer, on a full read-only copy of production loaded into a
+throwaway PostgreSQL 18 container (production's version), then deleted.
+The owner chose to rehearse locally, unscrambled.
+
+- **Database changes:** all v2 migrations applied to the real data in
+  under 10 s. Both businesses came out paid with no end date and with the
+  setup checklist hidden.
+- **Backfill:** no warnings. All 4 logins became Owner users keeping
+  their passwords (the owner's own email is one of VitalFix's); 4
+  channels, including Truefix's +250 number; all 8,352 conversations got a
+  channel and a product, none mismatched. 18 s; a second run changed
+  nothing.
+- **AI unchanged:** for every business and product, the system prompt
+  built the v1 way and the v2 way is identical character for character,
+  and the follow-up, receipt and product-text settings match.
+- **App on the copy:** every VitalFix page loads when opened as staff;
+  its test chat answers with VitalFix's own word-for-word script; a
+  signed message on its real number routes to VitalFix, its channel and
+  Diabetes Fix.
+- **Found and fixed:** no indexes on any table's links (events,
+  messages, follow-ups, orders, conversations): a production problem
+  already, since v1. Added (`20261004180000_index_foreign_keys`,
+  `20261004190000_index_event_types`); 13 s on the copy. The Trends page
+  crashed when stored WhatsApp credentials couldn't be read; now only its
+  number-health panel is affected.
+- **Production build** of v2 compiles; the website pages are static.
+  Timings on the copy (production build, second load): Home 0.35 s, a
+  conversation 0.16 s, a customer 0.14 s, Dashboard 3.9 s, Customers
+  12 s.
+
+**Still to do:** the Customers page loads every customer at once (12 s
+for VitalFix, slower as it grows): it needs pages. A staff member with
+no membership in any business can't log in (fine for the owner, who is in
+VitalFix). On switch-over day, run `scripts/v2-backfill.ts` right after
+deploy; VitalFix already has a stored Meta connection, so
+`--env-credentials-for` is only needed to give it its own webhook address.
+
 ## Order of work
 
 Each phase ends with something real working. Rough sizes, not promises.

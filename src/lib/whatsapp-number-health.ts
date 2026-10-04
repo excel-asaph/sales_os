@@ -40,7 +40,16 @@ export function qualityBadge(qualityRating: string | null): { label: string; cla
  * page, only this one panel.
  */
 export async function fetchNumberHealth(businessId: string, phoneNumberId: string): Promise<NumberHealth> {
-  const credentials = await getMetaCredentials(businessId);
+  // Inside the try too: stored credentials that can't be read (e.g. a
+  // missing or changed CREDENTIAL_ENCRYPTION_KEY) used to throw from here
+  // and take the whole Trends page down with them.
+  let credentials;
+  try {
+    credentials = await getMetaCredentials(businessId);
+  } catch (error) {
+    console.error(`Number health: couldn't read credentials for business ${businessId}`, error);
+    return { phoneNumberId, ok: false, reason: "fetch_failed" };
+  }
   if (!credentials) {
     console.log(`[whatsapp-number-health:dry-run] phoneNumberId=${phoneNumberId}`);
     return { phoneNumberId, ok: false, reason: "not_configured" };

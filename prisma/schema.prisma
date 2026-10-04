@@ -576,6 +576,10 @@ model Conversation {
   followups    Followup[]
   events       Event[]
 
+  @@index([customerId])
+  @@index([channelId])
+  @@index([productId])
+  @@index([assignedHumanId])
   @@map("conversations")
 }
 
@@ -596,6 +600,7 @@ model Message {
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
+  @@index([conversationId, createdAt])
   @@map("messages")
 }
 
@@ -611,6 +616,7 @@ model ConversationFact {
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
+  @@index([conversationId])
   @@map("conversation_facts")
 }
 
@@ -645,6 +651,8 @@ model Order {
   product        Product         @relation(fields: [productId], references: [id])
   paymentAccount PaymentAccount? @relation(fields: [paymentAccountId], references: [id])
 
+  @@index([conversationId])
+  @@index([productId])
   @@map("orders")
 }
 
@@ -669,6 +677,7 @@ model Followup {
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
+  @@index([conversationId])
   @@map("followups")
 }
 
@@ -727,5 +736,15 @@ model Event {
 
   conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
 
+  // Indexes on the links between tables (v2, 2026-10-04): PostgreSQL
+  // doesn't create them for foreign keys and Prisma doesn't either, so every
+  // "this conversation's events/messages/orders" lookup read whole tables.
+  // Found rehearsing the switch-over on a copy of production (155,000
+  // events): one lookup took 1.2 s.
+  @@index([conversationId, createdAt])
+  /// For "the latest event of these kinds per conversation" across a whole
+  /// business (the Customers page's follow-up column): 2.5 s to 0.14 s on
+  /// VitalFix's 155,000 events.
+  @@index([type, conversationId, createdAt(sort: Desc)])
   @@map("events")
 }
